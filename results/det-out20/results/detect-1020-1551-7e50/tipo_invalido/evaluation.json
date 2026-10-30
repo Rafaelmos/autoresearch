@@ -1,0 +1,85 @@
+{
+ "arm": "tipo_invalido",
+ "warmup_s": 300.0,
+ "requests": 3192317,
+ "error_rate": 1.0,
+ "server_error_rate": 0.9999943614622232,
+ "exception_rate": 5.63853777679347e-06,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 3192317
+ },
+ "rss_mb": {
+  "n": 660,
+  "mk_s": 55738,
+  "mk_z": 9.8507,
+  "mk_p_two_sided": 6.807613365002864e-23,
+  "mk_p_upward": 3.403806682501432e-23,
+  "sen_slope_per_h": 0.43933877655138903,
+  "first": 108.2421875,
+  "last": 108.41796875
+ },
+ "heap_mb": {
+  "n": 660,
+  "mk_s": 114966,
+  "mk_z": 20.3179,
+  "mk_p_two_sided": 8.926513989084355e-92,
+  "mk_p_upward": 4.463256994542178e-92,
+  "sen_slope_per_h": 0.07994918132895423,
+  "first": 7.9394073486328125,
+  "last": 7.9608917236328125
+ },
+ "external_mb": {
+  "n": 660,
+  "mk_s": -41132,
+  "mk_z": -7.2692,
+  "mk_p_two_sided": 3.6163315150548986e-13,
+  "mk_p_upward": 0.9999999999998191,
+  "sen_slope_per_h": -0.11073040949898003,
+  "first": 2.442812919616699,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 660,
+  "mk_s": -1316,
+  "mk_z": -2.4421,
+  "mk_p_two_sided": 0.014603406354119884,
+  "mk_p_upward": 0.9926982968229401,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 660,
+  "mk_s": 76076,
+  "mk_z": 13.4448,
+  "mk_p_two_sided": 3.300788297558138e-41,
+  "mk_p_upward": 1.650394148779069e-41,
+  "sen_slope_per_h": 0.9357486914725325
+ },
+ "throughput": {
+  "n": 660,
+  "mk_s": -70612,
+  "mk_z": -12.4795,
+  "mk_p_two_sided": 9.659012723118019e-36,
+  "mk_p_upward": 1.0,
+  "sen_slope_per_h": -28.960893854748406
+ },
+ "throughput_mean_rps": 888.7442424242423,
+ "p95_ms_median": 2.2678375244140625,
+ "db_rows": 0,
+ "db_state_counts": {
+  "credit_cards": 0,
+  "phones": 0,
+  "card_phone_associations": 0
+ },
+ "time_to_detect_min": 35.0,
+ "rss_upward_significant": false,
+ "flags": [
+  "E1_erros_5xx_da_app",
+  "E2_erro_dominante_revisao_humana"
+ ],
+ "valid": true,
+ "spec_name": "tipo_invalido",
+ "hypothesis": "C3: erro 500 da app (TypeError na validação, stack em console.error) retém memória no caminho de erro; esperado E2 (não pontua), serve para localizar a causa.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

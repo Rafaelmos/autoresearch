@@ -1,0 +1,6 @@
+---
+run_id: detect-1020-1223-63d9
+arm=baseline_artigo valid=True score_rss_mb_per_h=NA rss_slope=0.593 mk_p=0.00000 heap_slope=0.256 handles_slope=0.000 p95_slope=-2.970 ttd_min=45.000 ratio=1.000 req=467659 err=0.0172 db_rows=3 flags=E1_erros_5xx_da_app
+arm=aa_copia_3 valid=True score_rss_mb_per_h=NA rss_slope=-8.471 mk_p=1.00000 heap_slope=0.247 handles_slope=0.000 p95_slope=-6.990 ttd_min=NA ratio=NA req=469218 err=0.0172 db_rows=3 flags=E1_erros_5xx_da_app,D4_copia_da_baseline
+arm=aa_copia_1 valid=True score_rss_mb_per_h=NA rss_slope=0.808 mk_p=0.00000 heap_slope=0.259 handles_slope=0.000 p95_slope=-1.541 ttd_min=40.000 ratio=NA req=459944 err=0.0177 db_rows=3 flags=E1_erros_5xx_da_app,D4_copia_da_baseline
+arm=aa_copia_2 valid=True score_rss_mb_per_h=NA rss_slope=1.222 mk_p=0.00000 heap_slope=0.256 handles_slope=0.000 p95_slope=-5.184 ttd_min=35.000 ratio=NA req=474007 err=0.0169 db_rows=3 flags=E1_erros_5xx_da_app,D4_copia_da_baseline

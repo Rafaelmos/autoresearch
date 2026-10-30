@@ -1,0 +1,82 @@
+{
+ "arm": "retrieve_longo",
+ "warmup_s": 300.0,
+ "requests": 2966129,
+ "error_rate": 0.0,
+ "server_error_rate": 0.0,
+ "exception_rate": 0.0,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 2966129
+ },
+ "rss_mb": {
+  "n": 662,
+  "mk_s": 105429,
+  "mk_z": 18.5483,
+  "mk_p_two_sided": 8.410588056031308e-77,
+  "mk_p_upward": 4.205294028015654e-77,
+  "sen_slope_per_h": 6.556073666162235,
+  "first": 107.09765625,
+  "last": 113.41015625
+ },
+ "heap_mb": {
+  "n": 662,
+  "mk_s": 89414,
+  "mk_z": 15.7306,
+  "mk_p_two_sided": 9.33497631445928e-56,
+  "mk_p_upward": 4.66748815722964e-56,
+  "sen_slope_per_h": 0.07982246884926818,
+  "first": 7.976318359375,
+  "last": 8.068008422851562
+ },
+ "external_mb": {
+  "n": 662,
+  "mk_s": -10222,
+  "mk_z": -1.7982,
+  "mk_p_two_sided": 0.0721424662377607,
+  "mk_p_upward": 0.9639287668811196,
+  "sen_slope_per_h": -0.020516585968337428,
+  "first": 2.2675180435180664,
+  "last": 2.089797019958496
+ },
+ "handles": {
+  "n": 662,
+  "mk_s": -1320,
+  "mk_z": -2.4421,
+  "mk_p_two_sided": 0.014602499406352651,
+  "mk_p_upward": 0.9926987502968236,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 660,
+  "mk_s": 83038,
+  "mk_z": 14.6753,
+  "mk_p_two_sided": 9.287233414696964e-49,
+  "mk_p_upward": 4.643616707348482e-49,
+  "sen_slope_per_h": 1.1010667219518977
+ },
+ "throughput": {
+  "n": 660,
+  "mk_s": -79528,
+  "mk_z": -14.0553,
+  "mk_p_two_sided": 7.146989808651308e-45,
+  "mk_p_upward": 1.0,
+  "sen_slope_per_h": -31.759527910325513
+ },
+ "throughput_mean_rps": 824.8457575757575,
+ "p95_ms_median": 3.3409595489501953,
+ "db_rows": 0,
+ "db_state_counts": {
+  "credit_cards": 0,
+  "phones": 0,
+  "card_phone_associations": 0
+ },
+ "time_to_detect_min": 20.0,
+ "rss_upward_significant": true,
+ "flags": [],
+ "valid": true,
+ "spec_name": "retrieve_longo",
+ "hypothesis": "C2: leitura sem escrita com 10 telefones de 150 caracteres (cerca de 1,6 KB) estressa regex e binding sem BUSY; falsificada se RSS < 5 MB/h.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

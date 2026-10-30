@@ -1,0 +1,83 @@
+{
+ "arm": "leitura_densa_replica",
+ "warmup_s": 300.0,
+ "requests": 915026,
+ "error_rate": 0.0014556963408690025,
+ "server_error_rate": 0.00144586055478205,
+ "exception_rate": 9.835786086952721e-06,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 850230,
+  "/associate_card": 64796
+ },
+ "rss_mb": {
+  "n": 663,
+  "mk_s": 56640,
+  "mk_z": 9.9422,
+  "mk_p_two_sided": 2.7266724636591073e-23,
+  "mk_p_upward": 1.3633362318295537e-23,
+  "sen_slope_per_h": 0.532216991426038,
+  "first": 115.8984375,
+  "last": 115.53515625
+ },
+ "heap_mb": {
+  "n": 663,
+  "mk_s": 69712,
+  "mk_z": 12.2367,
+  "mk_p_two_sided": 1.980202650880926e-34,
+  "mk_p_upward": 9.90101325440463e-35,
+  "sen_slope_per_h": 0.11131533922532011,
+  "first": 8.204231262207031,
+  "last": 8.265357971191406
+ },
+ "external_mb": {
+  "n": 663,
+  "mk_s": -9034,
+  "mk_z": -1.5856,
+  "mk_p_two_sided": 0.11283003779903326,
+  "mk_p_upward": 0.9435849811004834,
+  "sen_slope_per_h": -0.019376555750131585,
+  "first": 2.1152877807617188,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 663,
+  "mk_s": -1862,
+  "mk_z": -2.8112,
+  "mk_p_two_sided": 0.004935977597028273,
+  "mk_p_upward": 0.9975320112014858,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 35660,
+  "mk_z": 6.2878,
+  "mk_p_two_sided": 3.2204037073154985e-10,
+  "mk_p_upward": 1.6102018536577492e-10,
+  "sen_slope_per_h": 8.036047534878968
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -35346,
+  "mk_z": -6.2325,
+  "mk_p_two_sided": 4.590997406693931e-10,
+  "mk_p_upward": 0.9999999997704502,
+  "sen_slope_per_h": -26.38167938931288
+ },
+ "throughput_mean_rps": 254.79546142208773,
+ "p95_ms_median": 46.6151237487793,
+ "db_rows": 605,
+ "db_state_counts": {
+  "credit_cards": 100,
+  "phones": 5,
+  "card_phone_associations": 500
+ },
+ "time_to_detect_min": 35.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "leitura_densa_replica",
+ "hypothesis": "H1: réplica de leitura_densa (100 cartões, 605 linhas, 8,46 MB/h). Se voltar a >= 5 MB/h com a baseline plana, o efeito é real; abaixo de 2, foi ruído.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

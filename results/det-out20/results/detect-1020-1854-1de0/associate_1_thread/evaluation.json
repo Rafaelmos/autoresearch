@@ -1,0 +1,82 @@
+{
+ "arm": "associate_1_thread",
+ "warmup_s": 300.0,
+ "requests": 77644,
+ "error_rate": 0.0003219823811241049,
+ "server_error_rate": 0.00024470660965431973,
+ "exception_rate": 7.727577146978517e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/associate_card": 77644
+ },
+ "rss_mb": {
+  "n": 662,
+  "mk_s": 57326,
+  "mk_z": 10.0856,
+  "mk_p_two_sided": 6.3984887217597756e-24,
+  "mk_p_upward": 3.1992443608798878e-24,
+  "sen_slope_per_h": 0.5257598983063521,
+  "first": 96.2109375,
+  "last": 99.21484375
+ },
+ "heap_mb": {
+  "n": 662,
+  "mk_s": 118919,
+  "mk_z": 20.9214,
+  "mk_p_two_sided": 3.415953699267338e-97,
+  "mk_p_upward": 1.707976849633669e-97,
+  "sen_slope_per_h": 0.1535475268497975,
+  "first": 8.669715881347656,
+  "last": 8.756195068359375
+ },
+ "external_mb": {
+  "n": 662,
+  "mk_s": 40147,
+  "mk_z": 7.0638,
+  "mk_p_two_sided": 1.6197534826802696e-12,
+  "mk_p_upward": 8.098767413401348e-13,
+  "sen_slope_per_h": 0.0021149834156978646,
+  "first": 2.1024627685546875,
+  "last": 2.103546142578125
+ },
+ "handles": {
+  "n": 662,
+  "mk_s": -661,
+  "mk_z": -1.7268,
+  "mk_p_two_sided": 0.08419999619493855,
+  "mk_p_upward": 0.9579000019025308,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 652,
+  "mk_s": 6374,
+  "mk_z": 1.1471,
+  "mk_p_two_sided": 0.2513459807378215,
+  "mk_p_upward": 0.12567299036891075,
+  "sen_slope_per_h": 0.4547149007069047
+ },
+ "throughput": {
+  "n": 652,
+  "mk_s": -5405,
+  "mk_z": -0.9746,
+  "mk_p_two_sided": 0.3297614649302413,
+  "mk_p_upward": 0.8351192675348793,
+  "sen_slope_per_h": 0.0
+ },
+ "throughput_mean_rps": 21.874233128834355,
+ "p95_ms_median": 39.42680358886719,
+ "db_rows": 3,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 1,
+  "card_phone_associations": 1
+ },
+ "time_to_detect_min": 10.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "associate_1_thread",
+ "hypothesis": "F2: com 1 thread não há SQLITE_BUSY, então escrita pura é válida; se a retenção vier de associate_card (transação, 4 statements), a inclinação passa de 5 MB/h e retrieve_1_thread não.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

@@ -1,0 +1,82 @@
+{
+ "arm": "retrieve_10",
+ "warmup_s": 300.0,
+ "requests": 3035144,
+ "error_rate": 0.0,
+ "server_error_rate": 0.0,
+ "exception_rate": 0.0,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 3035144
+ },
+ "rss_mb": {
+  "n": 650,
+  "mk_s": 109096,
+  "mk_z": 19.727,
+  "mk_p_two_sided": 1.263468063328913e-86,
+  "mk_p_upward": 6.317340316644565e-87,
+  "sen_slope_per_h": 1.1605175604500702,
+  "first": 106.87890625,
+  "last": 108.5859375
+ },
+ "heap_mb": {
+  "n": 650,
+  "mk_s": 110222,
+  "mk_z": 19.9304,
+  "mk_p_two_sided": 2.2170421197988326e-88,
+  "mk_p_upward": 1.1085210598994163e-88,
+  "sen_slope_per_h": 0.1058823589264008,
+  "first": 8.060218811035156,
+  "last": 8.050567626953125
+ },
+ "external_mb": {
+  "n": 650,
+  "mk_s": -3663,
+  "mk_z": -0.6622,
+  "mk_p_two_sided": 0.5078551703523748,
+  "mk_p_upward": 0.7460724148238126,
+  "sen_slope_per_h": -0.0013882708625830075,
+  "first": 2.092940330505371,
+  "last": 2.089797019958496
+ },
+ "handles": {
+  "n": 650,
+  "mk_s": -1296,
+  "mk_z": -2.442,
+  "mk_p_two_sided": 0.014608025574006265,
+  "mk_p_upward": 0.9926959872129969,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": -3417,
+  "mk_z": -0.6023,
+  "mk_p_two_sided": 0.5469434986887929,
+  "mk_p_upward": 0.7265282506556036,
+  "sen_slope_per_h": -0.023963901459806786
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": 13937,
+  "mk_z": 2.4575,
+  "mk_p_two_sided": 0.013991304207746691,
+  "mk_p_upward": 0.0069956521038733455,
+  "sen_slope_per_h": 3.1304347826088565
+ },
+ "throughput_mean_rps": 843.0677760968231,
+ "p95_ms_median": 2.6819705963134766,
+ "db_rows": 0,
+ "db_state_counts": {
+  "credit_cards": 0,
+  "phones": 0,
+  "card_phone_associations": 0
+ },
+ "time_to_detect_min": 25.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "retrieve_10",
+ "hypothesis": "B2: SQL com 10 placeholders compilado em conexão nova a cada requisição retém mais memória nativa que 1 placeholder (so_retrieve=0,61 MB/h); falsificada se < 5 MB/h.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

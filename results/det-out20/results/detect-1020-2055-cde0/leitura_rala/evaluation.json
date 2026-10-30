@@ -1,0 +1,83 @@
+{
+ "arm": "leitura_rala",
+ "warmup_s": 300.0,
+ "requests": 951572,
+ "error_rate": 0.0014334175448626064,
+ "server_error_rate": 0.0014239595112088207,
+ "exception_rate": 9.458033653785525e-06,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 886646,
+  "/associate_card": 64926
+ },
+ "rss_mb": {
+  "n": 663,
+  "mk_s": 4358,
+  "mk_z": 0.7648,
+  "mk_p_two_sided": 0.44438315536703316,
+  "mk_p_upward": 0.22219157768351658,
+  "sen_slope_per_h": 0.044999136016588503,
+  "first": 113.6484375,
+  "last": 114.75
+ },
+ "heap_mb": {
+  "n": 663,
+  "mk_s": 72252,
+  "mk_z": 12.6825,
+  "mk_p_two_sided": 7.39212090668539e-37,
+  "mk_p_upward": 3.696060453342695e-37,
+  "sen_slope_per_h": 0.12159118914086037,
+  "first": 8.23846435546875,
+  "last": 8.217430114746094
+ },
+ "external_mb": {
+  "n": 663,
+  "mk_s": 373,
+  "mk_z": 0.0653,
+  "mk_p_two_sided": 0.9479361373477406,
+  "mk_p_upward": 0.4739680686738703,
+  "sen_slope_per_h": 7.922771838053172e-05,
+  "first": 2.1093053817749023,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 663,
+  "mk_s": -1780,
+  "mk_z": -2.6873,
+  "mk_p_two_sided": 0.007202893264779495,
+  "mk_p_upward": 0.9963985533676103,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 35535,
+  "mk_z": 6.2657,
+  "mk_p_two_sided": 3.7106397208787414e-10,
+  "mk_p_upward": 1.8553198604393707e-10,
+  "sen_slope_per_h": 6.582827900731289
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -37363,
+  "mk_z": -6.5882,
+  "mk_p_two_sided": 4.453152377764026e-11,
+  "mk_p_upward": 0.9999999999777343,
+  "sen_slope_per_h": -27.74311926605497
+ },
+ "throughput_mean_rps": 265.07715582450834,
+ "p95_ms_median": 44.66509819030762,
+ "db_rows": 35,
+ "db_state_counts": {
+  "credit_cards": 5,
+  "phones": 5,
+  "card_phone_associations": 25
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "leitura_rala",
+ "hypothesis": "H2: mesma carga com 5 cartões (35 linhas, leituras devolvem até 5 cartões). Se a retenção vem do tamanho do result set, a inclinação cai para o ruído (< 2 MB/h).",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

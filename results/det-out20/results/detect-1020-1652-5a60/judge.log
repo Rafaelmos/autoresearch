@@ -1,0 +1,6 @@
+---
+run_id: detect-1020-1652-5a60
+arm=baseline_artigo valid=True score_rss_mb_per_h=NA rss_slope=7.767 mk_p=0.00000 heap_slope=0.170 handles_slope=0.000 p95_slope=-0.251 ttd_min=25.000 ratio=1.000 req=834711 err=0.0064 db_rows=3 flags=-
+arm=retrieve_max valid=True score_rss_mb_per_h=NA rss_slope=1.153 mk_p=0.00000 heap_slope=0.076 handles_slope=0.000 p95_slope=-0.226 ttd_min=20.000 ratio=NA req=2336197 err=0.0000 db_rows=0 flags=-
+arm=retrieve_1_longo valid=True score_rss_mb_per_h=NA rss_slope=0.809 mk_p=0.00000 heap_slope=0.089 handles_slope=0.000 p95_slope=-0.211 ttd_min=20.000 ratio=NA req=2347237 err=0.0000 db_rows=0 flags=-
+arm=retrieve_meio valid=True score_rss_mb_per_h=NA rss_slope=1.768 mk_p=0.00000 heap_slope=0.098 handles_slope=0.000 p95_slope=-0.212 ttd_min=20.000 ratio=NA req=2365348 err=0.0000 db_rows=0 flags=-

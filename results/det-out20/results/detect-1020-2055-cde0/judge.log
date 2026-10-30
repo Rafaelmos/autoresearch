@@ -1,0 +1,6 @@
+---
+run_id: detect-1020-2055-cde0
+arm=baseline_artigo valid=True score_rss_mb_per_h=NA rss_slope=0.614 mk_p=0.00000 heap_slope=-0.073 handles_slope=0.000 p95_slope=14.336 ttd_min=15.000 ratio=NA req=431123 err=0.0198 db_rows=3 flags=E1_erros_5xx_da_app
+arm=leitura_rala valid=True score_rss_mb_per_h=NA rss_slope=0.045 mk_p=0.22219 heap_slope=0.122 handles_slope=0.000 p95_slope=6.583 ttd_min=NA ratio=NA req=951572 err=0.0014 db_rows=35 flags=-
+arm=leitura_densa_replica valid=True score_rss_mb_per_h=NA rss_slope=0.532 mk_p=0.00000 heap_slope=0.111 handles_slope=0.000 p95_slope=8.036 ttd_min=35.000 ratio=NA req=915026 err=0.0015 db_rows=605 flags=-
+arm=leitura_densissima valid=True score_rss_mb_per_h=NA rss_slope=0.271 mk_p=0.00002 heap_slope=0.088 handles_slope=0.000 p95_slope=8.565 ttd_min=15.000 ratio=NA req=882591 err=0.0015 db_rows=905 flags=-

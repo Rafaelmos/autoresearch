@@ -1,0 +1,6 @@
+---
+run_id: detect-1020-1854-1de0
+arm=retrieve_1_thread valid=True score_rss_mb_per_h=NA rss_slope=0.824 mk_p=0.00000 heap_slope=0.089 handles_slope=0.000 p95_slope=0.099 ttd_min=15.000 ratio=NA req=312503 err=0.0000 db_rows=0 flags=-
+arm=associate_1_thread valid=True score_rss_mb_per_h=NA rss_slope=0.526 mk_p=0.00000 heap_slope=0.154 handles_slope=0.000 p95_slope=0.455 ttd_min=10.000 ratio=NA req=77644 err=0.0003 db_rows=3 flags=-
+arm=mix_1_thread_replica valid=True score_rss_mb_per_h=NA rss_slope=1.190 mk_p=0.00000 heap_slope=0.233 handles_slope=0.000 p95_slope=-0.008 ttd_min=10.000 ratio=NA req=120611 err=0.0002 db_rows=3 flags=-
+arm=baseline_artigo valid=True score_rss_mb_per_h=NA rss_slope=0.486 mk_p=0.00000 heap_slope=0.158 handles_slope=0.000 p95_slope=1.703 ttd_min=20.000 ratio=NA req=514548 err=0.0159 db_rows=3 flags=E1_erros_5xx_da_app

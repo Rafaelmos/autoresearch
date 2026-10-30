@@ -1,0 +1,82 @@
+{
+ "arm": "retrieve_1_longo",
+ "warmup_s": 300.0,
+ "requests": 2347237,
+ "error_rate": 4.2603282071644235e-06,
+ "server_error_rate": 0.0,
+ "exception_rate": 4.2603282071644235e-06,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 2347237
+ },
+ "rss_mb": {
+  "n": 661,
+  "mk_s": 84876,
+  "mk_z": 14.9663,
+  "mk_p_two_sided": 1.2191706831118519e-50,
+  "mk_p_upward": 6.095853415559259e-51,
+  "sen_slope_per_h": 0.8088148950062699,
+  "first": 104.77734375,
+  "last": 111.4609375
+ },
+ "heap_mb": {
+  "n": 661,
+  "mk_s": 104352,
+  "mk_z": 18.4003,
+  "mk_p_two_sided": 1.3065252786102927e-75,
+  "mk_p_upward": 6.532626393051463e-76,
+  "sen_slope_per_h": 0.08948752067673979,
+  "first": 8.039413452148438,
+  "last": 7.910064697265625
+ },
+ "external_mb": {
+  "n": 661,
+  "mk_s": -569,
+  "mk_z": -0.1002,
+  "mk_p_two_sided": 0.9202203238980642,
+  "mk_p_upward": 0.5398898380509679,
+  "sen_slope_per_h": -0.0017502481285567553,
+  "first": 2.2927122116088867,
+  "last": 2.1381025314331055
+ },
+ "handles": {
+  "n": 661,
+  "mk_s": -660,
+  "mk_z": -1.7268,
+  "mk_p_two_sided": 0.08420141732674265,
+  "mk_p_upward": 0.9578992913366287,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 660,
+  "mk_s": -7905,
+  "mk_z": -1.3969,
+  "mk_p_two_sided": 0.1624481781297955,
+  "mk_p_upward": 0.9187759109351022,
+  "sen_slope_per_h": -0.21141974582512063
+ },
+ "throughput": {
+  "n": 660,
+  "mk_s": 1263,
+  "mk_z": 0.223,
+  "mk_p_two_sided": 0.8235066625512554,
+  "mk_p_upward": 0.4117533312756277,
+  "sen_slope_per_h": 0.992248798148272
+ },
+ "throughput_mean_rps": 652.800909090909,
+ "p95_ms_median": 8.035898208618164,
+ "db_rows": 0,
+ "db_state_counts": {
+  "credit_cards": 0,
+  "phones": 0,
+  "card_phone_associations": 0
+ },
+ "time_to_detect_min": 20.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "retrieve_1_longo",
+ "hypothesis": "D3: 1 telefone de 1900 caracteres (mesmos bytes, 1 placeholder) separa tamanho do valor de quantidade de binds; se render como retrieve_max, o fator é o tamanho da string, não o número de placeholders.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

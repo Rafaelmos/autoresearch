@@ -1,0 +1,85 @@
+{
+ "arm": "aa_copia_1",
+ "warmup_s": 300.0,
+ "requests": 459944,
+ "error_rate": 0.017673890734524203,
+ "server_error_rate": 0.017621710469100587,
+ "exception_rate": 5.2180265423616786e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 377943,
+  "/associate_card": 82001
+ },
+ "rss_mb": {
+  "n": 639,
+  "mk_s": 69620,
+  "mk_z": 12.9151,
+  "mk_p_two_sided": 3.7006315792103134e-38,
+  "mk_p_upward": 1.8503157896051567e-38,
+  "sen_slope_per_h": 0.8080831926424966,
+  "first": 111.83984375,
+  "last": 112.58984375
+ },
+ "heap_mb": {
+  "n": 639,
+  "mk_s": 83916,
+  "mk_z": 15.5669,
+  "mk_p_two_sided": 1.2221173021500621e-54,
+  "mk_p_upward": 6.110586510750311e-55,
+  "sen_slope_per_h": 0.25905946782951866,
+  "first": 8.238204956054688,
+  "last": 8.142127990722656
+ },
+ "external_mb": {
+  "n": 639,
+  "mk_s": 5526,
+  "mk_z": 1.0249,
+  "mk_p_two_sided": 0.30539160060342674,
+  "mk_p_upward": 0.15269580030171337,
+  "sen_slope_per_h": 0.0009911210498489888,
+  "first": 2.113461494445801,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 639,
+  "mk_s": -1274,
+  "mk_z": -2.4418,
+  "mk_p_two_sided": 0.014613275249467726,
+  "mk_p_upward": 0.9926933623752662,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 660,
+  "mk_s": -3387,
+  "mk_z": -0.5984,
+  "mk_p_two_sided": 0.5495647803730808,
+  "mk_p_upward": 0.7252176098134596,
+  "sen_slope_per_h": -1.5410625038222128
+ },
+ "throughput": {
+  "n": 660,
+  "mk_s": 4556,
+  "mk_z": 0.805,
+  "mk_p_two_sided": 0.4208052052206846,
+  "mk_p_upward": 0.2104026026103423,
+  "sen_slope_per_h": 4.500000000000064
+ },
+ "throughput_mean_rps": 127.46757575757577,
+ "p95_ms_median": 76.19261741638184,
+ "db_rows": 3,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 1,
+  "card_phone_associations": 1
+ },
+ "time_to_detect_min": 40.0,
+ "rss_upward_significant": true,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "aa_copia_1",
+ "hypothesis": "A/A: cópia idêntica da baseline; mede ruído.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

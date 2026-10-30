@@ -1,0 +1,6 @@
+---
+run_id: detect-1020-1954-b1b1
+arm=densa_1_thread valid=True score_rss_mb_per_h=5.932 rss_slope=5.932 mk_p=0.00000 heap_slope=0.121 handles_slope=0.000 p95_slope=0.796 ttd_min=10.000 ratio=NA req=114585 err=0.0002 db_rows=605 flags=-
+arm=baseline_artigo valid=True score_rss_mb_per_h=NA rss_slope=-0.327 mk_p=1.00000 heap_slope=-1.300 handles_slope=0.000 p95_slope=3.643 ttd_min=NA ratio=NA req=458963 err=0.0187 db_rows=3 flags=E1_erros_5xx_da_app
+arm=densa_10_threads valid=True score_rss_mb_per_h=8.293 rss_slope=8.293 mk_p=0.00000 heap_slope=0.198 handles_slope=0.000 p95_slope=1.600 ttd_min=35.000 ratio=NA req=476280 err=0.0168 db_rows=605 flags=E1_erros_5xx_da_app
+arm=leitura_densa valid=True score_rss_mb_per_h=8.461 rss_slope=8.461 mk_p=0.00000 heap_slope=0.072 handles_slope=0.000 p95_slope=-0.092 ttd_min=40.000 ratio=NA req=1030401 err=0.0010 db_rows=605 flags=-

@@ -1,0 +1,85 @@
+{
+ "arm": "mix_longo",
+ "warmup_s": 300.0,
+ "requests": 544938,
+ "error_rate": 0.014008933126337308,
+ "server_error_rate": 0.013988747343734516,
+ "exception_rate": 2.0185782602791512e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 448862,
+  "/associate_card": 96076
+ },
+ "rss_mb": {
+  "n": 660,
+  "mk_s": 10824,
+  "mk_z": 1.9128,
+  "mk_p_two_sided": 0.05577461802296801,
+  "mk_p_upward": 0.027887309011484004,
+  "sen_slope_per_h": 0.11939448977550066,
+  "first": 114.51171875,
+  "last": 114.5234375
+ },
+ "heap_mb": {
+  "n": 660,
+  "mk_s": 68650,
+  "mk_z": 12.1324,
+  "mk_p_two_sided": 7.110515873747367e-34,
+  "mk_p_upward": 3.5552579368736834e-34,
+  "sen_slope_per_h": 0.1682913463424116,
+  "first": 8.23828125,
+  "last": 8.166328430175781
+ },
+ "external_mb": {
+  "n": 660,
+  "mk_s": 561,
+  "mk_z": 0.099,
+  "mk_p_two_sided": 0.921161957772076,
+  "mk_p_upward": 0.460580978886038,
+  "sen_slope_per_h": 0.00030484915925152,
+  "first": 2.148954391479492,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 660,
+  "mk_s": -1316,
+  "mk_z": -2.4421,
+  "mk_p_two_sided": 0.014603406354119884,
+  "mk_p_upward": 0.9926982968229401,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 13975,
+  "mk_z": 2.464,
+  "mk_p_two_sided": 0.013737841808767276,
+  "mk_p_upward": 0.006868920904383638,
+  "sen_slope_per_h": 3.3763921038704625
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -5772,
+  "mk_z": -1.0176,
+  "mk_p_two_sided": 0.30886024622506003,
+  "mk_p_upward": 0.84556987688747,
+  "sen_slope_per_h": -4.7131557803898385
+ },
+ "throughput_mean_rps": 151.21936459909227,
+ "p95_ms_median": 61.54942512512207,
+ "db_rows": 21,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 10,
+  "card_phone_associations": 10
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "mix_longo",
+ "hypothesis": "C1: strings de 150-300 caracteres (válidas após limpeza) ampliam a alocação nativa por conexão; falsificada se RSS < 5 MB/h.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

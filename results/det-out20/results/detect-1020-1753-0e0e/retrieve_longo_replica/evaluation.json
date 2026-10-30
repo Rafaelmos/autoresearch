@@ -1,0 +1,82 @@
+{
+ "arm": "retrieve_longo_replica",
+ "warmup_s": 300.0,
+ "requests": 2848930,
+ "error_rate": 0.0,
+ "server_error_rate": 0.0,
+ "exception_rate": 0.0,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 2848930
+ },
+ "rss_mb": {
+  "n": 663,
+  "mk_s": 67150,
+  "mk_z": 11.7871,
+  "mk_p_two_sided": 4.5468147164915993e-32,
+  "mk_p_upward": 2.2734073582457997e-32,
+  "sen_slope_per_h": 0.5028521461885522,
+  "first": 106.9296875,
+  "last": 107.6171875
+ },
+ "heap_mb": {
+  "n": 663,
+  "mk_s": 74722,
+  "mk_z": 13.1161,
+  "mk_p_two_sided": 2.6633753103850713e-39,
+  "mk_p_upward": 1.3316876551925357e-39,
+  "sen_slope_per_h": 0.07423209234137963,
+  "first": 8.027542114257812,
+  "last": 8.045860290527344
+ },
+ "external_mb": {
+  "n": 663,
+  "mk_s": 3508,
+  "mk_z": 0.6156,
+  "mk_p_two_sided": 0.5381558203869502,
+  "mk_p_upward": 0.2690779101934751,
+  "sen_slope_per_h": 0.0073331411894398445,
+  "first": 2.350348472595215,
+  "last": 2.089797019958496
+ },
+ "handles": {
+  "n": 663,
+  "mk_s": -1322,
+  "mk_z": -2.4421,
+  "mk_p_two_sided": 0.014602048002714566,
+  "mk_p_upward": 0.9926989759986428,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 30064,
+  "mk_z": 5.301,
+  "mk_p_two_sided": 1.1514894566525005e-07,
+  "mk_p_upward": 5.7574472832625024e-08,
+  "sen_slope_per_h": 0.585809034235427
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -30443,
+  "mk_z": -5.3679,
+  "mk_p_two_sided": 7.964907817364041e-08,
+  "mk_p_upward": 0.9999999601754609,
+  "sen_slope_per_h": -19.92857142857148
+ },
+ "throughput_mean_rps": 790.2484114977308,
+ "p95_ms_median": 4.041194915771484,
+ "db_rows": 0,
+ "db_state_counts": {
+  "credit_cards": 0,
+  "phones": 0,
+  "card_phone_associations": 0
+ },
+ "time_to_detect_min": 10.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "retrieve_longo_replica",
+ "hypothesis": "E1: réplica de retrieve_longo (10x150). Se o 6,56 MB/h da rodada 3 for real, volta a passar de 5 MB/h; abaixo disso, foi ruído.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

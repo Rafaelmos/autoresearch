@@ -1,0 +1,85 @@
+{
+ "arm": "densa_10_threads",
+ "warmup_s": 300.0,
+ "requests": 476280,
+ "error_rate": 0.01677164693037709,
+ "server_error_rate": 0.01675485008818342,
+ "exception_rate": 1.679684219366759e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 391461,
+  "/associate_card": 84819
+ },
+ "rss_mb": {
+  "n": 662,
+  "mk_s": 121296,
+  "mk_z": 21.3398,
+  "mk_p_two_sided": 4.8546033928719116e-101,
+  "mk_p_upward": 2.4273016964359558e-101,
+  "sen_slope_per_h": 8.292555195336861,
+  "first": 107.97265625,
+  "last": 113.1875
+ },
+ "heap_mb": {
+  "n": 662,
+  "mk_s": 78402,
+  "mk_z": 13.7932,
+  "mk_p_two_sided": 2.7997229095791473e-43,
+  "mk_p_upward": 1.3998614547895736e-43,
+  "sen_slope_per_h": 0.19825986072723525,
+  "first": 8.2308349609375,
+  "last": 8.129531860351562
+ },
+ "external_mb": {
+  "n": 662,
+  "mk_s": -17545,
+  "mk_z": -3.0866,
+  "mk_p_two_sided": 0.0020248715048454737,
+  "mk_p_upward": 0.9989875642475773,
+  "sen_slope_per_h": -0.045191056860371816,
+  "first": 2.1631221771240234,
+  "last": 2.2674407958984375
+ },
+ "handles": {
+  "n": 662,
+  "mk_s": -661,
+  "mk_z": -1.7268,
+  "mk_p_two_sided": 0.08419999619493855,
+  "mk_p_upward": 0.9579000019025308,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 3220,
+  "mk_z": 0.5676,
+  "mk_p_two_sided": 0.5703006745335442,
+  "mk_p_upward": 0.2851503372667721,
+  "sen_slope_per_h": 1.599690542701444
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -4208,
+  "mk_z": -0.7418,
+  "mk_p_two_sided": 0.4581904455925021,
+  "mk_p_upward": 0.770904777203749,
+  "sen_slope_per_h": -3.590027700831019
+ },
+ "throughput_mean_rps": 131.6783661119516,
+ "p95_ms_median": 82.41415023803711,
+ "db_rows": 605,
+ "db_state_counts": {
+  "credit_cards": 100,
+  "phones": 5,
+  "card_phone_associations": 500
+ },
+ "time_to_detect_min": 35.0,
+ "rss_upward_significant": true,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "densa_10_threads",
+ "hypothesis": "G1: banco com 600 linhas, em que cada leitura devolve até 100 cartões, retém memória nativa de result set (RSS > 5 MB/h, heap plano); falsificada se ficar no ruído de 0,5-1,5.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

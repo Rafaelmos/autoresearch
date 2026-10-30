@@ -1,0 +1,83 @@
+{
+ "arm": "leitura_densissima",
+ "warmup_s": 300.0,
+ "requests": 882591,
+ "error_rate": 0.001517124013274552,
+ "server_error_rate": 0.0015069267644922733,
+ "exception_rate": 1.0197248782278541e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 817766,
+  "/associate_card": 64825
+ },
+ "rss_mb": {
+  "n": 663,
+  "mk_s": 23687,
+  "mk_z": 4.1578,
+  "mk_p_two_sided": 3.213922173597356e-05,
+  "mk_p_upward": 1.606961086798678e-05,
+  "sen_slope_per_h": 0.27081917383702225,
+  "first": 114.13671875,
+  "last": 114.99609375
+ },
+ "heap_mb": {
+  "n": 663,
+  "mk_s": 57844,
+  "mk_z": 10.1534,
+  "mk_p_two_sided": 3.1995066903381947e-24,
+  "mk_p_upward": 1.5997533451690973e-24,
+  "sen_slope_per_h": 0.08814225354344915,
+  "first": 8.180618286132812,
+  "last": 8.044120788574219
+ },
+ "external_mb": {
+  "n": 663,
+  "mk_s": -2706,
+  "mk_z": -0.4748,
+  "mk_p_two_sided": 0.634915383007509,
+  "mk_p_upward": 0.6825423084962454,
+  "sen_slope_per_h": -0.00670737652460943,
+  "first": 2.2899742126464844,
+  "last": 2.64841365814209
+ },
+ "handles": {
+  "n": 663,
+  "mk_s": -662,
+  "mk_z": -1.7268,
+  "mk_p_two_sided": 0.08419857936783012,
+  "mk_p_upward": 0.9579007103160849,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 35940,
+  "mk_z": 6.3372,
+  "mk_p_two_sided": 2.34051991903349e-10,
+  "mk_p_upward": 1.170259959516745e-10,
+  "sen_slope_per_h": 8.565457214755165
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -37069,
+  "mk_z": -6.5363,
+  "mk_p_two_sided": 6.305328948860717e-11,
+  "mk_p_upward": 0.9999999999684733,
+  "sen_slope_per_h": -26.285714285714228
+ },
+ "throughput_mean_rps": 245.91467473524963,
+ "p95_ms_median": 48.06804656982422,
+ "db_rows": 905,
+ "db_state_counts": {
+  "credit_cards": 150,
+  "phones": 5,
+  "card_phone_associations": 750
+ },
+ "time_to_detect_min": 15.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "leitura_densissima",
+ "hypothesis": "H3: 150 cartões (905 linhas, abaixo de D2; leituras devolvem até 150 cartões). Se o efeito escala com o result set, a inclinação supera a de 100 cartões.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

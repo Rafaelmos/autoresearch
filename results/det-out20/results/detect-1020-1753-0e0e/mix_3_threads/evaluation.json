@@ -1,0 +1,85 @@
+{
+ "arm": "mix_3_threads",
+ "warmup_s": 300.0,
+ "requests": 133041,
+ "error_rate": 0.014394058974301155,
+ "server_error_rate": 0.014161048097954767,
+ "exception_rate": 0.00023301087634638946,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 66521,
+  "/associate_card": 66520
+ },
+ "rss_mb": {
+  "n": 660,
+  "mk_s": 128887,
+  "mk_z": 22.7786,
+  "mk_p_two_sided": 7.4801509525990005e-115,
+  "mk_p_upward": 3.7400754762995002e-115,
+  "sen_slope_per_h": 3.1228516358490435,
+  "first": 96.8828125,
+  "last": 103.4453125
+ },
+ "heap_mb": {
+  "n": 660,
+  "mk_s": 119861,
+  "mk_z": 21.183,
+  "mk_p_two_sided": 1.3695231644914244e-99,
+  "mk_p_upward": 6.847615822457122e-100,
+  "sen_slope_per_h": 0.2326814576437063,
+  "first": 8.854438781738281,
+  "last": 9.030624389648438
+ },
+ "external_mb": {
+  "n": 660,
+  "mk_s": -21129,
+  "mk_z": -3.7341,
+  "mk_p_two_sided": 0.00018836809719903765,
+  "mk_p_upward": 0.9999058159514005,
+  "sen_slope_per_h": -0.000808239498189381,
+  "first": 2.10335636138916,
+  "last": 2.093496322631836
+ },
+ "handles": {
+  "n": 660,
+  "mk_s": -1316,
+  "mk_z": -2.4421,
+  "mk_p_two_sided": 0.014603406354119884,
+  "mk_p_upward": 0.9926982968229401,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 660,
+  "mk_s": 38223,
+  "mk_z": 6.755,
+  "mk_p_two_sided": 1.4280921031598398e-11,
+  "mk_p_upward": 7.140460515799199e-12,
+  "sen_slope_per_h": 29.659684566312315
+ },
+ "throughput": {
+  "n": 660,
+  "mk_s": -36088,
+  "mk_z": -6.3795,
+  "mk_p_two_sided": 1.7765911457371118e-10,
+  "mk_p_upward": 0.9999999999111704,
+  "sen_slope_per_h": -4.63519313304721
+ },
+ "throughput_mean_rps": 36.20272727272727,
+ "p95_ms_median": 132.48538970947266,
+ "db_rows": 3,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 1,
+  "card_phone_associations": 1
+ },
+ "time_to_detect_min": 10.0,
+ "rss_upward_significant": false,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "mix_3_threads",
+ "hypothesis": "E3: com 3 threads há contenção menor; se a oscilação da baseline escalar com concorrência, a inclinação fica entre a de 1 e a de 10 threads.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

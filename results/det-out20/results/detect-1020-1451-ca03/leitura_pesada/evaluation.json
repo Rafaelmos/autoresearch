@@ -1,0 +1,83 @@
+{
+ "arm": "leitura_pesada",
+ "warmup_s": 300.0,
+ "requests": 915281,
+ "error_rate": 0.0017076722886195605,
+ "server_error_rate": 0.0017011169247477004,
+ "exception_rate": 6.555363871860117e-06,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 851279,
+  "/associate_card": 64002
+ },
+ "rss_mb": {
+  "n": 650,
+  "mk_s": 42467,
+  "mk_z": 7.6789,
+  "mk_p_two_sided": 1.604501942322258e-14,
+  "mk_p_upward": 8.02250971161129e-15,
+  "sen_slope_per_h": 0.43767837235754264,
+  "first": 116.78515625,
+  "last": 116.29296875
+ },
+ "heap_mb": {
+  "n": 650,
+  "mk_s": 72845,
+  "mk_z": 13.1718,
+  "mk_p_two_sided": 1.2748634291907582e-39,
+  "mk_p_upward": 6.374317145953791e-40,
+  "sen_slope_per_h": 0.11908097682190764,
+  "first": 8.096786499023438,
+  "last": 8.23980712890625
+ },
+ "external_mb": {
+  "n": 650,
+  "mk_s": -5176,
+  "mk_z": -0.9358,
+  "mk_p_two_sided": 0.34939855271754283,
+  "mk_p_upward": 0.8253007236412286,
+  "sen_slope_per_h": -0.0013499224921949449,
+  "first": 2.1086206436157227,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 650,
+  "mk_s": -1489,
+  "mk_z": -2.2928,
+  "mk_p_two_sided": 0.021861727097626925,
+  "mk_p_upward": 0.9890691364511865,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": -62726,
+  "mk_z": -11.0603,
+  "mk_p_two_sided": 1.9533722130032294e-28,
+  "mk_p_upward": 1.0,
+  "sen_slope_per_h": -15.071312636248415
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": 52649,
+  "mk_z": 9.2835,
+  "mk_p_two_sided": 1.6395873981149567e-20,
+  "mk_p_upward": 8.197936990574783e-21,
+  "sen_slope_per_h": 77.2598599082157
+ },
+ "throughput_mean_rps": 257.92768532526475,
+ "p95_ms_median": 45.273542404174805,
+ "db_rows": 120,
+ "db_state_counts": {
+  "credit_cards": 10,
+  "phones": 10,
+  "card_phone_associations": 100
+ },
+ "time_to_detect_min": 35.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "leitura_pesada",
+ "hypothesis": "B3: 90% leitura / 10% escrita gera SQLITE_BUSY em leituras (caminho de erro com db.close) sem saturar; falsificada se RSS < 5 MB/h.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

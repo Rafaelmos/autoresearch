@@ -1,0 +1,82 @@
+{
+ "arm": "retrieve_max",
+ "warmup_s": 300.0,
+ "requests": 2336197,
+ "error_rate": 0.0,
+ "server_error_rate": 0.0,
+ "exception_rate": 0.0,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 2336197
+ },
+ "rss_mb": {
+  "n": 663,
+  "mk_s": 96352,
+  "mk_z": 16.9131,
+  "mk_p_two_sided": 3.6030606224420003e-64,
+  "mk_p_upward": 1.8015303112210002e-64,
+  "sen_slope_per_h": 1.1531821115514815,
+  "first": 105.23828125,
+  "last": 106.609375
+ },
+ "heap_mb": {
+  "n": 663,
+  "mk_s": 93865,
+  "mk_z": 16.4763,
+  "mk_p_two_sided": 5.4275859442037194e-61,
+  "mk_p_upward": 2.7137929721018597e-61,
+  "sen_slope_per_h": 0.07559718153391908,
+  "first": 7.9776763916015625,
+  "last": 8.035263061523438
+ },
+ "external_mb": {
+  "n": 663,
+  "mk_s": 9132,
+  "mk_z": 1.6028,
+  "mk_p_two_sided": 0.10897698097893693,
+  "mk_p_upward": 0.054488490489468466,
+  "sen_slope_per_h": 0.024421641947444325,
+  "first": 2.2450828552246094,
+  "last": 2.089797019958496
+ },
+ "handles": {
+  "n": 663,
+  "mk_s": -1322,
+  "mk_z": -2.4421,
+  "mk_p_two_sided": 0.014602048002714566,
+  "mk_p_upward": 0.9926989759986428,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": -8095,
+  "mk_z": -1.4272,
+  "mk_p_two_sided": 0.1535160401990305,
+  "mk_p_upward": 0.9232419799004847,
+  "sen_slope_per_h": -0.2255529901572481
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": 3778,
+  "mk_z": 0.666,
+  "mk_p_two_sided": 0.505406323607308,
+  "mk_p_upward": 0.252703161803654,
+  "sen_slope_per_h": 3.1304347826086305
+ },
+ "throughput_mean_rps": 648.9948562783661,
+ "p95_ms_median": 8.196592330932617,
+ "db_rows": 0,
+ "db_state_counts": {
+  "credit_cards": 0,
+  "phones": 0,
+  "card_phone_associations": 0
+ },
+ "time_to_detect_min": 20.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "retrieve_max",
+ "hypothesis": "D2: 10 telefones de 195 caracteres (cerca de 2,0 KB, máximo do contrato) devem render mais que retrieve_longo; se ficar abaixo de 5 MB/h, o resultado da rodada 3 era ruído.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

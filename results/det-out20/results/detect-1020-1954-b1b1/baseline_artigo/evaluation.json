@@ -1,0 +1,85 @@
+{
+ "arm": "baseline_artigo",
+ "warmup_s": 300.0,
+ "requests": 458963,
+ "error_rate": 0.018711748005830534,
+ "server_error_rate": 0.018696496231722384,
+ "exception_rate": 1.5251774108152508e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 376708,
+  "/associate_card": 82255
+ },
+ "rss_mb": {
+  "n": 662,
+  "mk_s": -32354,
+  "mk_z": -5.692,
+  "mk_p_two_sided": 1.255512844431127e-08,
+  "mk_p_upward": 0.9999999937224358,
+  "sen_slope_per_h": -0.3271696436680762,
+  "first": 111.81640625,
+  "last": 112.24609375
+ },
+ "heap_mb": {
+  "n": 662,
+  "mk_s": -91837,
+  "mk_z": -16.1569,
+  "mk_p_two_sided": 1.016031727524619e-58,
+  "mk_p_upward": 1.0,
+  "sen_slope_per_h": -1.3000349801656006,
+  "first": 9.320755004882812,
+  "last": 8.085678100585938
+ },
+ "external_mb": {
+  "n": 662,
+  "mk_s": -25625,
+  "mk_z": -4.5081,
+  "mk_p_two_sided": 6.541601300222225e-06,
+  "mk_p_upward": 0.9999967291993499,
+  "sen_slope_per_h": -0.004911986294825373,
+  "first": 2.1135730743408203,
+  "last": 2.1187877655029297
+ },
+ "handles": {
+  "n": 662,
+  "mk_s": -661,
+  "mk_z": -1.7268,
+  "mk_p_two_sided": 0.08419999619493855,
+  "mk_p_upward": 0.9579000019025308,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 7117,
+  "mk_z": 1.2548,
+  "mk_p_two_sided": 0.20956235728179887,
+  "mk_p_upward": 0.10478117864089943,
+  "sen_slope_per_h": 3.6431532574062726
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -9531,
+  "mk_z": -1.6804,
+  "mk_p_two_sided": 0.09287050801266783,
+  "mk_p_upward": 0.953564745993666,
+  "sen_slope_per_h": -8.342917137780665
+ },
+ "throughput_mean_rps": 127.41452344931922,
+ "p95_ms_median": 81.68244361877441,
+ "db_rows": 3,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 1,
+  "card_phone_associations": 1
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "baseline_artigo",
+ "hypothesis": "Carga do artigo: alterna associate/retrieve com o mesmo par cartão/telefone.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

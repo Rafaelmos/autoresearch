@@ -1,0 +1,82 @@
+{
+ "arm": "retrieve_meio",
+ "warmup_s": 300.0,
+ "requests": 2365348,
+ "error_rate": 4.227707719963405e-06,
+ "server_error_rate": 0.0,
+ "exception_rate": 4.227707719963405e-06,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 2365348
+ },
+ "rss_mb": {
+  "n": 662,
+  "mk_s": 125065,
+  "mk_z": 22.003,
+  "mk_p_two_sided": 2.698322610134489e-107,
+  "mk_p_upward": 1.3491613050672444e-107,
+  "sen_slope_per_h": 1.7675269504011435,
+  "first": 106.59765625,
+  "last": 112.2421875
+ },
+ "heap_mb": {
+  "n": 662,
+  "mk_s": 113100,
+  "mk_z": 19.8977,
+  "mk_p_two_sided": 4.260352754675218e-88,
+  "mk_p_upward": 2.130176377337609e-88,
+  "sen_slope_per_h": 0.0979729813199416,
+  "first": 8.016258239746094,
+  "last": 7.921119689941406
+ },
+ "external_mb": {
+  "n": 662,
+  "mk_s": -25125,
+  "mk_z": -4.4201,
+  "mk_p_two_sided": 9.864053285651381e-06,
+  "mk_p_upward": 0.9999950679733571,
+  "sen_slope_per_h": -0.03381052096359646,
+  "first": 2.1268186569213867,
+  "last": 2.089797019958496
+ },
+ "handles": {
+  "n": 662,
+  "mk_s": -1320,
+  "mk_z": -2.4421,
+  "mk_p_two_sided": 0.014602499406352651,
+  "mk_p_upward": 0.9926987502968236,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 660,
+  "mk_s": -8055,
+  "mk_z": -1.4234,
+  "mk_p_two_sided": 0.1546217223799105,
+  "mk_p_upward": 0.9226891388100447,
+  "sen_slope_per_h": -0.2116512415389502
+ },
+ "throughput": {
+  "n": 660,
+  "mk_s": 1088,
+  "mk_z": 0.1921,
+  "mk_p_two_sided": 0.8476568011269376,
+  "mk_p_upward": 0.4238284005634688,
+  "sen_slope_per_h": 0.8287786942263268
+ },
+ "throughput_mean_rps": 657.8478787878787,
+ "p95_ms_median": 7.871866226196289,
+ "db_rows": 0,
+ "db_state_counts": {
+  "credit_cards": 0,
+  "phones": 0,
+  "card_phone_associations": 0
+ },
+ "time_to_detect_min": 20.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "retrieve_meio",
+ "hypothesis": "D1: dose-resposta. 10 telefones de 75 caracteres (cerca de 0,8 KB) devem render cerca de metade dos 6,6 MB/h de retrieve_longo; se render o mesmo ou nada, o efeito não escala com bytes.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

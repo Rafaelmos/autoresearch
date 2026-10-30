@@ -1,0 +1,83 @@
+{
+ "arm": "mix_1_thread",
+ "warmup_s": 300.0,
+ "requests": 97598,
+ "error_rate": 0.0021619295477366338,
+ "server_error_rate": 0.0018340539765159122,
+ "exception_rate": 0.00032787557122072175,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 48799,
+  "/associate_card": 48799
+ },
+ "rss_mb": {
+  "n": 662,
+  "mk_s": 129533,
+  "mk_z": 22.7897,
+  "mk_p_two_sided": 5.804712868382335e-115,
+  "mk_p_upward": 2.9023564341911677e-115,
+  "sen_slope_per_h": 6.124929761055304,
+  "first": 93.3828125,
+  "last": 101.78515625
+ },
+ "heap_mb": {
+  "n": 662,
+  "mk_s": 137120,
+  "mk_z": 24.1236,
+  "mk_p_two_sided": 1.41362545082507e-128,
+  "mk_p_upward": 7.06812725412535e-129,
+  "sen_slope_per_h": 0.20454861083313644,
+  "first": 8.725914001464844,
+  "last": 8.913345336914062
+ },
+ "external_mb": {
+  "n": 662,
+  "mk_s": -38886,
+  "mk_z": -6.8445,
+  "mk_p_two_sided": 7.672906280164014e-12,
+  "mk_p_upward": 0.9999999999961635,
+  "sen_slope_per_h": -0.0023154718508058853,
+  "first": 2.1103134155273438,
+  "last": 2.093496322631836
+ },
+ "handles": {
+  "n": 662,
+  "mk_s": -1320,
+  "mk_z": -2.4421,
+  "mk_p_two_sided": 0.014602499406352651,
+  "mk_p_upward": 0.9926987502968236,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 615,
+  "mk_s": 20437,
+  "mk_z": 4.0149,
+  "mk_p_two_sided": 5.946570049291925e-05,
+  "mk_p_upward": 2.9732850246459626e-05,
+  "sen_slope_per_h": 2.4422253567748275
+ },
+ "throughput": {
+  "n": 615,
+  "mk_s": -23016,
+  "mk_z": -4.5274,
+  "mk_p_two_sided": 5.971751050321393e-06,
+  "mk_p_upward": 0.9999970141244748,
+  "sen_slope_per_h": -1.4117647058823521
+ },
+ "throughput_mean_rps": 28.471544715447155,
+ "p95_ms_median": 39.08729553222656,
+ "db_rows": 3,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 1,
+  "card_phone_associations": 1
+ },
+ "time_to_detect_min": 10.0,
+ "rss_upward_significant": true,
+ "flags": [],
+ "valid": true,
+ "spec_name": "mix_1_thread",
+ "hypothesis": "E2: a baseline oscilou entre 0,4 e 7,8 MB/h. Com 1 thread não há contenção SQLITE_BUSY; se a tendência da baseline depender da contenção, a inclinação cai a ~0.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

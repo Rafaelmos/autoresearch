@@ -1,0 +1,85 @@
+{
+ "arm": "so_associate",
+ "warmup_s": 300.0,
+ "requests": 15247,
+ "error_rate": 0.9096215648980127,
+ "server_error_rate": 0.9094903915524365,
+ "exception_rate": 0.00013117334557617892,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/associate_card": 15247
+ },
+ "rss_mb": {
+  "n": 644,
+  "mk_s": 51085,
+  "mk_z": 9.3666,
+  "mk_p_two_sided": 7.487689739372194e-21,
+  "mk_p_upward": 3.743844869686097e-21,
+  "sen_slope_per_h": 0.6385072018495652,
+  "first": 75.0859375,
+  "last": 75.94140625
+ },
+ "heap_mb": {
+  "n": 644,
+  "mk_s": 156796,
+  "mk_z": 28.7489,
+  "mk_p_two_sided": 9.355719263697198e-182,
+  "mk_p_upward": 4.677859631848599e-182,
+  "sen_slope_per_h": 0.21754271027935715,
+  "first": 8.468513488769531,
+  "last": 8.845458984375
+ },
+ "external_mb": {
+  "n": 644,
+  "mk_s": -38704,
+  "mk_z": -7.707,
+  "mk_p_two_sided": 1.2877308961130328e-14,
+  "mk_p_upward": 0.9999999999999936,
+  "sen_slope_per_h": 0.0,
+  "first": 2.109647750854492,
+  "last": 2.093496322631836
+ },
+ "handles": {
+  "n": 644,
+  "mk_s": -1284,
+  "mk_z": -2.4419,
+  "mk_p_two_sided": 0.014610866597100867,
+  "mk_p_upward": 0.9926945667014496,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": -8798,
+  "mk_z": -1.5512,
+  "mk_p_two_sided": 0.12085813522813653,
+  "mk_p_upward": 0.9395709323859318,
+  "sen_slope_per_h": -80.36649643857582
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": 1900,
+  "mk_z": 0.402,
+  "mk_p_two_sided": 0.6877067883889721,
+  "mk_p_upward": 0.3438533941944861,
+  "sen_slope_per_h": 0.0
+ },
+ "throughput_mean_rps": 4.233585476550681,
+ "p95_ms_median": 3582.0107460021973,
+ "db_rows": 3,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 1,
+  "card_phone_associations": 1
+ },
+ "time_to_detect_min": 30.0,
+ "rss_upward_significant": false,
+ "flags": [
+  "E1_erros_5xx_da_app",
+  "E2_erro_dominante_revisao_humana"
+ ],
+ "valid": true,
+ "spec_name": "so_associate",
+ "hypothesis": "A1: a retenção vem do caminho de escrita (transação + conexão nova por requisição).",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

@@ -1,0 +1,83 @@
+{
+ "arm": "mix_1_thread_replica",
+ "warmup_s": 300.0,
+ "requests": 120611,
+ "error_rate": 0.0001658223545116117,
+ "server_error_rate": 0.00013265788360928936,
+ "exception_rate": 3.316447090232234e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 60306,
+  "/associate_card": 60305
+ },
+ "rss_mb": {
+  "n": 662,
+  "mk_s": 111402,
+  "mk_z": 19.5993,
+  "mk_p_two_sided": 1.5681502501848925e-85,
+  "mk_p_upward": 7.840751250924462e-86,
+  "sen_slope_per_h": 1.1900598605760675,
+  "first": 94.5625,
+  "last": 100.71484375
+ },
+ "heap_mb": {
+  "n": 662,
+  "mk_s": 128084,
+  "mk_z": 22.5339,
+  "mk_p_two_sided": 1.9335459458784238e-112,
+  "mk_p_upward": 9.667729729392119e-113,
+  "sen_slope_per_h": 0.23285534149135736,
+  "first": 8.664230346679688,
+  "last": 8.784950256347656
+ },
+ "external_mb": {
+  "n": 662,
+  "mk_s": 58669,
+  "mk_z": 10.3252,
+  "mk_p_two_sided": 5.41870488974019e-25,
+  "mk_p_upward": 2.709352444870095e-25,
+  "sen_slope_per_h": 0.0018527298875316439,
+  "first": 2.1043624877929688,
+  "last": 2.0963401794433594
+ },
+ "handles": {
+  "n": 662,
+  "mk_s": -661,
+  "mk_z": -1.7268,
+  "mk_p_two_sided": 0.08419999619493855,
+  "mk_p_upward": 0.9579000019025308,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 653,
+  "mk_s": -114,
+  "mk_z": -0.0203,
+  "mk_p_two_sided": 0.9838101348160551,
+  "mk_p_upward": 0.5080949325919725,
+  "sen_slope_per_h": -0.0075689379545252405
+ },
+ "throughput": {
+  "n": 653,
+  "mk_s": -4178,
+  "mk_z": -0.7515,
+  "mk_p_two_sided": 0.4523600900141881,
+  "mk_p_upward": 0.7738199549929059,
+  "sen_slope_per_h": 0.0
+ },
+ "throughput_mean_rps": 33.930781010719755,
+ "p95_ms_median": 38.046836853027344,
+ "db_rows": 3,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 1,
+  "card_phone_associations": 1
+ },
+ "time_to_detect_min": 10.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "mix_1_thread_replica",
+ "hypothesis": "F1: réplica de mix_1_thread (6,13 MB/h na rodada 5). Se voltar a >= 5 MB/h com MK p<0,01, o efeito de baixa concorrência é real; se ficar perto de 1, foi ruído.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

@@ -1,0 +1,82 @@
+{
+ "arm": "so_retrieve",
+ "warmup_s": 300.0,
+ "requests": 3090835,
+ "error_rate": 0.0,
+ "server_error_rate": 0.0,
+ "exception_rate": 0.0,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 3090835
+ },
+ "rss_mb": {
+  "n": 644,
+  "mk_s": 67533,
+  "mk_z": 12.3824,
+  "mk_p_two_sided": 3.254159361965891e-35,
+  "mk_p_upward": 1.6270796809829455e-35,
+  "sen_slope_per_h": 0.6130465461877399,
+  "first": 107.1328125,
+  "last": 107.35546875
+ },
+ "heap_mb": {
+  "n": 644,
+  "mk_s": 101753,
+  "mk_z": 18.6566,
+  "mk_p_two_sided": 1.1168973330723547e-77,
+  "mk_p_upward": 5.584486665361773e-78,
+  "sen_slope_per_h": 0.07695889697859998,
+  "first": 8.009422302246094,
+  "last": 8.054039001464844
+ },
+ "external_mb": {
+  "n": 644,
+  "mk_s": -5035,
+  "mk_z": -0.9232,
+  "mk_p_two_sided": 0.35590963261741937,
+  "mk_p_upward": 0.8220451836912903,
+  "sen_slope_per_h": -0.00010509257595384147,
+  "first": 2.091181755065918,
+  "last": 2.089797019958496
+ },
+ "handles": {
+  "n": 644,
+  "mk_s": -1284,
+  "mk_z": -2.4419,
+  "mk_p_two_sided": 0.014610866597100867,
+  "mk_p_upward": 0.9926945667014496,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 15935,
+  "mk_z": 2.8097,
+  "mk_p_two_sided": 0.004959383007190094,
+  "mk_p_upward": 0.002479691503595047,
+  "sen_slope_per_h": 0.053847357825388034
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -11705,
+  "mk_z": -2.0641,
+  "mk_p_two_sided": 0.03901269516095839,
+  "mk_p_upward": 0.9804936524195208,
+  "sen_slope_per_h": -1.499999999999915
+ },
+ "throughput_mean_rps": 858.9304084720121,
+ "p95_ms_median": 2.092123031616211,
+ "db_rows": 0,
+ "db_state_counts": {
+  "credit_cards": 0,
+  "phones": 0,
+  "card_phone_associations": 0
+ },
+ "time_to_detect_min": 30.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "so_retrieve",
+ "hypothesis": "A2: a retenção vem do caminho de leitura (db.all + conexão nova por requisição).",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

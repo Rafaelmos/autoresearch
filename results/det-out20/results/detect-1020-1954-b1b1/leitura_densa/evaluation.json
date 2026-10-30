@@ -1,0 +1,83 @@
+{
+ "arm": "leitura_densa",
+ "warmup_s": 300.0,
+ "requests": 1030401,
+ "error_rate": 0.0009656434727838967,
+ "server_error_rate": 0.0009627319849262569,
+ "exception_rate": 2.9114878576398897e-06,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 962317,
+  "/associate_card": 68084
+ },
+ "rss_mb": {
+  "n": 662,
+  "mk_s": 118211,
+  "mk_z": 20.797,
+  "mk_p_two_sided": 4.607199013845993e-96,
+  "mk_p_upward": 2.3035995069229965e-96,
+  "sen_slope_per_h": 8.460960257540917,
+  "first": 108.53125,
+  "last": 115.0234375
+ },
+ "heap_mb": {
+  "n": 662,
+  "mk_s": 49437,
+  "mk_z": 8.6974,
+  "mk_p_two_sided": 3.396947314188486e-18,
+  "mk_p_upward": 1.698473657094243e-18,
+  "sen_slope_per_h": 0.07234209607541414,
+  "first": 8.1905517578125,
+  "last": 8.10662841796875
+ },
+ "external_mb": {
+  "n": 662,
+  "mk_s": -8369,
+  "mk_z": -1.4722,
+  "mk_p_two_sided": 0.14096785106205434,
+  "mk_p_upward": 0.9295160744689728,
+  "sen_slope_per_h": -0.018033574314711965,
+  "first": 2.2289047241210938,
+  "last": 2.350534439086914
+ },
+ "handles": {
+  "n": 662,
+  "mk_s": -661,
+  "mk_z": -1.7268,
+  "mk_p_two_sided": 0.08419999619493855,
+  "mk_p_upward": 0.9579000019025308,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": -723,
+  "mk_z": -0.1273,
+  "mk_p_two_sided": 0.8986944009270346,
+  "mk_p_upward": 0.5506527995364827,
+  "sen_slope_per_h": -0.09234563300484105
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -3611,
+  "mk_z": -0.6366,
+  "mk_p_two_sided": 0.524410731172533,
+  "mk_p_upward": 0.7377946344137335,
+  "sen_slope_per_h": -2.468571428571405
+ },
+ "throughput_mean_rps": 284.79243570347955,
+ "p95_ms_median": 41.54396057128906,
+ "db_rows": 605,
+ "db_state_counts": {
+  "credit_cards": 100,
+  "phones": 5,
+  "card_phone_associations": 500
+ },
+ "time_to_detect_min": 40.0,
+ "rss_upward_significant": true,
+ "flags": [],
+ "valid": true,
+ "spec_name": "leitura_densa",
+ "hypothesis": "G3: 90% leituras de 1 a 3 telefones sobre o banco denso (cada leitura devolve até 100 cartões ou faz o JOIN com HAVING): se o custo está no result set, deve passar de 5 MB/h.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

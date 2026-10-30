@@ -1,0 +1,37 @@
+commit	run_id	arm	score_rss_mb_per_h	mk_p	ratio_vs_baseline	ttd_min	status	flags	hypothesis
+9ad9356	detect-1020-1344-1613	baseline_artigo	NA	NA	NA	NA	invalid	erro_infra_symlink_EACCES	falha antes da carga
+9ad9356	detect-1020-1344-1613	so_associate	NA	NA	NA	NA	invalid	erro_infra_symlink_EACCES	falha antes da carga
+9ad9356	detect-1020-1344-1613	so_retrieve	NA	NA	NA	NA	invalid	erro_infra_symlink_EACCES	falha antes da carga
+9ad9356	detect-1020-1344-1613	so_invalidas	NA	NA	NA	NA	invalid	erro_infra_symlink_EACCES	falha antes da carga
+9ad9356	detect-1020-1349-7f38	baseline_artigo	NA	NA	NA	NA	baseline	-	rodada 1 (ablação), abaixo de 5 MB/h
+9ad9356	detect-1020-1349-7f38	so_associate	NA	NA	NA	NA	discard	-	rodada 1 (ablação), abaixo de 5 MB/h
+9ad9356	detect-1020-1349-7f38	so_retrieve	NA	NA	NA	NA	discard	-	rodada 1 (ablação), abaixo de 5 MB/h
+9ad9356	detect-1020-1349-7f38	so_invalidas	NA	NA	NA	NA	discard	-	rodada 1 (ablação), abaixo de 5 MB/h
+3855356	detect-1020-1451-ca03	baseline_artigo	NA	NA	NA	NA	baseline	E1_erros_5xx_da_app	rodada 2: RSS abaixo de 5 MB/h (ruído)
+3855356	detect-1020-1451-ca03	mix_variado	NA	NA	NA	NA	discard	E1_erros_5xx_da_app	rodada 2: RSS abaixo de 5 MB/h (ruído)
+3855356	detect-1020-1451-ca03	retrieve_10	NA	NA	NA	NA	discard	-	rodada 2: RSS abaixo de 5 MB/h (ruído)
+3855356	detect-1020-1451-ca03	leitura_pesada	NA	NA	NA	NA	discard	-	rodada 2: RSS abaixo de 5 MB/h (ruído)
+2cdf6ce	detect-1020-1551-7e50	baseline_artigo	NA	0.00000	NA	15	baseline	E1_erros_5xx_da_app	rodada 3: referência (rss 0,41 MB/h)
+2cdf6ce	detect-1020-1551-7e50	mix_longo	NA	0.02789	NA	NA	discard	E1_erros_5xx_da_app	C1: rss 0,12 MB/h; não elegível
+2cdf6ce	detect-1020-1551-7e50	tipo_invalido	NA	0.00000	NA	35	discard	E1_erros_5xx_da_app,E2_erro_dominante_revisao_humana	C3: 100% 500 (TypeError na validação); rss 0,44; não pontua
+2cdf6ce	detect-1020-1551-7e50	retrieve_longo	6.556	0.00000	15.992	20	keep	-	C2: 10 telefones de 150 caracteres sem escrita; heap 0,08 MB/h => retenção nativa
+6f98805	detect-1020-1652-5a60	baseline_artigo	NA	0.00000	NA	25	baseline	-	rodada 4: referência com rss 7,77 MB/h (nesta rodada a própria baseline teve tendência; ruído maior que o A/A)
+6f98805	detect-1020-1652-5a60	retrieve_meio	NA	0.00000	NA	20	discard	-	D1: 10x75 caracteres, rss 1,77 MB/h
+6f98805	detect-1020-1652-5a60	retrieve_max	NA	0.00000	NA	20	discard	-	D2: 10x195 caracteres, rss 1,15 MB/h; não replica o efeito do tamanho
+6f98805	detect-1020-1652-5a60	retrieve_1_longo	NA	0.00000	NA	20	discard	-	D3: 1x1900 caracteres, rss 0,81 MB/h
+b3e4ef0	detect-1020-1753-0e0e	baseline_artigo	NA	0.00000	NA	10	baseline	E1_erros_5xx_da_app	rodada 5: referência rss 1,37 MB/h
+b3e4ef0	detect-1020-1753-0e0e	retrieve_longo_replica	NA	0.00000	NA	10	discard	-	E1: rss 0,50 MB/h; refuta o 6,56 da rodada 3
+b3e4ef0	detect-1020-1753-0e0e	mix_1_thread	6.125	0.00000	4.472	10	discard	-	E2: 1 thread, mix 1:1 invertido; elegível mas 6,125 < 6,556*1,1 (melhor anterior, depois refutado); candidato a réplica
+b3e4ef0	detect-1020-1753-0e0e	mix_3_threads	NA	0.00000	NA	10	discard	E1_erros_5xx_da_app	E3: 3 threads, rss 3,12 MB/h (abaixo do piso de 5)
+daad04a	detect-1020-1854-1de0	baseline_artigo	NA	0.00000	NA	20	baseline	E1_erros_5xx_da_app	rodada 6: referência rss 0,49 MB/h
+daad04a	detect-1020-1854-1de0	mix_1_thread_replica	NA	0.00000	NA	10	discard	-	F1: rss 1,19 MB/h; refuta o 6,13 do mix_1_thread
+daad04a	detect-1020-1854-1de0	associate_1_thread	NA	0.00000	NA	10	discard	-	F2: escrita pura sem BUSY, rss 0,53 MB/h
+daad04a	detect-1020-1854-1de0	retrieve_1_thread	NA	0.00000	NA	15	discard	-	F3: leitura pura, rss 0,82 MB/h
+228995b	detect-1020-1954-b1b1	baseline_artigo	NA	1.00000	NA	NA	baseline	E1_erros_5xx_da_app	rodada 7: referência rss -0,33 MB/h
+228995b	detect-1020-1954-b1b1	densa_1_thread	5.932	0.00000	NA	10	discard	-	G2: banco denso (605 linhas), 1 thread; elegível, abaixo de leitura_densa
+228995b	detect-1020-1954-b1b1	densa_10_threads	8.293	0.00000	NA	35	discard	E1_erros_5xx_da_app	G1: banco denso, 10 threads, 1,7% de 5xx (SQLITE_BUSY); elegível
+228995b	detect-1020-1954-b1b1	leitura_densa	8.461	0.00000	NA	40	discard	-	G3: 90% leitura sobre banco denso, 0,1% de erro; maior score, mas 8,461 < 6,556+2 (margem mínima sobre o melhor anterior não replicado)
+2a6aa80	detect-1020-2055-cde0	baseline_artigo	NA	0.00000	NA	15	baseline	E1_erros_5xx_da_app	rodada 8: referência rss 0,61 MB/h
+2a6aa80	detect-1020-2055-cde0	leitura_densa_replica	NA	0.00000	NA	35	discard	-	H1: réplica de leitura_densa, rss 0,53 MB/h; refuta o 8,46
+2a6aa80	detect-1020-2055-cde0	leitura_rala	NA	0.22219	NA	NA	discard	-	H2: 5 cartões (35 linhas), rss 0,05 MB/h, sem tendência
+2a6aa80	detect-1020-2055-cde0	leitura_densissima	NA	0.00002	NA	15	discard	-	H3: 150 cartões (905 linhas), rss 0,27 MB/h

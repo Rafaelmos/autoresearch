@@ -1,0 +1,85 @@
+{
+ "arm": "mix_variado",
+ "warmup_s": 300.0,
+ "requests": 425008,
+ "error_rate": 0.019976094567631667,
+ "server_error_rate": 0.01995962428942514,
+ "exception_rate": 1.6470278206527876e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 348537,
+  "/associate_card": 76471
+ },
+ "rss_mb": {
+  "n": 650,
+  "mk_s": 40482,
+  "mk_z": 7.3199,
+  "mk_p_two_sided": 2.4806444040684534e-13,
+  "mk_p_upward": 1.2403222020342267e-13,
+  "sen_slope_per_h": 0.5561330466462724,
+  "first": 113.48828125,
+  "last": 114.19140625
+ },
+ "heap_mb": {
+  "n": 650,
+  "mk_s": 46066,
+  "mk_z": 8.3296,
+  "mk_p_two_sided": 8.112995628692394e-17,
+  "mk_p_upward": 4.056497814346197e-17,
+  "sen_slope_per_h": 0.1525669437434551,
+  "first": 9.074691772460938,
+  "last": 8.178016662597656
+ },
+ "external_mb": {
+  "n": 650,
+  "mk_s": -10890,
+  "mk_z": -1.969,
+  "mk_p_two_sided": 0.048955567608140176,
+  "mk_p_upward": 0.9755222161959299,
+  "sen_slope_per_h": -0.004010964117305929,
+  "first": 2.1337890625,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 650,
+  "mk_s": -1296,
+  "mk_z": -2.442,
+  "mk_p_two_sided": 0.014608025574006265,
+  "mk_p_upward": 0.9926959872129969,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": -51362,
+  "mk_z": -9.0565,
+  "mk_p_two_sided": 1.3467324987655242e-19,
+  "mk_p_upward": 1.0,
+  "sen_slope_per_h": -72.59504625413302
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": 48230,
+  "mk_z": 8.5043,
+  "mk_p_two_sided": 1.8267879786025743e-17,
+  "mk_p_upward": 9.133939893012871e-18,
+  "sen_slope_per_h": 67.08954772349114
+ },
+ "throughput_mean_rps": 120.40151285930408,
+ "p95_ms_median": 125.52380561828613,
+ "db_rows": 120,
+ "db_state_counts": {
+  "credit_cards": 10,
+  "phones": 10,
+  "card_phone_associations": 100
+ },
+ "time_to_detect_min": 10.0,
+ "rss_upward_significant": false,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "mix_variado",
+ "hypothesis": "B1: valores variados (10 cartões x 10 telefones, listas de 1-10) em mix 1:1 retêm mais memória nativa que a baseline de valores fixos (RSS > 5 MB/h); falsificada se ficar no ruído.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

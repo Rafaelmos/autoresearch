@@ -1,0 +1,83 @@
+{
+ "arm": "densa_1_thread",
+ "warmup_s": 300.0,
+ "requests": 114585,
+ "error_rate": 0.00016581576995243705,
+ "server_error_rate": 0.0001221800410175852,
+ "exception_rate": 4.3635728934851856e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/associate_card": 57293,
+  "/retrieve_cards": 57292
+ },
+ "rss_mb": {
+  "n": 662,
+  "mk_s": 156640,
+  "mk_z": 27.558,
+  "mk_p_two_sided": 3.545228320505376e-167,
+  "mk_p_upward": 1.772614160252688e-167,
+  "sen_slope_per_h": 5.93162405593999,
+  "first": 93.515625,
+  "last": 97.8671875
+ },
+ "heap_mb": {
+  "n": 662,
+  "mk_s": 80361,
+  "mk_z": 14.1379,
+  "mk_p_two_sided": 2.2189594842859175e-45,
+  "mk_p_upward": 1.1094797421429588e-45,
+  "sen_slope_per_h": 0.1210347569228781,
+  "first": 8.7535400390625,
+  "last": 8.827194213867188
+ },
+ "external_mb": {
+  "n": 662,
+  "mk_s": -34275,
+  "mk_z": -6.0314,
+  "mk_p_two_sided": 1.6255396774252169e-09,
+  "mk_p_upward": 0.9999999991872301,
+  "sen_slope_per_h": -0.017521623872231037,
+  "first": 2.2658510208129883,
+  "last": 2.167365074157715
+ },
+ "handles": {
+  "n": 662,
+  "mk_s": -661,
+  "mk_z": -1.7268,
+  "mk_p_two_sided": 0.08419999619493855,
+  "mk_p_upward": 0.9579000019025308,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 655,
+  "mk_s": 8120,
+  "mk_z": 1.4513,
+  "mk_p_two_sided": 0.14668774081618233,
+  "mk_p_upward": 0.07334387040809116,
+  "sen_slope_per_h": 0.7959774562290738
+ },
+ "throughput": {
+  "n": 655,
+  "mk_s": 1737,
+  "mk_z": 0.3107,
+  "mk_p_two_sided": 0.7559973270944176,
+  "mk_p_upward": 0.3779986635472088,
+  "sen_slope_per_h": 0.0
+ },
+ "throughput_mean_rps": 31.979847328244272,
+ "p95_ms_median": 44.15631294250488,
+ "db_rows": 605,
+ "db_state_counts": {
+  "credit_cards": 100,
+  "phones": 5,
+  "card_phone_associations": 500
+ },
+ "time_to_detect_min": 10.0,
+ "rss_upward_significant": true,
+ "flags": [],
+ "valid": true,
+ "spec_name": "densa_1_thread",
+ "hypothesis": "G2: mesma carga com 1 thread, sem SQLITE_BUSY; separa o efeito do volume de resultado do efeito da contenção.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

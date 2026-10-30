@@ -1,0 +1,6 @@
+---
+run_id: detect-1020-1551-7e50
+arm=baseline_artigo valid=True score_rss_mb_per_h=NA rss_slope=0.410 mk_p=0.00000 heap_slope=0.094 handles_slope=0.000 p95_slope=3.000 ttd_min=15.000 ratio=NA req=536132 err=0.0146 db_rows=3 flags=E1_erros_5xx_da_app
+arm=mix_longo valid=True score_rss_mb_per_h=NA rss_slope=0.119 mk_p=0.02789 heap_slope=0.168 handles_slope=0.000 p95_slope=3.376 ttd_min=NA ratio=NA req=544938 err=0.0140 db_rows=21 flags=E1_erros_5xx_da_app
+arm=tipo_invalido valid=True score_rss_mb_per_h=NA rss_slope=0.439 mk_p=0.00000 heap_slope=0.080 handles_slope=0.000 p95_slope=0.936 ttd_min=35.000 ratio=NA req=3192317 err=1.0000 db_rows=0 flags=E1_erros_5xx_da_app,E2_erro_dominante_revisao_humana
+arm=retrieve_longo valid=True score_rss_mb_per_h=6.556 rss_slope=6.556 mk_p=0.00000 heap_slope=0.080 handles_slope=0.000 p95_slope=1.101 ttd_min=20.000 ratio=15.992 req=2966129 err=0.0000 db_rows=0 flags=-
