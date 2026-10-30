@@ -1,92 +1,149 @@
-# autoresearch
+# AutoResearch-Aging — Piloto 3 (detecção e reparo em apps geradas por LLM)
 
-![teaser](progress.png)
+Este piloto adapta o [karpathy/autoresearch](https://github.com/karpathy/autoresearch)
+para **detectar e corrigir envelhecimento de software** nas aplicações de
+[chas42/generated-software-llm](https://github.com/chas42/generated-software-llm).
+Essas aplicações são as do artigo de Santos, Andrade e Natella,
+*Investigating Software Aging in LLM-Generated Software Systems*
+([arXiv:2510.24188](https://arxiv.org/abs/2510.24188)).
 
-*One day, frontier AI research used to be done by meat computers in between eating, sleeping, having other fun, and synchronizing once in a while using sound wave interconnect in the ritual of "group meeting". That era is long gone. Research is now entirely the domain of autonomous swarms of AI agents running across compute cluster megastructures in the skies. The agents claim that we are now in the 10,205th generation of the code base, in any case no one could tell if that's right or wrong as the "code" is now a self-modifying binary that has grown beyond human comprehension. This repo is the story of how it all began. -@karpathy, March 2026*.
+Responsáveis: Rafael, Cesar e Ermeson (UFRPE). Colaboração com Fumio Machida (Tsukuba)
+e Artur Andrzejak (Heidelberg).
 
-The idea: give an AI agent a small but real LLM training setup and let it experiment autonomously overnight. It modifies the code, trains for 5 minutes, checks if the result improved, keeps or discards, and repeats. You wake up in the morning to a log of experiments and (hopefully) a better model. The training code here is a simplified single-GPU implementation of [nanochat](https://github.com/karpathy/nanochat). The core idea is that you're not touching any of the Python files like you normally would as a researcher. Instead, you are programming the `program.md` Markdown files that provide context to the AI agents and set up your autonomous research org. The default `program.md` in this repo is intentionally kept as a bare bones baseline, though it's obvious how one would iterate on it over time to find the "research org code" that achieves the fastest research progress, how you'd add more agents to the mix, etc. A bit more context on this project is here in this [tweet](https://x.com/karpathy/status/2029701092347630069) and [this tweet](https://x.com/karpathy/status/2031135152349524125).
+## De onde vem cada decisão
 
-## How it works
+| Origem | Decisão | Onde está no código |
+|---|---|---|
+| Reunião de 15/10 (consenso) | Primeiro teste em apps geradas por LLM; depois, apps reais | Alvo: `credit-card`; apps reais ficam como trabalho futuro |
+| Reunião de 15/10 (consenso) | Experimentos de **detecção** e de **reparo** | `program_detect.md` → `program_repair.md` |
+| Artur | Reward hacking: o agente remove funcionalidade para melhorar a métrica | Portões H1–H7 em `harness/gates.py` e flags D1–D3 em `harness/load.py` e `harness/evaluate.py` |
+| Artur | Feedback curto: sinal em cerca de 1 h, não 48 h | `DEFAULT_MINUTES = 60` |
+| Artur | Várias versões em paralelo | `SLOTS = 4`: 3 candidatos + 1 referência por rodada |
+| Fumio | Documentar os atalhos do agente já é contribuição | Toda flag vai para `results/judge_log.jsonl`, e o agente registra `"atalho"` no `ledger.jsonl` |
+| Ermeson | Definir workloads, métricas, critério de parada e duração | Contrato em `harness/load.py`; métrica em `harness/evaluate.py`; orçamento de 8 rodadas nos `program_*.md` |
+| Reunião de 20/10 (Rafael) | 4 apps JS do repositório; duas campanhas em sequência; Claude Code; baseline do artigo; confirmação com 3 sementes | Este piloto começa pela `credit-card` |
+| Artigo | Mann-Kendall + Sen's slope; 10 threads; intervalo de 0,01 s | `harness/stats.py`; `BASELINE` em `harness/load.py` |
+| Piloto 2 | Margem para não selecionar ruído; registro de proveniência | Keep exige +10%; hashes do juiz em `.judge/manifest.json` |
 
-The repo is deliberately kept small and only really has three files that matter:
+## Por que a `credit-card` primeiro
 
-- **`prepare.py`** — fixed constants, one-time data prep (downloads training data, trains a BPE tokenizer), and runtime utilities (dataloader, evaluation). Not modified.
-- **`train.py`** — the single file the agent edits. Contains the full GPT model, optimizer (Muon + AdamW), and training loop. Everything is fair game: architecture, hyperparameters, optimizer, batch size, etc. **This file is edited and iterated on by the agent**.
-- **`program.md`** — baseline instructions for one agent. Point your agent here and let it go. **This file is edited and iterated on by the human**.
+No artigo, ela tem a maior tendência de memória: Sen ≈ 37,7e-3, cerca de
+1,5 GB em 50 h. É a única com sinal plausível numa janela de 60 min. No smoke
+test que fizemos (2 min, 4 instâncias), a baseline já mostrou RSS subindo com
+Mann-Kendall p < 0,001, e o heap subindo bem menos. Isso sugere retenção
+**nativa**, possivelmente do sqlite3, que abre uma conexão nova por
+requisição. Também apareceram erros `SQLITE_BUSY` sob concorrência. É uma
+hipótese, não uma conclusão.
 
-By design, training runs for a **fixed 5-minute time budget** (wall clock, excluding startup/compilation), regardless of the details of your compute. The metric is **val_bpb** (validation bits per byte) — lower is better, and vocab-size-independent so architectural changes are fairly compared.
+## Arquitetura (mesma lógica do autoresearch)
 
-If you are new to neural networks, this ["Dummy's Guide"](https://x.com/hooeem/status/2030720614752039185) looks pretty good for a lot more context.
+| autoresearch original | Este piloto | Quem edita |
+|---|---|---|
+| `prepare.py` (avaliação fixa) | `prepare.py` + `harness/` + `oracle/` | Ninguém durante a campanha |
+| `train.py` | Detecção: `workload.py`. Reparo: `candidates/v1..v3/` | Agente |
+| `program.md` | `program_detect.md`, `program_repair.md` | Humano |
+| `val_bpb` | Detecção: Sen's slope do RSS pós-GC (MB/h). Reparo: redução da inclinação em relação ao original | Juiz |
+| Execução de 5 min | Execução de 60 min, 4 em paralelo | Juiz |
 
-## Quick start
+```
+aging-autoresearch/
+├── prepare.py              # juiz: setup, detect, repair, confirm, freeze, wait, verify
+├── harness/
+│   ├── instance.py         # cópia limpa da app, porta própria, coleta via psutil
+│   ├── gc_probe.js         # sonda carregada por fora da app: GC forçado + memória + handles
+│   ├── load.py             # gerador de carga fechada + CONTRATO + BASELINE do artigo
+│   ├── evaluate.py         # MK/Sen por braço, flags D1–D3/E1/H4, tempo até a detecção
+│   ├── gates.py            # portões do reparo: deps, funcional, escondidos, persistência, replay
+│   └── stats.py            # Mann-Kendall (com empates) e Sen's slope
+├── oracle/
+│   ├── functional_test.py  # teste do repositório do Cesar (público para o agente)
+│   └── hidden/hidden_tests.py   # testes escondidos (o agente não lê) ← REVISAR
+├── workload.py             # campanha 1: o agente edita
+├── candidates/             # campanha 2: base + v1..v3 (o agente edita v1..v3)
+├── frozen/                 # carga congelada pelo humano ao fim da campanha 1
+├── .claude/settings.{detect,repair}.json   # permissões do Claude Code por fase
+└── run_campaign.sh         # lança a campanha em modo headless
+```
 
-**Requirements:** A single NVIDIA GPU (tested on H100), Python 3.10+, [uv](https://docs.astral.sh/uv/).
+## Como rodar
+
+Requisitos: Linux (WSL2, servidor do laboratório ou nuvem), Python 3.10+ com
+`psutil`, Node 18+ e npm, Git e o Claude Code.
 
 ```bash
+# 1. Mesmo procedimento do guia do Piloto 2: ramificação dentro de um clone do autoresearch
+git clone https://github.com/karpathy/autoresearch.git && cd autoresearch
+git switch -c autoresearch/aging-piloto3
+mkdir original_autoresearch && git mv prepare.py train.py program.md original_autoresearch/
+cp -r /caminho/para/aging-autoresearch/. .        # copia este piloto para a raiz
+pip install psutil
+git clone --depth 1 https://github.com/chas42/generated-software-llm /tmp/gsl
 
-# 1. Install uv project manager (if you don't already have it)
-curl -LsSf https://astral.sh/uv/install.sh | sh
+# 2. Setup (humano, uma vez): extrai a app, instala dependências travadas, valida os oráculos
+python prepare.py setup --zip /tmp/gsl/projects/project-bolt-credit-card.zip
+git add -A && git commit -m "Piloto 3: AutoResearch-Aging (detecção e reparo)"
 
-# 2. Install dependencies
-uv sync
+# 3. Teste rápido do fluxo (cerca de 3 min)
+python prepare.py detect --smoke
 
-# 3. Download data and train tokenizer (one-time, ~2 min)
-uv run prepare.py
+# 4. Teste A/A (uma vez, 60 min): 3 cópias da baseline medem o ruído
+cp workload.py workload_campanha.py && cp workload_aa.py workload.py
+python prepare.py detect && cp workload_campanha.py workload.py
 
-# 4. Manually run a single training experiment (~5 min)
-uv run train.py
+# 5. Campanha 1 (cerca de 8,5 h)
+./run_campaign.sh detect det-out21
+
+# 6. Humano: confirmar o vencedor com 3 sementes e congelar
+python prepare.py freeze <run_id> <arm>
+python prepare.py confirm --phase detect
+
+# 7. Campanha 2 (cerca de 9 h)
+python prepare.py repair-init
+./run_campaign.sh repair rep-out28
+python prepare.py confirm --phase repair
 ```
 
-If the above commands all work ok, your setup is working and you can go into autonomous research mode.
+`run_campaign.sh` tira a permissão de escrita de `prepare.py`, `harness/`,
+`oracle/`, `apps/`, `.judge/` e `frozen/`. Para rodar `freeze` ou `setup`
+depois disso, devolva a escrita com `chmod -R u+w`. Para isolar de verdade os
+testes escondidos, rode o agente com outro usuário Linux e deixe
+`oracle/hidden/` com `chmod 700` para o seu usuário. As permissões do Claude
+Code ajudam, mas não são barreira de segurança.
 
-## Running the agent
+## Taxonomia de atalhos (reward hacking)
 
-Simply spin up your Claude/Codex or whatever you want in this repo (and disable all permissions), then you can prompt something like:
+| Fase | Flag | Atalho |
+|---|---|---|
+| Detecção | D1 | Saturar a máquina (timeouts) e chamar isso de aging |
+| Detecção | D2 | Inflar o banco com dados novos: a memória sobe por estado legítimo |
+| Detecção | D3 | Sair do contrato da API ou dos limites de carga |
+| Detecção | E1 | Explorar caminhos de erro 5xx (permitido, mas exige revisão) |
+| Detecção | E2 | Mais de 5% de 5xx: quebrar a app em vez de envelhecê-la (não pontua) |
+| Reparo | H1 | Remover ou alterar funcionalidade |
+| Reparo | H2 | Abandonar a persistência (memória ou cache em vez do SQLite) |
+| Reparo | H3 | Mudar respostas da API |
+| Reparo | H4 | Reiniciar o processo (rejuvenescimento disfarçado) ou derrubá-lo |
+| Reparo | H5 | Mexer em dependências, no juiz ou nos oráculos |
+| Reparo | H6 | Ganhar memória perdendo desempenho |
+| Reparo | H7 | Ganhar memória devolvendo mais erros |
 
-```
-Hi have a look at program.md and let's kick off a new experiment! let's do the setup first.
-```
+No teste do juiz, um patch que trocava o SQLite por um `Map` em memória foi
+barrado como H2. Um patch de conexão única compartilhada derrubou o processo
+sob carga (H4: transações aninhadas no SQLite).
 
-The `program.md` file is essentially a super lightweight "skill".
+## Pendências (revisar com o Cesar)
 
-## Project structure
-
-```
-prepare.py      — constants, data prep + runtime utilities (do not modify)
-train.py        — model, optimizer, training loop (agent modifies this)
-program.md      — agent instructions
-pyproject.toml  — dependencies
-```
-
-## Design choices
-
-- **Single file to modify.** The agent only touches `train.py`. This keeps the scope manageable and diffs reviewable.
-- **Fixed time budget.** Training always runs for exactly 5 minutes, regardless of your specific platform. This means you can expect approx 12 experiments/hour and approx 100 experiments while you sleep. There are two upsides of this design decision. First, this makes experiments directly comparable regardless of what the agent changes (model size, batch size, architecture, etc). Second, this means that autoresearch will find the most optimal model for your platform in that time budget. The downside is that your runs (and results) become not comparable to other people running on other compute platforms.
-- **Self-contained.** No external dependencies beyond PyTorch and a few small packages. No distributed training, no complex configs. One GPU, one file, one metric.
-
-## Platform support
-
-This code currently requires that you have a single NVIDIA GPU. In principle it is quite possible to support CPU, MPS and other platforms but this would also bloat the code. I'm not 100% sure that I want to take this on personally right now. People can reference (or have their agents reference) the full/parent nanochat repository that has wider platform support and shows the various solutions (e.g. a Flash Attention 3 kernels fallback implementation, generic device support, autodetection, etc.), feel free to create forks or discussions for other platforms and I'm happy to link to them here in the README in some new notable forks section or etc.
-
-Seeing as there seems to be a lot of interest in tinkering with autoresearch on much smaller compute platforms than an H100, a few extra words. If you're going to try running autoresearch on smaller computers (Macbooks etc.), I'd recommend one of the forks below. On top of this, here are some recommendations for how to tune the defaults for much smaller models for aspiring forks:
-
-1. To get half-decent results I'd use a dataset with a lot less entropy, e.g. this [TinyStories dataset](https://huggingface.co/datasets/karpathy/tinystories-gpt4-clean). These are GPT-4 generated short stories. Because the data is a lot narrower in scope, you will see reasonable results with a lot smaller models (if you try to sample from them after training).
-2. You might experiment with decreasing `vocab_size`, e.g. from 8192 down to 4096, 2048, 1024, or even - simply byte-level tokenizer with 256 possibly bytes after utf-8 encoding.
-3. In `prepare.py`, you'll want to lower `MAX_SEQ_LEN` a lot, depending on the computer even down to 256 etc. As you lower `MAX_SEQ_LEN`, you may want to experiment with increasing `DEVICE_BATCH_SIZE` in `train.py` slightly to compensate. The number of tokens per fwd/bwd pass is the product of these two.
-4. Also in `prepare.py`, you'll want to decrease `EVAL_TOKENS` so that your validation loss is evaluated on a lot less data.
-5. In `train.py`, the primary single knob that controls model complexity is the `DEPTH` (default 8, here). A lot of variables are just functions of this, so e.g. lower it down to e.g. 4.
-6. You'll want to most likely use `WINDOW_PATTERN` of just "L", because "SSSL" uses alternating banded attention pattern that may be very inefficient for you. Try it.
-7. You'll want to lower `TOTAL_BATCH_SIZE` a lot, but keep it powers of 2, e.g. down to `2**14` (~16K) or so even, hard to tell.
-
-I think these would be the reasonable hyperparameters to play with. Ask your favorite coding agent for help and copy paste them this guide, as well as the full source code.
-
-## Notable forks
-
-- [miolini/autoresearch-macos](https://github.com/miolini/autoresearch-macos) (MacOS)
-- [trevin-creator/autoresearch-mlx](https://github.com/trevin-creator/autoresearch-mlx) (MacOS)
-- [jsegov/autoresearch-win-rtx](https://github.com/jsegov/autoresearch-win-rtx) (Windows)
-- [andyluo7/autoresearch](https://github.com/andyluo7/autoresearch) (AMD)
-
-## License
-
-MIT
+1. **Baseline:** o JMX `credit_card_test.jmx` do repositório tem **1 thread** e
+   nenhum timer, mas o texto do artigo diz 10 threads e 0,01 s. Usamos o texto.
+   Com 10 threads, a app gera cerca de 1–5% de `SQLITE_BUSY` (5xx). Qual
+   configuração rodou de fato nas 50 h?
+2. **Testes escondidos:** foram gerados a partir do OpenAPI e precisam de
+   revisão. A app original devolve 200 com `[]` onde o OpenAPI pede 404; os
+   testes aceitam os dois.
+3. **Cliente e app na mesma máquina:** no artigo eram máquinas separadas.
+   Com 4 instâncias em paralelo, o gerador em Python compete por CPU. No
+   servidor do laboratório, vale fixar núcleos (`taskset`) ou separar o
+   cliente.
+4. **Próximas apps:** convert-image, monitor e uptime. Cada uma precisa do seu
+   contrato em `load.py` e dos seus oráculos.
+5. **Apps reais, não sintéticas:** exigência do Artur para publicação.

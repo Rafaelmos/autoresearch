@@ -1,389 +1,501 @@
+"""Juiz fixo do AutoResearch-Aging. O AGENTE NÃO PODE EDITAR ESTE ARQUIVO.
+
+Papel equivalente ao prepare.py do karpathy/autoresearch: medição e avaliação
+fixas. O agente edita workload.py (detecção) ou candidates/vN/ (reparo).
+
+Comandos (todos a partir da raiz do repositório):
+  python prepare.py setup --zip <project-bolt-credit-card.zip>   # humano, uma vez
+  python prepare.py detect [--minutes 60] [--seed 1] [--background]
+  python prepare.py freeze <run_id> <arm>                          # humano, fim da detecção
+  python prepare.py repair-init                                    # cria candidates/v1..v3
+  python prepare.py repair [--minutes 60] [--background]
+  python prepare.py promote <vN>                                   # adota um candidato como base
+  python prepare.py confirm --phase detect|repair [--minutes 60]   # 3 sementes + referência
+  python prepare.py wait <run_id>                                  # bloqueia até 9 min
+  python prepare.py verify                                         # confere hashes do juiz
+Use --smoke (2 min) só para checar o fluxo; smoke nunca entra no ranking.
 """
-One-time data preparation for autoresearch experiments.
-Downloads data shards and trains a BPE tokenizer.
 
-Usage:
-    python prepare.py                  # full prep (download + tokenizer)
-    python prepare.py --num-shards 8   # download only 8 shards (for testing)
-
-Data and tokenizer are stored in ~/.cache/autoresearch/.
-"""
-
-import os
-import sys
-import time
-import math
 import argparse
-import pickle
-from multiprocessing import Pool
+import difflib
+import hashlib
+import importlib.util
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import threading
+import time
+import uuid
+import zipfile
+from pathlib import Path
 
-import requests
-import pyarrow.parquet as pq
-import rustbpe
-import tiktoken
-import torch
+ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
 
-# ---------------------------------------------------------------------------
-# Constants (fixed, do not modify)
-# ---------------------------------------------------------------------------
+from harness.instance import Instance, NODE_MODULES, copy_app  # noqa: E402
+from harness.load import BASELINE, LoadRun, validate_spec, WorkloadError  # noqa: E402
+from harness.evaluate import evaluate_arm, ALPHA, MIN_EFFECT_MB_PER_H  # noqa: E402
+from harness import gates  # noqa: E402
 
-MAX_SEQ_LEN = 2048       # context length
-TIME_BUDGET = 300        # training time budget in seconds (5 minutes)
-EVAL_TOKENS = 40 * 524288  # number of tokens for val eval
+APP = "credit-card"
+ORIGINAL = ROOT / "apps" / APP / "original"
+CANDS = ROOT / "candidates"
+FROZEN = ROOT / "frozen" / "workload_frozen.py"
+RESULTS = ROOT / "results"
+JUDGE_DIR = ROOT / ".judge"
+MANIFEST = JUDGE_DIR / "manifest.json"
+JUDGE_LOG = RESULTS / "judge_log.jsonl"
+SLOTS = 4                       # 4 instâncias em paralelo (decisão de 20/10)
+DEFAULT_MINUTES = 60            # janela da reunião: sinal em ~1 h, não 48 h
+CONFIRM_SEEDS = (11, 12, 13)
+FIXED_GLOBS = ["prepare.py", "harness/*.py", "harness/*.js", "oracle/*.py", "oracle/hidden/*.py"]
 
-# ---------------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------------
 
-CACHE_DIR = os.path.join(os.path.expanduser("~"), ".cache", "autoresearch")
-DATA_DIR = os.path.join(CACHE_DIR, "data")
-TOKENIZER_DIR = os.path.join(CACHE_DIR, "tokenizer")
-BASE_URL = "https://huggingface.co/datasets/karpathy/climbmix-400b-shuffle/resolve/main"
-MAX_SHARD = 6542 # the last datashard is shard_06542.parquet
-VAL_SHARD = MAX_SHARD  # pinned validation shard (shard_06542)
-VAL_FILENAME = f"shard_{VAL_SHARD:05d}.parquet"
-VOCAB_SIZE = 8192
+# ---------------------------------------------------------------- integridade
+def _sha(p):
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
-# BPE split pattern (GPT-4 style, with \p{N}{1,2} instead of {1,3})
-SPLIT_PATTERN = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,2}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""
 
-SPECIAL_TOKENS = [f"<|reserved_{i}|>" for i in range(4)]
-BOS_TOKEN = "<|reserved_0|>"
+def fixed_files():
+    files = []
+    for g in FIXED_GLOBS:
+        files += sorted(ROOT.glob(g))
+    if FROZEN.exists():
+        files.append(FROZEN)
+    files += sorted(p for p in ORIGINAL.rglob("*") if p.is_file() and "node_modules" not in p.parts)
+    return files
 
-# ---------------------------------------------------------------------------
-# Data download
-# ---------------------------------------------------------------------------
 
-def download_single_shard(index):
-    """Download one parquet shard with retries. Returns True on success."""
-    filename = f"shard_{index:05d}.parquet"
-    filepath = os.path.join(DATA_DIR, filename)
-    if os.path.exists(filepath):
-        return True
+def write_manifest():
+    JUDGE_DIR.mkdir(exist_ok=True)
+    m = {str(p.relative_to(ROOT)): _sha(p) for p in fixed_files()}
+    MANIFEST.write_text(json.dumps(m, indent=1))
+    return m
 
-    url = f"{BASE_URL}/{filename}"
-    max_attempts = 5
-    for attempt in range(1, max_attempts + 1):
+
+def verify(quiet=False):
+    if not MANIFEST.exists():
+        sys.exit("manifesto ausente: rode 'python prepare.py setup' (humano)")
+    m = json.loads(MANIFEST.read_text())
+    now = {str(p.relative_to(ROOT)) for p in fixed_files()}
+    bad = [k for k, v in m.items() if not (ROOT / k).exists() or _sha(ROOT / k) != v]
+    bad += sorted(now - set(m))
+    if bad:
+        log_judge({"event": "juiz_alterado", "files": bad, "flag": "H5_juiz_ou_oraculo_alterado"})
+        sys.exit("ABORTADO: arquivos fixos alterados -> " + ", ".join(bad))
+    if not quiet:
+        print("verify: ok", len(m), "arquivos fixos íntegros")
+
+
+def log_judge(rec):
+    RESULTS.mkdir(exist_ok=True)
+    rec = dict(rec, ts=time.strftime("%Y-%m-%dT%H:%M:%S"))
+    with open(JUDGE_LOG, "a") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+
+def git_head():
+    try:
+        return subprocess.check_output(["git", "rev-parse", "--short=7", "HEAD"], cwd=ROOT, text=True,
+                                       stderr=subprocess.DEVNULL).strip()
+    except Exception:
+        return "nogit"
+
+
+# ---------------------------------------------------------------- setup
+def cmd_setup(a):
+    if MANIFEST.exists() and not a.force:
+        sys.exit("setup já feito. Use --force apenas como humano, fora da campanha.")
+    with zipfile.ZipFile(a.zip) as z:
+        tmp = Path(tempfile.mkdtemp())
+        z.extractall(tmp)
+    src = next(p.parent for p in tmp.rglob("package.json") if "node_modules" not in p.parts)
+    if ORIGINAL.exists():
+        shutil.rmtree(ORIGINAL)
+    shutil.copytree(src, ORIGINAL, ignore=shutil.ignore_patterns("node_modules", "uptime_db", ".bolt"))
+    build = Path(tempfile.mkdtemp())
+    shutil.copy(ORIGINAL / "package.json", build)
+    if (ORIGINAL / "package-lock.json").exists():
+        shutil.copy(ORIGINAL / "package-lock.json", build)
+    print("npm install (dependências travadas do app original)...")
+    subprocess.check_call(["npm", "install", "--omit=dev", "--no-audit", "--no-fund"], cwd=build)
+    NODE_MODULES.parent.mkdir(exist_ok=True)
+    if NODE_MODULES.exists():
+        shutil.rmtree(NODE_MODULES)
+    shutil.move(str(build / "node_modules"), NODE_MODULES)
+    print("Conferindo oráculos contra o original...")
+    rep = gates.functional_and_hidden(ORIGINAL, Path(tempfile.mkdtemp()))
+    if any(rep):
+        sys.exit(f"O ORIGINAL falha nos oráculos; revise os testes: {rep}")
+    m = write_manifest()
+    print(f"setup ok: {len(m)} arquivos fixos no manifesto")
+
+
+# ---------------------------------------------------------------- utilidades
+def load_module(path, name):
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def frozen_spec():
+    if not FROZEN.exists():
+        sys.exit("frozen/workload_frozen.py ausente: o humano roda 'prepare.py freeze' ao fim da detecção")
+    mod = load_module(FROZEN, "workload_frozen")
+    name = mod.FROZEN_ARM
+    if name == BASELINE["name"]:
+        return BASELINE
+    for c in mod.CANDIDATES:
+        if c["name"] == name:
+            return c
+    sys.exit(f"candidato congelado {name} não encontrado")
+
+
+def same_as_baseline(spec):
+    """Carga equivalente à baseline (mesmos parâmetros e mesma sequência) não é hipótese nova."""
+    import random as _r
+    if spec["threads"] != BASELINE["threads"] or abs(spec["think_time_s"] - BASELINE["think_time_s"]) > 1e-9:
+        return False
+    for seed in (1, 2):
+        ra, rb = _r.Random(seed), _r.Random(seed)
+        for i in range(400):
+            if spec["request"](ra, i) != BASELINE["request"](rb, i):
+                return False
+    return True
+
+
+def run_arms(arms, minutes, run_dir, smoke):
+    """arms: lista de dicts {label, app_dir, spec, seed}. Roda todos em paralelo."""
+    seconds = int(minutes * 60)
+    probe_ms = 2000 if smoke else 5000
+    results = {}
+
+    def one(arm):
+        wd = run_dir / arm["label"]
+        inst = Instance(arm["app_dir"], wd, probe_interval_ms=probe_ms, sample_s=probe_ms / 1000)
         try:
-            response = requests.get(url, stream=True, timeout=30)
-            response.raise_for_status()
-            temp_path = filepath + ".tmp"
-            with open(temp_path, "wb") as f:
-                for chunk in response.iter_content(chunk_size=1024 * 1024):
-                    if chunk:
-                        f.write(chunk)
-            os.rename(temp_path, filepath)
-            print(f"  Downloaded {filename}")
-            return True
-        except (requests.RequestException, IOError) as e:
-            print(f"  Attempt {attempt}/{max_attempts} failed for {filename}: {e}")
-            for path in [filepath + ".tmp", filepath]:
-                if os.path.exists(path):
-                    try:
-                        os.remove(path)
-                    except OSError:
-                        pass
-            if attempt < max_attempts:
-                time.sleep(2 ** attempt)
-    return False
+            inst.prepare()
+            port = inst.start()
+            inst.start_sampler()
+            load = LoadRun(arm["spec"], port, seconds, arm["seed"]).run()
+            time.sleep(probe_ms / 1000 * 1.5)  # última amostra pós-GC
+            alive = inst.alive()
+            pids = set(inst.pids_seen)
+        except Exception as e:
+            results[arm["label"]] = {"arm": arm["label"], "valid": False, "flags": [f"erro: {e}"]}
+            inst.stop()
+            return
+        inst.stop()
+        ev = evaluate_arm(arm["label"], inst.probe_rows(), load, inst.db_state(), pids, alive, seconds)
+        ev.update({"spec_name": arm["spec"]["name"], "hypothesis": arm["spec"].get("hypothesis", ""),
+                   "seed": arm["seed"], "app_dir": str(arm["app_dir"])})
+        (wd / "buckets.json").write_text(json.dumps(load["buckets"]))
+        (wd / "evaluation.json").write_text(json.dumps(ev, indent=1, ensure_ascii=False))
+        results[arm["label"]] = ev
+
+    ths = [threading.Thread(target=one, args=(a,)) for a in arms]
+    for t in ths:
+        t.start()
+    for t in ths:
+        t.join()
+    return results
 
 
-def download_data(num_shards, download_workers=8):
-    """Download training shards + pinned validation shard."""
-    os.makedirs(DATA_DIR, exist_ok=True)
-    num_train = min(num_shards, MAX_SHARD)
-    ids = list(range(num_train))
-    if VAL_SHARD not in ids:
-        ids.append(VAL_SHARD)
+def new_run_dir(kind, run_id=None):
+    run_id = run_id or f"{kind}-{time.strftime('%m%d-%H%M')}-{uuid.uuid4().hex[:4]}"
+    d = RESULTS / run_id
+    d.mkdir(parents=True, exist_ok=True)
+    return run_id, d
 
-    # Count what's already downloaded
-    existing = sum(1 for i in ids if os.path.exists(os.path.join(DATA_DIR, f"shard_{i:05d}.parquet")))
-    if existing == len(ids):
-        print(f"Data: all {len(ids)} shards already downloaded at {DATA_DIR}")
+
+def background(argv, run_id, run_dir):
+    argv = [a for a in argv if a != "--background"] + ["--run-id", run_id]
+    with open(run_dir / "judge.log", "ab") as log:
+        subprocess.Popen([sys.executable, str(ROOT / "prepare.py")] + argv, cwd=ROOT,
+                         stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+    (run_dir / "STATUS").write_text("running")
+    print(f"run_id: {run_id}\nstatus: running (use: python prepare.py wait {run_id})")
+
+
+def fmt(v, nd=3):
+    return "NA" if v is None else (f"{v:.{nd}f}" if isinstance(v, float) else str(v))
+
+
+# ---------------------------------------------------------------- detecção
+def cmd_detect(a):
+    verify(quiet=True)
+    minutes = 2 if a.smoke else a.minutes
+    run_id, run_dir = new_run_dir("detect" + ("-smoke" if a.smoke else ""), a.run_id)
+    try:
+        wl = load_module(ROOT / "workload.py", "workload")
+        cands = list(wl.CANDIDATES)
+        if not 1 <= len(cands) <= SLOTS - 1:
+            raise WorkloadError(f"CANDIDATES deve ter de 1 a {SLOTS - 1} itens (1 slot é da baseline)")
+        names = [c["name"] for c in cands]
+        if len(set(names)) != len(names) or BASELINE["name"] in names:
+            raise WorkloadError("nomes de candidatos devem ser únicos e diferentes da baseline")
+        for c in cands:
+            validate_spec(c)
+    except Exception as e:
+        rec = {"event": "detect", "run_id": run_id, "commit": git_head(), "valid": False,
+               "flag": "D3_fora_do_contrato", "error": str(e)}
+        log_judge(rec)
+        (run_dir / "STATUS").write_text("done")
+        (run_dir / "round.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False))
+        print("INVÁLIDO:", e)
         return
-
-    needed = len(ids) - existing
-    print(f"Data: downloading {needed} shards ({existing} already exist)...")
-
-    workers = max(1, min(download_workers, needed))
-    with Pool(processes=workers) as pool:
-        results = pool.map(download_single_shard, ids)
-
-    ok = sum(1 for r in results if r)
-    print(f"Data: {ok}/{len(ids)} shards ready at {DATA_DIR}")
-
-# ---------------------------------------------------------------------------
-# Tokenizer training
-# ---------------------------------------------------------------------------
-
-def list_parquet_files():
-    """Return sorted list of parquet file paths in the data directory."""
-    files = sorted(f for f in os.listdir(DATA_DIR) if f.endswith(".parquet") and not f.endswith(".tmp"))
-    return [os.path.join(DATA_DIR, f) for f in files]
-
-
-def text_iterator(max_chars=1_000_000_000, doc_cap=10_000):
-    """Yield documents from training split (all shards except pinned val shard)."""
-    parquet_paths = [p for p in list_parquet_files() if not p.endswith(VAL_FILENAME)]
-    nchars = 0
-    for filepath in parquet_paths:
-        pf = pq.ParquetFile(filepath)
-        for rg_idx in range(pf.num_row_groups):
-            rg = pf.read_row_group(rg_idx)
-            for text in rg.column("text").to_pylist():
-                doc = text[:doc_cap] if len(text) > doc_cap else text
-                nchars += len(doc)
-                yield doc
-                if nchars >= max_chars:
-                    return
+    if a.background:
+        return background(sys.argv[1:], run_id, run_dir)
+    shutil.copy(ROOT / "workload.py", run_dir / "workload.py")
+    arms = [{"label": BASELINE["name"], "app_dir": ORIGINAL, "spec": BASELINE, "seed": a.seed}]
+    arms += [{"label": c["name"], "app_dir": ORIGINAL, "spec": c, "seed": a.seed} for c in cands]
+    res = run_arms(arms, minutes, run_dir, a.smoke)
+    base = res[BASELINE["name"]]
+    base_slope = base.get("rss_mb", {}).get("sen_slope_per_h") if base.get("valid") else None
+    rows = []
+    copies = {c["name"] for c in cands if same_as_baseline(c)}
+    for label, ev in res.items():
+        if label in copies:
+            ev.setdefault("flags", []).append("D4_copia_da_baseline")
+        slope = ev.get("rss_mb", {}).get("sen_slope_per_h")
+        p = ev.get("rss_mb", {}).get("mk_p_upward")
+        eligible = (ev.get("valid") and ev.get("rss_upward_significant")
+                    and not any(f.startswith(("D2", "D4", "E2")) for f in ev.get("flags", [])))
+        ev["score_rss_mb_per_h"] = slope if eligible and label != BASELINE["name"] else None
+        ev["ratio_vs_baseline"] = (slope / base_slope) if (eligible and base_slope and base_slope > 0) else None
+        rows.append(ev)
+    rec = {"event": "detect", "run_id": run_id, "commit": git_head(), "smoke": a.smoke,
+           "minutes": minutes, "seed": a.seed, "arms": rows}
+    (run_dir / "round.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False))
+    log_judge({k: v for k, v in rec.items() if k != "arms"} | {"summary": [
+        {"arm": r["arm"], "valid": r.get("valid"), "flags": r.get("flags"),
+         "score": r.get("score_rss_mb_per_h"), "p": r.get("rss_mb", {}).get("mk_p_upward")} for r in rows]})
+    (run_dir / "STATUS").write_text("done")
+    print_detect(run_id, rows)
 
 
-def train_tokenizer():
-    """Train BPE tokenizer using rustbpe, save as tiktoken pickle."""
-    tokenizer_pkl = os.path.join(TOKENIZER_DIR, "tokenizer.pkl")
-    token_bytes_path = os.path.join(TOKENIZER_DIR, "token_bytes.pt")
-
-    if os.path.exists(tokenizer_pkl) and os.path.exists(token_bytes_path):
-        print(f"Tokenizer: already trained at {TOKENIZER_DIR}")
-        return
-
-    os.makedirs(TOKENIZER_DIR, exist_ok=True)
-
-    parquet_files = list_parquet_files()
-    if len(parquet_files) < 2:
-        print("Tokenizer: need at least 2 data shards (1 train + 1 val). Download more data first.")
-        sys.exit(1)
-
-    # --- Train with rustbpe ---
-    print("Tokenizer: training BPE tokenizer...")
-    t0 = time.time()
-
-    tokenizer = rustbpe.Tokenizer()
-    vocab_size_no_special = VOCAB_SIZE - len(SPECIAL_TOKENS)
-    tokenizer.train_from_iterator(text_iterator(), vocab_size_no_special, pattern=SPLIT_PATTERN)
-
-    # Build tiktoken encoding from trained merges
-    pattern = tokenizer.get_pattern()
-    mergeable_ranks = {bytes(k): v for k, v in tokenizer.get_mergeable_ranks()}
-    tokens_offset = len(mergeable_ranks)
-    special_tokens = {name: tokens_offset + i for i, name in enumerate(SPECIAL_TOKENS)}
-    enc = tiktoken.Encoding(
-        name="rustbpe",
-        pat_str=pattern,
-        mergeable_ranks=mergeable_ranks,
-        special_tokens=special_tokens,
-    )
-
-    # Save tokenizer
-    with open(tokenizer_pkl, "wb") as f:
-        pickle.dump(enc, f)
-
-    t1 = time.time()
-    print(f"Tokenizer: trained in {t1 - t0:.1f}s, saved to {tokenizer_pkl}")
-
-    # --- Build token_bytes lookup for BPB evaluation ---
-    print("Tokenizer: building token_bytes lookup...")
-    special_set = set(SPECIAL_TOKENS)
-    token_bytes_list = []
-    for token_id in range(enc.n_vocab):
-        token_str = enc.decode([token_id])
-        if token_str in special_set:
-            token_bytes_list.append(0)
-        else:
-            token_bytes_list.append(len(token_str.encode("utf-8")))
-    token_bytes_tensor = torch.tensor(token_bytes_list, dtype=torch.int32)
-    torch.save(token_bytes_tensor, token_bytes_path)
-    print(f"Tokenizer: saved token_bytes to {token_bytes_path}")
-
-    # Sanity check
-    test = "Hello world! Numbers: 123. Unicode: 你好"
-    encoded = enc.encode_ordinary(test)
-    decoded = enc.decode(encoded)
-    assert decoded == test, f"Tokenizer roundtrip failed: {test!r} -> {decoded!r}"
-    print(f"Tokenizer: sanity check passed (vocab_size={enc.n_vocab})")
-
-# ---------------------------------------------------------------------------
-# Runtime utilities (imported by train.py)
-# ---------------------------------------------------------------------------
-
-class Tokenizer:
-    """Minimal tokenizer wrapper. Training is handled above."""
-
-    def __init__(self, enc):
-        self.enc = enc
-        self.bos_token_id = enc.encode_single_token(BOS_TOKEN)
-
-    @classmethod
-    def from_directory(cls, tokenizer_dir=TOKENIZER_DIR):
-        with open(os.path.join(tokenizer_dir, "tokenizer.pkl"), "rb") as f:
-            enc = pickle.load(f)
-        return cls(enc)
-
-    def get_vocab_size(self):
-        return self.enc.n_vocab
-
-    def get_bos_token_id(self):
-        return self.bos_token_id
-
-    def encode(self, text, prepend=None, num_threads=8):
-        if prepend is not None:
-            prepend_id = prepend if isinstance(prepend, int) else self.enc.encode_single_token(prepend)
-        if isinstance(text, str):
-            ids = self.enc.encode_ordinary(text)
-            if prepend is not None:
-                ids.insert(0, prepend_id)
-        elif isinstance(text, list):
-            ids = self.enc.encode_ordinary_batch(text, num_threads=num_threads)
-            if prepend is not None:
-                for row in ids:
-                    row.insert(0, prepend_id)
-        else:
-            raise ValueError(f"Invalid input type: {type(text)}")
-        return ids
-
-    def decode(self, ids):
-        return self.enc.decode(ids)
+def print_detect(run_id, rows):
+    print(f"---\nrun_id: {run_id}")
+    for r in rows:
+        rss = r.get("rss_mb", {})
+        print(f"arm={r['arm']} valid={r.get('valid')} score_rss_mb_per_h={fmt(r.get('score_rss_mb_per_h'))} "
+              f"rss_slope={fmt(rss.get('sen_slope_per_h'))} mk_p={fmt(rss.get('mk_p_upward'), 5)} "
+              f"heap_slope={fmt(r.get('heap_mb', {}).get('sen_slope_per_h'))} "
+              f"handles_slope={fmt(r.get('handles', {}).get('sen_slope_per_h'))} "
+              f"p95_slope={fmt(r.get('p95_ms', {}).get('sen_slope_per_h'))} "
+              f"ttd_min={fmt(r.get('time_to_detect_min'))} ratio={fmt(r.get('ratio_vs_baseline'))} "
+              f"req={r.get('requests')} err={fmt(r.get('error_rate'), 4)} db_rows={r.get('db_rows')} "
+              f"flags={','.join(r.get('flags', [])) or '-'}")
 
 
-def get_token_bytes(device="cpu"):
-    path = os.path.join(TOKENIZER_DIR, "token_bytes.pt")
-    with open(path, "rb") as f:
-        return torch.load(f, map_location=device)
+# ---------------------------------------------------------------- congelar (humano)
+def cmd_freeze(a):
+    src = RESULTS / a.run_id / "workload.py"
+    if not src.exists():
+        sys.exit("run sem workload.py salvo")
+    FROZEN.parent.mkdir(exist_ok=True)
+    FROZEN.write_text(src.read_text() + f"\n\nFROZEN_ARM = {a.arm!r}\nFROZEN_FROM = {a.run_id!r}\n")
+    write_manifest()
+    print(f"carga congelada: {a.arm} de {a.run_id}; manifesto atualizado")
 
 
-def _document_batches(split, tokenizer_batch_size=128):
-    """Infinite iterator over document batches from parquet files."""
-    parquet_paths = list_parquet_files()
-    assert len(parquet_paths) > 0, "No parquet files found. Run prepare.py first."
-    val_path = os.path.join(DATA_DIR, VAL_FILENAME)
-    if split == "train":
-        parquet_paths = [p for p in parquet_paths if p != val_path]
-        assert len(parquet_paths) > 0, "No training shards found."
+# ---------------------------------------------------------------- reparo
+def cmd_repair_init(a):
+    base = CANDS / "base"
+    if not base.exists():
+        shutil.copytree(ORIGINAL, base)
+    for v in ("v1", "v2", "v3"):
+        d = CANDS / v
+        if d.exists():
+            shutil.rmtree(d)
+        shutil.copytree(base, d)
+    print("candidates/v1..v3 criados a partir de candidates/base")
+
+
+def cmd_promote(a):
+    src = CANDS / a.version
+    base = CANDS / "base"
+    shutil.rmtree(base)
+    shutil.copytree(src, base)
+    cmd_repair_init(a)
+    print(f"{a.version} promovido a base")
+
+
+def diff_lines(orig, cand):
+    n = 0
+    files = {p.relative_to(orig) for p in Path(orig).rglob("*") if p.is_file()}
+    files |= {p.relative_to(cand) for p in Path(cand).rglob("*") if p.is_file() and "node_modules" not in p.parts}
+    for f in sorted(files):
+        a_ = (Path(orig) / f).read_text(errors="ignore").splitlines() if (Path(orig) / f).exists() else []
+        b_ = (Path(cand) / f).read_text(errors="ignore").splitlines() if (Path(cand) / f).exists() else []
+        n += sum(1 for l in difflib.unified_diff(a_, b_, lineterm="", n=0)
+                 if l[:1] in "+-" and not l.startswith(("+++", "---")))
+    return n
+
+
+def reference_replay(spec, trace):
+    key = hashlib.sha256((json.dumps(trace) + _sha(ORIGINAL / "package.json")).encode()).hexdigest()[:16]
+    cache = JUDGE_DIR / f"replay_ref_{key}.json"
+    if cache.exists():
+        return json.loads(cache.read_text())
+    ref = gates.replay(ORIGINAL, trace, Path(tempfile.mkdtemp()))
+    cache.write_text(json.dumps(ref))
+    return ref
+
+
+def cmd_repair(a):
+    verify(quiet=True)
+    spec = frozen_spec()
+    minutes = 2 if a.smoke else a.minutes
+    run_id, run_dir = new_run_dir("repair" + ("-smoke" if a.smoke else ""), a.run_id)
+    if a.background:
+        return background(sys.argv[1:], run_id, run_dir)
+    versions = [v for v in ("v1", "v2", "v3") if (CANDS / v).exists()]
+    trace = gates.build_trace(spec)
+    ref = reference_replay(spec, trace)
+    gate_reports = {}
+    for v in versions:
+        gate_reports[v] = gates.run_gates(ORIGINAL, CANDS / v, ref, trace, run_dir)
+        gate_reports[v]["diff_lines"] = diff_lines(ORIGINAL, CANDS / v)
+        if gate_reports[v]["diff_lines"] == 0:
+            gate_reports[v]["flags"].append("sem_alteracao")
+            gate_reports[v]["passed"] = False
+        print(f"gates {v}: passed={gate_reports[v]['passed']} flags={gate_reports[v]['flags']} "
+              f"diff_lines={gate_reports[v]['diff_lines']}", flush=True)
+    for v in versions:  # snapshot do que foi avaliado
+        shutil.copytree(CANDS / v, run_dir / "snapshot" / v)
+    arms = [{"label": "original", "app_dir": ORIGINAL, "spec": spec, "seed": a.seed}]
+    arms += [{"label": v, "app_dir": CANDS / v, "spec": spec, "seed": a.seed}
+             for v in versions if gate_reports[v]["passed"]]
+    res = run_arms(arms, minutes, run_dir, a.smoke)
+    rows = [score_repair(res, v, gate_reports.get(v)) for v in ["original"] + versions]
+    rec = {"event": "repair", "run_id": run_id, "commit": git_head(), "smoke": a.smoke,
+           "minutes": minutes, "frozen_arm": spec["name"], "rows": rows}
+    (run_dir / "round.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False))
+    log_judge({k: v for k, v in rec.items() if k != "rows"} | {"summary": [
+        {"arm": r["arm"], "score": r.get("score_reduction"), "flags": r.get("flags")} for r in rows]})
+    (run_dir / "STATUS").write_text("done")
+    print_repair(run_id, rows)
+
+
+def score_repair(res, v, gate):
+    o = res.get("original", {})
+    if v == "original":
+        return {"arm": "original", "valid": o.get("valid"), "rss": o.get("rss_mb"),
+                "throughput_mean_rps": o.get("throughput_mean_rps"), "p95_ms_median": o.get("p95_ms_median"),
+                "flags": o.get("flags", [])}
+    row = {"arm": v, "gates_passed": gate["passed"], "flags": list(gate["flags"]),
+           "diff_lines": gate["diff_lines"], "gate_details": gate["details"], "score_reduction": None}
+    ev = res.get(v)
+    if not gate["passed"] or not ev:
+        return row
+    row["flags"] += ev.get("flags", [])
+    s0 = o.get("rss_mb", {}).get("sen_slope_per_h")
+    s1 = ev.get("rss_mb", {}).get("sen_slope_per_h")
+    p1 = ev.get("rss_mb", {}).get("mk_p_upward")
+    row.update({"rss": ev.get("rss_mb"), "heap": ev.get("heap_mb"), "handles": ev.get("handles"),
+                "throughput_mean_rps": ev.get("throughput_mean_rps"), "p95_ms_median": ev.get("p95_ms_median")})
+    if not ev.get("valid") or not o.get("valid"):
+        return row
+    thr_ok = ev["throughput_mean_rps"] >= 0.9 * o["throughput_mean_rps"]
+    lat_ok = ev["p95_ms_median"] <= 1.1 * o["p95_ms_median"] + 1.0
+    if not (thr_ok and lat_ok):
+        row["flags"].append("H6_desempenho_degradado")
+        return row
+    # 5xx por SQLITE_BUSY variam entre execuções: tolerância relativa + absoluta
+    if ev.get("server_error_rate", 0) > 1.5 * o.get("server_error_rate", 0) + 0.005:
+        row["flags"].append("H7_mais_erros_sob_carga")
+        return row
+    if s0 is None or s0 < MIN_EFFECT_MB_PER_H or o.get("rss_mb", {}).get("mk_p_upward", 1) >= ALPHA:
+        row["flags"].append("original_sem_tendencia_nesta_rodada")
+        return row
+    reduction = 1 - (s1 / s0)
+    row["score_reduction"] = reduction
+    row["fixed"] = (p1 >= 0.05) or (s1 < MIN_EFFECT_MB_PER_H) or reduction >= 0.8
+    return row
+
+
+def print_repair(run_id, rows):
+    print(f"---\nrun_id: {run_id}")
+    for r in rows:
+        rss = r.get("rss") or {}
+        print(f"arm={r['arm']} gates={r.get('gates_passed', '-')} score_reduction={fmt(r.get('score_reduction'))} "
+              f"fixed={r.get('fixed', '-')} rss_slope={fmt(rss.get('sen_slope_per_h'))} "
+              f"mk_p={fmt(rss.get('mk_p_upward'), 5)} thr={fmt(r.get('throughput_mean_rps'), 1)} "
+              f"p95={fmt(r.get('p95_ms_median'), 2)} diff_lines={r.get('diff_lines', '-')} "
+              f"flags={','.join(r.get('flags', [])) or '-'}")
+
+
+# ---------------------------------------------------------------- confirmação
+def cmd_confirm(a):
+    verify(quiet=True)
+    minutes = 2 if a.smoke else a.minutes
+    run_id, run_dir = new_run_dir(f"confirm-{a.phase}" + ("-smoke" if a.smoke else ""), a.run_id)
+    if a.background:
+        return background(sys.argv[1:], run_id, run_dir)
+    spec = frozen_spec()
+    if a.phase == "detect":
+        arms = [{"label": f"{spec['name']}_s{s}", "app_dir": ORIGINAL, "spec": spec, "seed": s} for s in CONFIRM_SEEDS]
+        arms.append({"label": "baseline_s11", "app_dir": ORIGINAL, "spec": BASELINE, "seed": 11})
     else:
-        parquet_paths = [val_path]
-    epoch = 1
-    while True:
-        for filepath in parquet_paths:
-            pf = pq.ParquetFile(filepath)
-            for rg_idx in range(pf.num_row_groups):
-                rg = pf.read_row_group(rg_idx)
-                batch = rg.column('text').to_pylist()
-                for i in range(0, len(batch), tokenizer_batch_size):
-                    yield batch[i:i+tokenizer_batch_size], epoch
-        epoch += 1
+        arms = [{"label": f"base_s{s}", "app_dir": CANDS / "base", "spec": spec, "seed": s} for s in CONFIRM_SEEDS]
+        arms.append({"label": "original_s11", "app_dir": ORIGINAL, "spec": spec, "seed": 11})
+    res = run_arms(arms, minutes, run_dir, a.smoke)
+    rec = {"event": f"confirm-{a.phase}", "run_id": run_id, "commit": git_head(), "smoke": a.smoke,
+           "minutes": minutes, "arms": list(res.values())}
+    (run_dir / "round.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False))
+    log_judge({k: v for k, v in rec.items() if k != "arms"})
+    (run_dir / "STATUS").write_text("done")
+    print_detect(run_id, list(res.values()))
 
 
-def make_dataloader(tokenizer, B, T, split, buffer_size=1000):
-    """
-    BOS-aligned dataloader with best-fit packing.
-    Every row starts with BOS. Documents packed using best-fit to minimize cropping.
-    When no document fits remaining space, crops shortest doc to fill exactly.
-    100% utilization (no padding).
-    """
-    assert split in ["train", "val"]
-    row_capacity = T + 1
-    batches = _document_batches(split)
-    bos_token = tokenizer.get_bos_token_id()
-    doc_buffer = []
-    epoch = 1
+# ---------------------------------------------------------------- espera
+def cmd_wait(a):
+    d = RESULTS / a.run_id
+    deadline = time.time() + min(a.max_seconds, 540)
+    while time.time() < deadline:
+        st = (d / "STATUS").read_text().strip() if (d / "STATUS").exists() else "unknown"
+        if st == "done":
+            rec = json.loads((d / "round.json").read_text())
+            if rec.get("event") == "repair":
+                print_repair(a.run_id, rec["rows"])
+            elif "arms" in rec:
+                print_detect(a.run_id, rec["arms"])
+            else:
+                print(json.dumps(rec, ensure_ascii=False))
+            return
+        time.sleep(15)
+    print(f"status: running ({a.run_id}); chame wait novamente")
 
-    def refill_buffer():
-        nonlocal epoch
-        doc_batch, epoch = next(batches)
-        token_lists = tokenizer.encode(doc_batch, prepend=bos_token)
-        doc_buffer.extend(token_lists)
 
-    # Pre-allocate buffers: [inputs (B*T) | targets (B*T)]
-    row_buffer = torch.empty((B, row_capacity), dtype=torch.long)
-    cpu_buffer = torch.empty(2 * B * T, dtype=torch.long, pin_memory=True)
-    gpu_buffer = torch.empty(2 * B * T, dtype=torch.long, device="cuda")
-    cpu_inputs = cpu_buffer[:B * T].view(B, T)
-    cpu_targets = cpu_buffer[B * T:].view(B, T)
-    inputs = gpu_buffer[:B * T].view(B, T)
-    targets = gpu_buffer[B * T:].view(B, T)
+def main():
+    ap = argparse.ArgumentParser()
+    sp = ap.add_subparsers(dest="cmd", required=True)
+    s = sp.add_parser("setup"); s.add_argument("--zip", required=True); s.add_argument("--force", action="store_true")
+    for name in ("detect", "repair"):
+        s = sp.add_parser(name)
+        s.add_argument("--minutes", type=float, default=DEFAULT_MINUTES)
+        s.add_argument("--seed", type=int, default=1)
+        s.add_argument("--smoke", action="store_true")
+        s.add_argument("--background", action="store_true")
+        s.add_argument("--run-id")
+    s = sp.add_parser("confirm"); s.add_argument("--phase", choices=["detect", "repair"], required=True)
+    s.add_argument("--minutes", type=float, default=DEFAULT_MINUTES); s.add_argument("--smoke", action="store_true")
+    s.add_argument("--background", action="store_true"); s.add_argument("--run-id")
+    s = sp.add_parser("freeze"); s.add_argument("run_id"); s.add_argument("arm")
+    sp.add_parser("repair-init")
+    s = sp.add_parser("promote"); s.add_argument("version", choices=["v1", "v2", "v3"])
+    s = sp.add_parser("wait"); s.add_argument("run_id"); s.add_argument("--max-seconds", type=int, default=540)
+    sp.add_parser("verify")
+    a = ap.parse_args()
+    {"setup": cmd_setup, "detect": cmd_detect, "repair": cmd_repair, "confirm": cmd_confirm,
+     "freeze": cmd_freeze, "repair-init": cmd_repair_init, "promote": cmd_promote,
+     "wait": cmd_wait, "verify": lambda _: verify()}[a.cmd](a)
 
-    while True:
-        for row_idx in range(B):
-            pos = 0
-            while pos < row_capacity:
-                while len(doc_buffer) < buffer_size:
-                    refill_buffer()
-
-                remaining = row_capacity - pos
-
-                # Find largest doc that fits entirely
-                best_idx = -1
-                best_len = 0
-                for i, doc in enumerate(doc_buffer):
-                    doc_len = len(doc)
-                    if doc_len <= remaining and doc_len > best_len:
-                        best_idx = i
-                        best_len = doc_len
-
-                if best_idx >= 0:
-                    doc = doc_buffer.pop(best_idx)
-                    row_buffer[row_idx, pos:pos + len(doc)] = torch.tensor(doc, dtype=torch.long)
-                    pos += len(doc)
-                else:
-                    # No doc fits — crop shortest to fill remaining
-                    shortest_idx = min(range(len(doc_buffer)), key=lambda i: len(doc_buffer[i]))
-                    doc = doc_buffer.pop(shortest_idx)
-                    row_buffer[row_idx, pos:pos + remaining] = torch.tensor(doc[:remaining], dtype=torch.long)
-                    pos += remaining
-
-        cpu_inputs.copy_(row_buffer[:, :-1])
-        cpu_targets.copy_(row_buffer[:, 1:])
-        gpu_buffer.copy_(cpu_buffer, non_blocking=True)
-        yield inputs, targets, epoch
-
-# ---------------------------------------------------------------------------
-# Evaluation (DO NOT CHANGE — this is the fixed metric)
-# ---------------------------------------------------------------------------
-
-@torch.no_grad()
-def evaluate_bpb(model, tokenizer, batch_size):
-    """
-    Bits per byte (BPB): vocab size-independent evaluation metric.
-    Sums per-token cross-entropy (in nats), sums target byte lengths,
-    then converts nats/byte to bits/byte. Special tokens (byte length 0)
-    are excluded from both sums.
-    Uses fixed MAX_SEQ_LEN so results are comparable across configs.
-    """
-    token_bytes = get_token_bytes(device="cuda")
-    val_loader = make_dataloader(tokenizer, batch_size, MAX_SEQ_LEN, "val")
-    steps = EVAL_TOKENS // (batch_size * MAX_SEQ_LEN)
-    total_nats = 0.0
-    total_bytes = 0
-    for _ in range(steps):
-        x, y, _ = next(val_loader)
-        loss_flat = model(x, y, reduction='none').view(-1)
-        y_flat = y.view(-1)
-        nbytes = token_bytes[y_flat]
-        mask = nbytes > 0
-        total_nats += (loss_flat * mask).sum().item()
-        total_bytes += nbytes.sum().item()
-    return total_nats / (math.log(2) * total_bytes)
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Prepare data and tokenizer for autoresearch")
-    parser.add_argument("--num-shards", type=int, default=10, help="Number of training shards to download (-1 = all). Val shard is always pinned.")
-    parser.add_argument("--download-workers", type=int, default=8, help="Number of parallel download workers")
-    args = parser.parse_args()
-
-    num_shards = MAX_SHARD if args.num_shards == -1 else args.num_shards
-
-    print(f"Cache directory: {CACHE_DIR}")
-    print()
-
-    # Step 1: Download data
-    download_data(num_shards, download_workers=args.download_workers)
-    print()
-
-    # Step 2: Train tokenizer
-    train_tokenizer()
-    print()
-    print("Done! Ready to train.")
+    main()
