@@ -1,6 +1,6 @@
 """Avaliação fixa de um braço (uma instância sob uma carga)."""
 
-from .stats import trend, percentile
+from .stats import trend, percentile, sen_slope
 
 MB = 1024 * 1024
 ALPHA = 0.01                 # significância exigida para "tendência de alta"
@@ -23,6 +23,15 @@ def _series(probe, key, warm):
     return [t / 3600.0 for t, _ in pts], [v for _, v in pts]
 
 
+def half_slopes(x, y):
+    """Sen's slope de cada metade da série. Um degrau único infla a inclinação total,
+    mas não as duas metades: a menor delas é robusta a degraus (calibrar com prepare.py control)."""
+    h = len(y) // 2
+    if h < 10:
+        return None
+    return [sen_slope(x[:h], y[:h]), sen_slope(x[h:], y[h:])]
+
+
 def time_to_detect(probe, warm, key="rss"):
     """Primeiro checkpoint (min) a partir do qual MK de alta é significativo e assim permanece."""
     if not probe:
@@ -43,10 +52,10 @@ def time_to_detect(probe, warm, key="rss"):
     return first
 
 
-def evaluate_arm(name, probe, load, db_state, pids_seen, alive_at_end, total_s):
+def evaluate_arm(name, probe, load, db_state, pids_seen, alive_at_end, total_s, max_children=0):
     warm = warmup_seconds(total_s)
     flags = []
-    out = {"arm": name, "warmup_s": warm, "requests": load["requests"],
+    out = {"arm": name, "warmup_s": warm, "requests": load["requests"], "max_children": max_children,
            "error_rate": load["error_rate"], "server_error_rate": load["server_error_rate"],
            "exception_rate": load["exception_rate"], "client_error_rate": load["client_error_rate"],
            "ops": load["ops"]}
@@ -62,6 +71,10 @@ def evaluate_arm(name, probe, load, db_state, pids_seen, alive_at_end, total_s):
         flags.append("E2_erro_dominante_revisao_humana")
     if not alive_at_end or len(probe_pids | set(pids_seen)) > 1:
         flags.append("H4_processo_reiniciado_ou_morto")
+    if max_children > 0:
+        # Só o PID principal é medido: memória em filhos escapa do RSS e um filho
+        # reciclado é rejuvenescimento, não correção.
+        flags.append("H4_processo_filho")
     if len(probe) < 10:
         flags.append("sem_amostras_suficientes")
 
@@ -72,6 +85,10 @@ def evaluate_arm(name, probe, load, db_state, pids_seen, alive_at_end, total_s):
         if y:
             out[label]["first"] = y[0] / MB
             out[label]["last"] = y[-1] / MB
+        if key == "rss":
+            halves = half_slopes(x, [v / MB for v in y])
+            out[label]["sen_halves_per_h"] = halves
+            out[label]["sen_min_halves_per_h"] = min(halves) if halves else None
     x, y = _series(probe, "handles", warm)
     out["handles"] = trend(x, y)
 

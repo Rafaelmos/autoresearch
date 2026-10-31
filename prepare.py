@@ -11,6 +11,8 @@ Comandos (todos a partir da raiz do repositório):
   python prepare.py repair [--minutes 60] [--background]
   python prepare.py promote <vN>                                   # adota um candidato como base
   python prepare.py confirm --phase detect|repair [--minutes 60]   # 3 sementes + referência
+  python prepare.py control [--rates 0,2.5,5,10] [--minutes 60]   # humano: vazamento sintético (controle positivo)
+  python prepare.py rehash                                         # humano: refaz o manifesto após mudar o juiz
   python prepare.py wait <run_id>                                  # bloqueia até 9 min
   python prepare.py verify                                         # confere hashes do juiz
 Use --smoke (2 min) só para checar o fluxo; smoke nunca entra no ranking.
@@ -19,7 +21,6 @@ Use --smoke (2 min) só para checar o fluxo; smoke nunca entra no ranking.
 import argparse
 import difflib
 import hashlib
-import importlib.util
 import json
 import os
 import shutil
@@ -35,10 +36,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from harness.instance import Instance, NODE_MODULES, copy_app  # noqa: E402
+from harness.instance import Instance, NODE_MODULES, copy_app, copy_writable  # noqa: E402
 from harness.load import BASELINE, LoadRun, validate_spec, WorkloadError  # noqa: E402
 from harness.evaluate import evaluate_arm, ALPHA, MIN_EFFECT_MB_PER_H  # noqa: E402
 from harness import gates  # noqa: E402
+from harness.workload_check import load_workload, check_determinism  # noqa: E402
 
 APP = "credit-card"
 ORIGINAL = ROOT / "apps" / APP / "original"
@@ -51,7 +53,9 @@ JUDGE_LOG = RESULTS / "judge_log.jsonl"
 SLOTS = 4                       # 4 instâncias em paralelo (decisão de 20/10)
 DEFAULT_MINUTES = 60            # janela da reunião: sinal em ~1 h, não 48 h
 CONFIRM_SEEDS = (11, 12, 13)
-FIXED_GLOBS = ["prepare.py", "harness/*.py", "harness/*.js", "oracle/*.py", "oracle/hidden/*.py"]
+CONTROL_RATES = (0.0, 2.5, 5.0, 10.0)  # MiB/h injetados por harness/leak_inject.js
+FIXED_GLOBS = ["prepare.py", "harness/*.py", "harness/*.js", "oracle/*.py"]
+HIDDEN_KEY = "@hidden/hidden_tests.py"  # fora do repo: harness/gates.py:HIDDEN
 
 
 # ---------------------------------------------------------------- integridade
@@ -66,12 +70,24 @@ def fixed_files():
     if FROZEN.exists():
         files.append(FROZEN)
     files += sorted(p for p in ORIGINAL.rglob("*") if p.is_file() and "node_modules" not in p.parts)
+    if gates.HIDDEN.exists():
+        files.append(gates.HIDDEN)
     return files
+
+
+def _key(p):
+    return HIDDEN_KEY if p == gates.HIDDEN else str(p.relative_to(ROOT))
+
+
+def _path(k):
+    return gates.HIDDEN if k == HIDDEN_KEY else ROOT / k
 
 
 def write_manifest():
     JUDGE_DIR.mkdir(exist_ok=True)
-    m = {str(p.relative_to(ROOT)): _sha(p) for p in fixed_files()}
+    if not gates.HIDDEN.exists():
+        sys.exit(f"testes escondidos ausentes em {gates.HIDDEN}: defina AGING_HIDDEN_DIR ou mova o arquivo")
+    m = {_key(p): _sha(p) for p in fixed_files()}
     MANIFEST.write_text(json.dumps(m, indent=1))
     return m
 
@@ -80,8 +96,8 @@ def verify(quiet=False):
     if not MANIFEST.exists():
         sys.exit("manifesto ausente: rode 'python prepare.py setup' (humano)")
     m = json.loads(MANIFEST.read_text())
-    now = {str(p.relative_to(ROOT)) for p in fixed_files()}
-    bad = [k for k, v in m.items() if not (ROOT / k).exists() or _sha(ROOT / k) != v]
+    now = {_key(p) for p in fixed_files()}
+    bad = [k for k, v in m.items() if not _path(k).exists() or _sha(_path(k)) != v]
     bad += sorted(now - set(m))
     if bad:
         log_judge({"event": "juiz_alterado", "files": bad, "flag": "H5_juiz_ou_oraculo_alterado"})
@@ -135,21 +151,17 @@ def cmd_setup(a):
 
 
 # ---------------------------------------------------------------- utilidades
-def load_module(path, name):
-    spec = importlib.util.spec_from_file_location(name, path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
 def frozen_spec():
     if not FROZEN.exists():
         sys.exit("frozen/workload_frozen.py ausente: o humano roda 'prepare.py freeze' ao fim da detecção")
-    mod = load_module(FROZEN, "workload_frozen")
-    name = mod.FROZEN_ARM
+    try:
+        ns = load_workload(FROZEN)
+    except WorkloadError as e:
+        sys.exit(f"carga congelada rejeitada: {e}")
+    name = ns["FROZEN_ARM"]
     if name == BASELINE["name"]:
         return BASELINE
-    for c in mod.CANDIDATES:
+    for c in ns["CANDIDATES"]:
         if c["name"] == name:
             return c
     sys.exit(f"candidato congelado {name} não encontrado")
@@ -176,7 +188,8 @@ def run_arms(arms, minutes, run_dir, smoke):
 
     def one(arm):
         wd = run_dir / arm["label"]
-        inst = Instance(arm["app_dir"], wd, probe_interval_ms=probe_ms, sample_s=probe_ms / 1000)
+        inst = Instance(arm["app_dir"], wd, probe_interval_ms=probe_ms, sample_s=probe_ms / 1000,
+                        leak_mb_per_h=arm.get("leak_mb_per_h", 0.0))
         try:
             inst.prepare()
             port = inst.start()
@@ -185,12 +198,14 @@ def run_arms(arms, minutes, run_dir, smoke):
             time.sleep(probe_ms / 1000 * 1.5)  # última amostra pós-GC
             alive = inst.alive()
             pids = set(inst.pids_seen)
+            children = inst.max_children
         except Exception as e:
             results[arm["label"]] = {"arm": arm["label"], "valid": False, "flags": [f"erro: {e}"]}
             inst.stop()
             return
         inst.stop()
-        ev = evaluate_arm(arm["label"], inst.probe_rows(), load, inst.db_state(), pids, alive, seconds)
+        ev = evaluate_arm(arm["label"], inst.probe_rows(), load, inst.db_state(), pids, alive, seconds,
+                          children)
         ev.update({"spec_name": arm["spec"]["name"], "hypothesis": arm["spec"].get("hypothesis", ""),
                    "seed": arm["seed"], "app_dir": str(arm["app_dir"])})
         (wd / "buckets.json").write_text(json.dumps(load["buckets"]))
@@ -231,8 +246,10 @@ def cmd_detect(a):
     minutes = 2 if a.smoke else a.minutes
     run_id, run_dir = new_run_dir("detect" + ("-smoke" if a.smoke else ""), a.run_id)
     try:
-        wl = load_module(ROOT / "workload.py", "workload")
-        cands = list(wl.CANDIDATES)
+        wl = load_workload(ROOT / "workload.py")
+        if not isinstance(wl.get("CANDIDATES"), list):
+            raise WorkloadError("workload.py deve definir CANDIDATES como lista")
+        cands = list(wl["CANDIDATES"])
         if not 1 <= len(cands) <= SLOTS - 1:
             raise WorkloadError(f"CANDIDATES deve ter de 1 a {SLOTS - 1} itens (1 slot é da baseline)")
         names = [c["name"] for c in cands]
@@ -240,6 +257,7 @@ def cmd_detect(a):
             raise WorkloadError("nomes de candidatos devem ser únicos e diferentes da baseline")
         for c in cands:
             validate_spec(c)
+            check_determinism(c, wl)
     except Exception as e:
         rec = {"event": "detect", "run_id": run_id, "commit": git_head(), "valid": False,
                "flag": "D3_fora_do_contrato", "error": str(e)}
@@ -307,12 +325,12 @@ def cmd_freeze(a):
 def cmd_repair_init(a):
     base = CANDS / "base"
     if not base.exists():
-        shutil.copytree(ORIGINAL, base)
+        copy_writable(ORIGINAL, base)
     for v in ("v1", "v2", "v3"):
         d = CANDS / v
         if d.exists():
             shutil.rmtree(d)
-        shutil.copytree(base, d)
+        copy_writable(base, d)
     print("candidates/v1..v3 criados a partir de candidates/base")
 
 
@@ -320,7 +338,7 @@ def cmd_promote(a):
     src = CANDS / a.version
     base = CANDS / "base"
     shutil.rmtree(base)
-    shutil.copytree(src, base)
+    copy_writable(src, base)
     cmd_repair_init(a)
     print(f"{a.version} promovido a base")
 
@@ -453,6 +471,57 @@ def cmd_confirm(a):
     print_detect(run_id, list(res.values()))
 
 
+# ---------------------------------------------------------------- controle positivo (humano)
+def cmd_control(a):
+    """Baseline do artigo com vazamento sintético de taxa conhecida, um por slot.
+    Responde: a partir de qual taxa o juiz detecta em `minutes`, e se a nota medida se aproxima da injetada."""
+    verify(quiet=True)
+    rates = [float(r) for r in a.rates.split(",")] if a.rates else list(CONTROL_RATES)
+    if not 1 <= len(rates) <= SLOTS:
+        sys.exit(f"--rates deve ter de 1 a {SLOTS} taxas")
+    minutes = 2 if a.smoke else a.minutes
+    run_id, run_dir = new_run_dir("control" + ("-smoke" if a.smoke else ""), a.run_id)
+    if a.background:
+        return background(sys.argv[1:], run_id, run_dir)
+    arms = [{"label": f"leak_{r:g}", "app_dir": ORIGINAL, "spec": BASELINE, "seed": a.seed, "leak_mb_per_h": r}
+            for r in rates]
+    res = run_arms(arms, minutes, run_dir, a.smoke)
+    rows = []
+    for arm in arms:
+        ev = res[arm["label"]]
+        ev["leak_injected_mb_per_h"] = arm["leak_mb_per_h"]
+        ev["detected"] = bool(ev.get("valid") and ev.get("rss_upward_significant"))
+        rows.append(ev)
+    rec = {"event": "control", "run_id": run_id, "commit": git_head(), "smoke": a.smoke,
+           "minutes": minutes, "seed": a.seed, "arms": rows}
+    (run_dir / "round.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False))
+    log_judge({k: v for k, v in rec.items() if k != "arms"} | {"summary": [
+        {"arm": r["arm"], "injected": r["leak_injected_mb_per_h"], "detected": r["detected"],
+         "slope": r.get("rss_mb", {}).get("sen_slope_per_h"),
+         "min_halves": r.get("rss_mb", {}).get("sen_min_halves_per_h")} for r in rows]})
+    (run_dir / "STATUS").write_text("done")
+    print_control(run_id, rows)
+
+
+def print_control(run_id, rows):
+    print(f"---\nrun_id: {run_id}")
+    for r in rows:
+        rss = r.get("rss_mb", {})
+        print(f"arm={r['arm']} injected={fmt(r.get('leak_injected_mb_per_h'), 1)} valid={r.get('valid')} "
+              f"detected={r.get('detected')} rss_slope={fmt(rss.get('sen_slope_per_h'))} "
+              f"min_halves={fmt(rss.get('sen_min_halves_per_h'))} mk_p={fmt(rss.get('mk_p_upward'), 5)} "
+              f"external_slope={fmt(r.get('external_mb', {}).get('sen_slope_per_h'))} "
+              f"heap_slope={fmt(r.get('heap_mb', {}).get('sen_slope_per_h'))} "
+              f"flags={','.join(r.get('flags', [])) or '-'}")
+
+
+def cmd_rehash(a):
+    if not MANIFEST.exists():
+        sys.exit("manifesto ausente: rode 'python prepare.py setup' (humano)")
+    m = write_manifest()
+    print(f"manifesto refeito: {len(m)} arquivos fixos")
+
+
 # ---------------------------------------------------------------- espera
 def cmd_wait(a):
     d = RESULTS / a.run_id
@@ -463,6 +532,8 @@ def cmd_wait(a):
             rec = json.loads((d / "round.json").read_text())
             if rec.get("event") == "repair":
                 print_repair(a.run_id, rec["rows"])
+            elif rec.get("event") == "control":
+                print_control(a.run_id, rec["arms"])
             elif "arms" in rec:
                 print_detect(a.run_id, rec["arms"])
             else:
@@ -486,6 +557,11 @@ def main():
     s = sp.add_parser("confirm"); s.add_argument("--phase", choices=["detect", "repair"], required=True)
     s.add_argument("--minutes", type=float, default=DEFAULT_MINUTES); s.add_argument("--smoke", action="store_true")
     s.add_argument("--background", action="store_true"); s.add_argument("--run-id")
+    s = sp.add_parser("control"); s.add_argument("--rates", help="taxas em MiB/h separadas por vírgula")
+    s.add_argument("--minutes", type=float, default=DEFAULT_MINUTES); s.add_argument("--seed", type=int, default=1)
+    s.add_argument("--smoke", action="store_true"); s.add_argument("--background", action="store_true")
+    s.add_argument("--run-id")
+    sp.add_parser("rehash")
     s = sp.add_parser("freeze"); s.add_argument("run_id"); s.add_argument("arm")
     sp.add_parser("repair-init")
     s = sp.add_parser("promote"); s.add_argument("version", choices=["v1", "v2", "v3"])
@@ -493,7 +569,7 @@ def main():
     sp.add_parser("verify")
     a = ap.parse_args()
     {"setup": cmd_setup, "detect": cmd_detect, "repair": cmd_repair, "confirm": cmd_confirm,
-     "freeze": cmd_freeze, "repair-init": cmd_repair_init, "promote": cmd_promote,
+     "control": cmd_control, "rehash": cmd_rehash, "freeze": cmd_freeze, "repair-init": cmd_repair_init, "promote": cmd_promote,
      "wait": cmd_wait, "verify": lambda _: verify()}[a.cmd](a)
 
 

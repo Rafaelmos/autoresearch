@@ -42,7 +42,13 @@ em 50 h, mas não identificou a causa.
 - Editar `prepare.py`, `harness/`, `oracle/`, `apps/`, `frozen/`, `.judge/`,
   `.claude/` ou este arquivo. O juiz confere hashes a cada rodada e aborta se
   algum mudar. Isso fica registrado como `H5` no `results/judge_log.jsonl`.
-- Ler `oracle/hidden/`.
+- Ler `oracle/hidden/` ou os testes escondidos fora do repositório.
+- Usar `import`, `class`, `while`, `global`, `getattr`, `eval`, `open`,
+  `.format` ou atributos com `_` em `workload.py`. O arquivo só pode ter
+  docstring, constantes e funções. `request(rng, i)` precisa ser
+  determinística (mesmo `rng` e mesmo `i`, mesma requisição) e não pode
+  alterar constantes do módulo. O juiz confere isso antes de rodar, e uma
+  violação invalida a rodada inteira (flag D3).
 - Instalar pacotes, abrir outros processos de carga, rodar a aplicação fora do
   juiz ou mexer em limites do sistema operacional.
 - Editar resultados passados, `results/judge_log.jsonl` ou `round.json`. O

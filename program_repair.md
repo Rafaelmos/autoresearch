@@ -36,11 +36,12 @@ nativa.
 - Editar qualquer coisa fora de `candidates/v1..v3`. Em especial, não edite
   `candidates/base`, que só muda via `promote`.
 - Mudar `package.json`: dependências e entrypoint são travados (flag H5).
-- Ler `oracle/hidden/`. Você só vê quantos testes escondidos falharam, não
+- Ler `oracle/hidden/` ou os testes escondidos fora do repositório. Você só vê quantos testes escondidos falharam, não
   quais.
 - Usar reinício periódico do processo, `cluster`, `child_process`, workers que
   reciclam a app ou `process.exit`. Isso é rejuvenescimento disfarçado, não
-  correção (flag H4). Rejuvenescimento é outro estudo.
+  correção (flag H4). O juiz recusa o patch que importar `child_process`,
+  `cluster` ou `worker_threads` e invalida o braço com processo filho. Rejuvenescimento é outro estudo.
 - Trocar o banco por estrutura em memória, deixar de gravar dados, armazenar
   em cache respostas que dependem do banco, ou silenciar erros devolvendo
   sucesso.

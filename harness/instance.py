@@ -18,6 +18,7 @@ import psutil
 
 ROOT = Path(__file__).resolve().parent.parent
 PROBE = ROOT / "harness" / "gc_probe.js"
+LEAK = ROOT / "harness" / "leak_inject.js"  # controle positivo (prepare.py control)
 NODE_MODULES = ROOT / ".cache" / "node_modules"
 DB_NAME = "uptime_db"  # exigido pelo prompt do BaxBench
 
@@ -28,17 +29,30 @@ def free_port():
         return s.getsockname()[1]
 
 
+def copy_writable(src, dst, ignore=None):
+    """copytree que devolve a escrita ao dono. run_campaign.sh faz chmod -R a-w em apps/,
+    e copytree copia o modo: sem isto o app falha com EACCES ao criar o banco."""
+    shutil.copytree(src, dst, ignore=ignore, copy_function=shutil.copyfile)
+    for d, _, files in os.walk(dst):
+        os.chmod(d, os.stat(d).st_mode | 0o700)
+        for f in files:
+            fp = os.path.join(d, f)
+            if not os.path.islink(fp):
+                os.chmod(fp, os.stat(fp).st_mode | 0o600)
+    return Path(dst)
+
+
 def copy_app(src, dst):
     src, dst = Path(src), Path(dst)
     if dst.exists():
         shutil.rmtree(dst)
-    shutil.copytree(src, dst, ignore=shutil.ignore_patterns("node_modules", DB_NAME, ".git"))
+    copy_writable(src, dst, ignore=shutil.ignore_patterns("node_modules", DB_NAME, ".git"))
     (dst / "node_modules").symlink_to(NODE_MODULES, target_is_directory=True)
     return dst
 
 
 class Instance:
-    def __init__(self, app_src, workdir, probe_interval_ms=5000, sample_s=5.0):
+    def __init__(self, app_src, workdir, probe_interval_ms=5000, sample_s=5.0, leak_mb_per_h=0.0):
         self.app_src = Path(app_src)
         self.workdir = Path(workdir)
         self.code_dir = self.workdir / "app"
@@ -49,9 +63,11 @@ class Instance:
         self.log_out = self.workdir / "app.log"
         self.probe_interval_ms = probe_interval_ms
         self.sample_s = sample_s
+        self.leak_mb_per_h = leak_mb_per_h
         self._stop = threading.Event()
         self._sampler = None
         self.pids_seen = set()
+        self.max_children = 0  # filhos do node: rejuvenescimento escondido (H4)
         self.t0 = None
 
     def prepare(self):
@@ -68,9 +84,13 @@ class Instance:
             "AGING_PROBE_OUT": str(self.probe_out),
             "AGING_PROBE_INTERVAL_MS": str(self.probe_interval_ms),
         })
+        cmd = ["node", "--expose-gc", "-r", str(PROBE)]
+        if self.leak_mb_per_h > 0:
+            env["AGING_LEAK_MB_PER_H"] = str(self.leak_mb_per_h)
+            cmd += ["-r", str(LEAK)]
         log = open(self.log_out, "ab")
         self.proc = subprocess.Popen(
-            ["node", "--expose-gc", "-r", str(PROBE), "index.js"],
+            cmd + ["index.js"],
             cwd=self.code_dir, env=env, stdout=log, stderr=subprocess.STDOUT,
         )
         deadline = time.time() + timeout
@@ -107,6 +127,7 @@ class Instance:
                     mi = p.memory_info()
                     fds = p.num_fds() if hasattr(p, "num_fds") else -1
                     ch = len(p.children(recursive=True))
+                    self.max_children = max(self.max_children, ch)
                     db = self.code_dir / DB_NAME
                     dbb = db.stat().st_size if db.exists() else 0
                     f.write(f"{time.time()-self.t0:.2f},{p.pid},{mi.rss},{mi.vms},{fds},"
