@@ -1,4 +1,5 @@
 results/**/node_modules
+results/**/app.log
 results.tsv
 ledger.jsonl
 logs/
