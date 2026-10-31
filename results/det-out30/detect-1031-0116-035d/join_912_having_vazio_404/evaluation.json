@@ -1,0 +1,102 @@
+{
+ "arm": "join_912_having_vazio_404",
+ "warmup_s": 300.0,
+ "requests": 1885151,
+ "error_rate": 0.0009463432902722381,
+ "server_error_rate": 0.0009341426761039301,
+ "exception_rate": 1.2200614168308003e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 1879680,
+  "/associate_card": 5471
+ },
+ "rss_mb": {
+  "n": 672,
+  "mk_s": 87751,
+  "mk_z": 15.095,
+  "mk_p_two_sided": 1.746025868251803e-51,
+  "mk_p_upward": 8.730129341259015e-52,
+  "sen_slope_per_h": 6.2540793056802375,
+  "sen_slope_first_half_per_h": 16.537925598627304,
+  "sen_slope_second_half_per_h": 0.47767229016288903,
+  "robust_slope_per_h": 0.47767229016288903,
+  "first": 124.05859375,
+  "last": 128.36328125
+ },
+ "heap_mb": {
+  "n": 672,
+  "mk_s": 99420,
+  "mk_z": 17.1023,
+  "mk_p_two_sided": 1.4272989510726191e-65,
+  "mk_p_upward": 7.136494755363096e-66,
+  "sen_slope_per_h": 0.17743602771686062,
+  "sen_slope_first_half_per_h": 0.14255520947402167,
+  "sen_slope_second_half_per_h": 0.07232269175677657,
+  "robust_slope_per_h": 0.07232269175677657,
+  "first": 8.178855895996094,
+  "last": 8.239959716796875
+ },
+ "external_mb": {
+  "n": 672,
+  "mk_s": -1889,
+  "mk_z": -0.3248,
+  "mk_p_two_sided": 0.7453455866237718,
+  "mk_p_upward": 0.6273272066881141,
+  "sen_slope_per_h": -0.0038966171162431174,
+  "sen_slope_first_half_per_h": -0.20200450163737854,
+  "sen_slope_second_half_per_h": 0.08530261583215384,
+  "robust_slope_per_h": -0.20200450163737854,
+  "first": 2.3075952529907227,
+  "last": 2.1745195388793945
+ },
+ "handles": {
+  "n": 672,
+  "mk_s": -671,
+  "mk_z": -1.7269,
+  "mk_p_two_sided": 0.08418601845138297,
+  "mk_p_upward": 0.9579069907743085,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 22792,
+  "mk_z": 4.0188,
+  "mk_p_two_sided": 5.850592373216109e-05,
+  "mk_p_upward": 2.9252961866080546e-05,
+  "sen_slope_per_h": 0.23827111543114504,
+  "sen_slope_first_half_per_h": 1.794159642517797,
+  "sen_slope_second_half_per_h": -0.2324581146240235,
+  "robust_slope_per_h": -0.2324581146240235
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -4316,
+  "mk_z": -0.7609,
+  "mk_p_two_sided": 0.4467046965583456,
+  "mk_p_upward": 0.7766476517208272,
+  "sen_slope_per_h": -1.4922279792745266,
+  "sen_slope_first_half_per_h": -165.51724137931035,
+  "sen_slope_second_half_per_h": 43.31707317073222,
+  "robust_slope_per_h": -165.51724137931035
+ },
+ "throughput_mean_rps": 518.621482602118,
+ "p95_ms_median": 7.706165313720703,
+ "db_rows": 912,
+ "db_state_counts": {
+  "credit_cards": 91,
+  "phones": 10,
+  "card_phone_associations": 811
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "join_912_having_vazio_404",
+ "hypothesis": "D3: /retrieve_cards com 10 telefones sobre 811 associações (912 linhas) cuja interseção falha no HAVING COUNT(DISTINCT)=10 (404 curto) maximiza a taxa de B-trees temporárias no SQLite.",
+ "sig_hash": "440143fa590d",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

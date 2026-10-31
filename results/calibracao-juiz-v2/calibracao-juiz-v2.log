@@ -1,0 +1,21 @@
+=== 2026-10-31T10:44:30-03:00 verify
+verify: ok 26 arquivos fixos íntegros
+=== 2026-10-31T10:44:30-03:00 controle positivo (62 min)
+---
+run_id: control-1031-1044-4c7d
+arm=leak_0 injected=0.0 valid=True detected=False rss_slope=1.097 min_halves=0.021 mk_p=0.00000 external_slope=-0.002 heap_slope=0.181 flags=E1_erros_5xx_da_app
+arm=leak_2.5 injected=2.5 valid=True detected=False rss_slope=3.413 min_halves=3.051 mk_p=0.00000 external_slope=2.622 heap_slope=0.315 flags=E1_erros_5xx_da_app
+arm=leak_5 injected=5.0 valid=True detected=True rss_slope=8.686 min_halves=6.987 mk_p=0.00000 external_slope=5.242 heap_slope=0.327 flags=E1_erros_5xx_da_app
+arm=leak_10 injected=10.0 valid=True detected=True rss_slope=13.588 min_halves=12.522 mk_p=0.00000 external_slope=10.487 heap_slope=0.292 flags=E1_erros_5xx_da_app
+=== 2026-10-31T11:44:49-03:00 controle terminou (exit 0)
+=== 2026-10-31T11:44:49-03:00 teste A/A (60 min)
+---
+run_id: detect-1031-1144-750d
+arm=baseline_artigo valid=True score_rss_mb_per_h=NA rss_slope=2.193 mk_p=0.00000 heap_slope=-0.208 handles_slope=0.000 p95_slope=-2.871 ttd_min=15.000 ratio=NA req=462802 err=0.0191 db_rows=3 flags=E1_erros_5xx_da_app
+arm=aa_copia_3 valid=True score_rss_mb_per_h=NA rss_slope=2.944 mk_p=0.00000 heap_slope=-0.128 handles_slope=0.000 p95_slope=-4.835 ttd_min=15.000 ratio=NA req=463744 err=0.0191 db_rows=3 flags=E1_erros_5xx_da_app,D4_copia_da_baseline
+arm=aa_copia_1 valid=True score_rss_mb_per_h=NA rss_slope=4.170 mk_p=0.00000 heap_slope=-0.475 handles_slope=0.000 p95_slope=-6.258 ttd_min=20.000 ratio=NA req=462625 err=0.0192 db_rows=3 flags=E1_erros_5xx_da_app,D4_copia_da_baseline
+arm=aa_copia_2 valid=True score_rss_mb_per_h=NA rss_slope=1.726 mk_p=0.00000 heap_slope=-0.451 handles_slope=0.000 p95_slope=-0.883 ttd_min=20.000 ratio=NA req=461378 err=0.0193 db_rows=3 flags=E1_erros_5xx_da_app,D4_copia_da_baseline
+=== 2026-10-31T12:45:03-03:00 A/A terminou (exit 0)
+=== round.json gerados:
+results/detect-1031-1144-750d/round.json
+results/control-1031-1044-4c7d/round.json

@@ -1,0 +1,104 @@
+{
+ "arm": "erro_500_controlado_4pct",
+ "warmup_s": 300.0,
+ "requests": 1045682,
+ "error_rate": 0.04000355748688416,
+ "server_error_rate": 0.03999781960481293,
+ "exception_rate": 5.737882071222418e-06,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 1045382,
+  "/associate_card": 300
+ },
+ "rss_mb": {
+  "n": 677,
+  "mk_s": 109830,
+  "mk_z": 18.6845,
+  "mk_p_two_sided": 6.622518871850435e-78,
+  "mk_p_upward": 3.3112594359252175e-78,
+  "sen_slope_per_h": 1.1865345273701982,
+  "sen_slope_first_half_per_h": 2.69076372381865,
+  "sen_slope_second_half_per_h": 1.6019856215035115,
+  "robust_slope_per_h": 1.6019856215035115,
+  "first": 164.1171875,
+  "last": 168.4765625
+ },
+ "heap_mb": {
+  "n": 677,
+  "mk_s": 143148,
+  "mk_z": 24.3524,
+  "mk_p_two_sided": 5.472450384380328e-131,
+  "mk_p_upward": 2.736225192190164e-131,
+  "sen_slope_per_h": 0.1514075344900636,
+  "sen_slope_first_half_per_h": 0.2156219531806913,
+  "sen_slope_second_half_per_h": 0.0977886894695361,
+  "robust_slope_per_h": 0.0977886894695361,
+  "first": 8.116165161132812,
+  "last": 8.084602355957031
+ },
+ "external_mb": {
+  "n": 677,
+  "mk_s": -2806,
+  "mk_z": -0.4772,
+  "mk_p_two_sided": 0.6332258999896936,
+  "mk_p_upward": 0.6833870500051532,
+  "sen_slope_per_h": -0.021777836012268827,
+  "sen_slope_first_half_per_h": -0.3263201069416745,
+  "sen_slope_second_half_per_h": -0.010374603761396243,
+  "robust_slope_per_h": -0.3263201069416745,
+  "first": 8.289965629577637,
+  "last": 12.963826179504395
+ },
+ "handles": {
+  "n": 677,
+  "mk_s": -676,
+  "mk_z": -1.7269,
+  "mk_p_two_sided": 0.08417918505594708,
+  "mk_p_upward": 0.9579104074720264,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 660,
+  "mk_s": 37715,
+  "mk_z": 6.6652,
+  "mk_p_two_sided": 2.642196535094785e-11,
+  "mk_p_upward": 1.3210982675473924e-11,
+  "sen_slope_per_h": 1.8801929754890683,
+  "sen_slope_first_half_per_h": -3.1175451763605664,
+  "sen_slope_second_half_per_h": 2.0345990508244927,
+  "robust_slope_per_h": -3.1175451763605664
+ },
+ "throughput": {
+  "n": 660,
+  "mk_s": -26991,
+  "mk_z": -4.7701,
+  "mk_p_two_sided": 1.8411571472896704e-06,
+  "mk_p_upward": 0.9999990794214264,
+  "sen_slope_per_h": -8.61971830985917,
+  "sen_slope_first_half_per_h": 16.566371681415713,
+  "sen_slope_second_half_per_h": -9.0,
+  "robust_slope_per_h": -9.0
+ },
+ "throughput_mean_rps": 291.53818181818184,
+ "p95_ms_median": 35.099029541015625,
+ "db_rows": 601,
+ "db_state_counts": {
+  "credit_cards": 300,
+  "phones": 1,
+  "card_phone_associations": 300
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "erro_500_controlado_4pct",
+ "hypothesis": "F1: réplica na semente 2 do melhor braço da Rodada 4 (robust_slope=4,794 MB/h, h1=4,794, h2=6,202 MB/h); verifica se a tendência monótona em 601 linhas + 4% TypeError é reprodutível.",
+ "sig_hash": "e050ef136e64",
+ "seed": 2,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

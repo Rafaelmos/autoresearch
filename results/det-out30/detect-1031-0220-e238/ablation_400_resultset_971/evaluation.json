@@ -1,0 +1,102 @@
+{
+ "arm": "ablation_400_resultset_971",
+ "warmup_s": 300.0,
+ "requests": 720210,
+ "error_rate": 1.1107871315310811e-05,
+ "server_error_rate": 1.1107871315310811e-05,
+ "exception_rate": 0.0,
+ "client_error_rate": 0.045424251260049155,
+ "ops": {
+  "/retrieve_cards": 719725,
+  "/associate_card": 485
+ },
+ "rss_mb": {
+  "n": 678,
+  "mk_s": 39480,
+  "mk_z": 6.7014,
+  "mk_p_two_sided": 2.0639741531780116e-11,
+  "mk_p_upward": 1.0319870765890058e-11,
+  "sen_slope_per_h": 0.6990253316538062,
+  "sen_slope_first_half_per_h": 2.6555373173353476,
+  "sen_slope_second_half_per_h": 0.07295890176424355,
+  "robust_slope_per_h": 0.07295890176424355,
+  "first": 187.0859375,
+  "last": 189.921875
+ },
+ "heap_mb": {
+  "n": 678,
+  "mk_s": 107617,
+  "mk_z": 18.2673,
+  "mk_p_two_sided": 1.5066004757652753e-74,
+  "mk_p_upward": 7.533002378826376e-75,
+  "sen_slope_per_h": 0.08899787707576146,
+  "sen_slope_first_half_per_h": 0.14941258999229207,
+  "sen_slope_second_half_per_h": 0.0369720719720428,
+  "robust_slope_per_h": 0.0369720719720428,
+  "first": 8.05322265625,
+  "last": 7.9607086181640625
+ },
+ "external_mb": {
+  "n": 678,
+  "mk_s": 17877,
+  "mk_z": 3.0344,
+  "mk_p_two_sided": 0.0024102579218431164,
+  "mk_p_upward": 0.0012051289609215582,
+  "sen_slope_per_h": 1.0851597551469354,
+  "sen_slope_first_half_per_h": 0.05516677712501927,
+  "sen_slope_second_half_per_h": -0.007756050576009716,
+  "robust_slope_per_h": -0.007756050576009716,
+  "first": 2.0913000106811523,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 678,
+  "mk_s": -1352,
+  "mk_z": -2.4423,
+  "mk_p_two_sided": 0.014595438132550003,
+  "mk_p_upward": 0.992702280933725,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": -30271,
+  "mk_z": -5.3375,
+  "mk_p_two_sided": 9.421965796713083e-08,
+  "mk_p_upward": 0.999999952890171,
+  "sen_slope_per_h": -1.2390366414698157,
+  "sen_slope_first_half_per_h": -6.288411665935905,
+  "sen_slope_second_half_per_h": 0.7794698079427084,
+  "robust_slope_per_h": -6.288411665935905
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": 18978,
+  "mk_z": 3.3465,
+  "mk_p_two_sided": 0.0008184904072689206,
+  "mk_p_upward": 0.0004092452036344603,
+  "sen_slope_per_h": 3.2727272727272614,
+  "sen_slope_first_half_per_h": 15.84000000000002,
+  "sen_slope_second_half_per_h": -3.555555555555608,
+  "robust_slope_per_h": -3.555555555555608
+ },
+ "throughput_mean_rps": 200.28986384266264,
+ "p95_ms_median": 54.167747497558594,
+ "db_rows": 971,
+ "db_state_counts": {
+  "credit_cards": 485,
+  "phones": 1,
+  "card_phone_associations": 485
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "ablation_400_resultset_971",
+ "hypothesis": "E2: ablação exata de E1 trocando apenas o 500 (TypeError -> errorHandler.js) por 400 (string inválida); se cair para o ruído enquanto E1 sobe, isola errorHandler.js + stack trace sob carga como causa.",
+ "sig_hash": "ec7590210b54",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

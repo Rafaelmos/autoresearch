@@ -1,4 +1,4 @@
-results/
+results/**/node_modules
 results.tsv
 ledger.jsonl
 logs/

@@ -1,0 +1,91 @@
+{
+ "arm": "leak_0",
+ "warmup_s": 300.0,
+ "requests": 487035,
+ "max_children": 0,
+ "error_rate": 0.01787961850791011,
+ "server_error_rate": 0.017869352305275803,
+ "exception_rate": 1.0266202634307596e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 399979,
+  "/associate_card": 87056
+ },
+ "rss_mb": {
+  "n": 696,
+  "mk_s": 80028,
+  "mk_z": 13.0612,
+  "mk_p_two_sided": 5.489076209600991e-39,
+  "mk_p_upward": 2.7445381048004956e-39,
+  "sen_slope_per_h": 1.0967080644709988,
+  "first": 112.109375,
+  "last": 113.83203125,
+  "sen_halves_per_h": [
+   3.124413393518177,
+   0.02092552626083848
+  ],
+  "sen_min_halves_per_h": 0.02092552626083848
+ },
+ "heap_mb": {
+  "n": 696,
+  "mk_s": 82493,
+  "mk_z": 13.4633,
+  "mk_p_two_sided": 2.570229639038026e-41,
+  "mk_p_upward": 1.285114819519013e-41,
+  "sen_slope_per_h": 0.18104464551017427,
+  "first": 8.201522827148438,
+  "last": 8.070838928222656
+ },
+ "external_mb": {
+  "n": 696,
+  "mk_s": -12140,
+  "mk_z": -1.9812,
+  "mk_p_two_sided": 0.04756994563514954,
+  "mk_p_upward": 0.9762150271824253,
+  "sen_slope_per_h": -0.0018549640865281563,
+  "first": 2.120854377746582,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 696,
+  "mk_s": -2081,
+  "mk_z": -2.9928,
+  "mk_p_two_sided": 0.002764218813896704,
+  "mk_p_upward": 0.9986178905930516,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 720,
+  "mk_z": 0.1268,
+  "mk_p_two_sided": 0.8991130846783874,
+  "mk_p_upward": 0.4495565423391937,
+  "sen_slope_per_h": 0.39697229915862675
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -1289,
+  "mk_z": -0.2271,
+  "mk_p_two_sided": 0.8203338924597527,
+  "mk_p_upward": 0.5898330537701236,
+  "sen_slope_per_h": -1.3846153846153388
+ },
+ "throughput_mean_rps": 137.2320726172466,
+ "p95_ms_median": 83.52899551391602,
+ "db_rows": 3,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 1,
+  "card_phone_associations": 1
+ },
+ "time_to_detect_min": 15.0,
+ "rss_upward_significant": false,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "baseline_artigo",
+ "hypothesis": "Carga do artigo: alterna associate/retrieve com o mesmo par cartão/telefone.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card/original"
+}

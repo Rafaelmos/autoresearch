@@ -1,0 +1,102 @@
+{
+ "arm": "fragmentacao_resultset_misto",
+ "warmup_s": 300.0,
+ "requests": 1390965,
+ "error_rate": 0.00021639653046625905,
+ "server_error_rate": 0.00021423975441510032,
+ "exception_rate": 2.156776051158728e-06,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 1385069,
+  "/associate_card": 5896
+ },
+ "rss_mb": {
+  "n": 663,
+  "mk_s": 67975,
+  "mk_z": 11.9318,
+  "mk_p_two_sided": 8.082179425337024e-33,
+  "mk_p_upward": 4.041089712668512e-33,
+  "sen_slope_per_h": 4.096283330124309,
+  "sen_slope_first_half_per_h": 16.426010655628193,
+  "sen_slope_second_half_per_h": 1.9362553551247925,
+  "robust_slope_per_h": 1.9362553551247925,
+  "first": 153.8515625,
+  "last": 159.1015625
+ },
+ "heap_mb": {
+  "n": 663,
+  "mk_s": 108679,
+  "mk_z": 19.0767,
+  "mk_p_two_sided": 3.9440321208489896e-81,
+  "mk_p_upward": 1.9720160604244948e-81,
+  "sen_slope_per_h": 0.1223792578422785,
+  "sen_slope_first_half_per_h": 0.1284111239854242,
+  "sen_slope_second_half_per_h": 0.2038944852066247,
+  "robust_slope_per_h": 0.1284111239854242,
+  "first": 8.147979736328125,
+  "last": 8.211860656738281
+ },
+ "external_mb": {
+  "n": 663,
+  "mk_s": -9278,
+  "mk_z": -1.6284,
+  "mk_p_two_sided": 0.10343344545611302,
+  "mk_p_upward": 0.9482832772719435,
+  "sen_slope_per_h": -0.3637611300566491,
+  "sen_slope_first_half_per_h": -0.43920525542036937,
+  "sen_slope_second_half_per_h": -3.143915374144673,
+  "robust_slope_per_h": -3.143915374144673,
+  "first": 2.1550588607788086,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 663,
+  "mk_s": -1322,
+  "mk_z": -2.4421,
+  "mk_p_two_sided": 0.014602048002714566,
+  "mk_p_upward": 0.9926989759986428,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 16120,
+  "mk_z": 2.8423,
+  "mk_p_two_sided": 0.004479267523461615,
+  "mk_p_upward": 0.0022396337617308073,
+  "sen_slope_per_h": 0.5436275508730153,
+  "sen_slope_first_half_per_h": 0.6572449404890366,
+  "sen_slope_second_half_per_h": 0.8640289306640626,
+  "robust_slope_per_h": 0.6572449404890366
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -12277,
+  "mk_z": -2.1647,
+  "mk_p_two_sided": 0.030410508346909323,
+  "mk_p_upward": 0.9847947458265454,
+  "sen_slope_per_h": -3.8571428571428203,
+  "sen_slope_first_half_per_h": -9.566433566433595,
+  "sen_slope_second_half_per_h": -2.3040000000001957,
+  "robust_slope_per_h": -9.566433566433595
+ },
+ "throughput_mean_rps": 393.0786686838124,
+ "p95_ms_median": 29.793500900268555,
+ "db_rows": 934,
+ "db_state_counts": {
+  "credit_cards": 450,
+  "phones": 3,
+  "card_phone_associations": 481
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "fragmentacao_resultset_misto",
+ "hypothesis": "C2: alternar result sets de 880 KB (450 cartões), 58 KB (30 cartões), 2 KB (1 cartão) e 404 (0 cartões) com escritas intercaladas (934 linhas) fragmenta arenas nativas do glibc/sqlite3.",
+ "sig_hash": "ac17fc14426e",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

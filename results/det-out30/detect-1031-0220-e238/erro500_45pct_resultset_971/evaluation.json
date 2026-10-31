@@ -1,0 +1,104 @@
+{
+ "arm": "erro500_45pct_resultset_971",
+ "warmup_s": 300.0,
+ "requests": 710652,
+ "error_rate": 0.04542589059061256,
+ "server_error_rate": 0.04542589059061256,
+ "exception_rate": 0.0,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 710167,
+  "/associate_card": 485
+ },
+ "rss_mb": {
+  "n": 678,
+  "mk_s": 131701,
+  "mk_z": 22.3555,
+  "mk_p_two_sided": 1.0664631782917186e-110,
+  "mk_p_upward": 5.332315891458593e-111,
+  "sen_slope_per_h": 7.656365537919228,
+  "sen_slope_first_half_per_h": 11.550000570370397,
+  "sen_slope_second_half_per_h": 2.3542174075054128,
+  "robust_slope_per_h": 2.3542174075054128,
+  "first": 173.47265625,
+  "last": 193.5703125
+ },
+ "heap_mb": {
+  "n": 678,
+  "mk_s": 109526,
+  "mk_z": 18.5914,
+  "mk_p_two_sided": 3.774163016654876e-77,
+  "mk_p_upward": 1.887081508327438e-77,
+  "sen_slope_per_h": 0.09469599362999591,
+  "sen_slope_first_half_per_h": 0.15257122983004182,
+  "sen_slope_second_half_per_h": 0.04420493992936734,
+  "robust_slope_per_h": 0.04420493992936734,
+  "first": 8.165733337402344,
+  "last": 8.121406555175781
+ },
+ "external_mb": {
+  "n": 678,
+  "mk_s": -14441,
+  "mk_z": -2.4511,
+  "mk_p_two_sided": 0.014240502843705585,
+  "mk_p_upward": 0.9928797485781472,
+  "sen_slope_per_h": -0.08304666964074231,
+  "sen_slope_first_half_per_h": -0.09334422326515214,
+  "sen_slope_second_half_per_h": 0.03254600340249497,
+  "robust_slope_per_h": -0.09334422326515214,
+  "first": 4.863729476928711,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 678,
+  "mk_s": -1352,
+  "mk_z": -2.4423,
+  "mk_p_two_sided": 0.014595438132550003,
+  "mk_p_upward": 0.992702280933725,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 31289,
+  "mk_z": 5.517,
+  "mk_p_two_sided": 3.44761692892085e-08,
+  "mk_p_upward": 1.723808464460425e-08,
+  "sen_slope_per_h": 1.112833089093144,
+  "sen_slope_first_half_per_h": 1.9332622659617456,
+  "sen_slope_second_half_per_h": 0.5856043175805973,
+  "robust_slope_per_h": 0.5856043175805973
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -24853,
+  "mk_z": -4.3829,
+  "mk_p_two_sided": 1.17133442051237e-05,
+  "mk_p_upward": 0.9999941433278975,
+  "sen_slope_per_h": -2.9930715935335064,
+  "sen_slope_first_half_per_h": -7.0588235294117645,
+  "sen_slope_second_half_per_h": -1.440000000000122,
+  "robust_slope_per_h": -7.0588235294117645
+ },
+ "throughput_mean_rps": 197.21512859304084,
+ "p95_ms_median": 55.11331558227539,
+ "db_rows": 971,
+ "db_state_counts": {
+  "credit_cards": 485,
+  "phones": 1,
+  "card_phone_associations": 485
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "erro500_45pct_resultset_971",
+ "hypothesis": "E1: elevar D2 (robust_slope=4,79 MB/h) para 485 cartões de 1960 B (971 linhas, ~950 KB/leitura, 0 escritas após 35s) + 4,54% de TypeError 500 (E1 < 5% E2) amplifica a inclinação acima de 10 MB/h.",
+ "sig_hash": "88fb2ec97879",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

@@ -1,0 +1,6 @@
+---
+run_id: detect-1031-0323-cf0d seed: 2
+arm=contencao_3w_3r_6threads valid=True score_rss_mb_per_h=NA rss_slope=0.412 robust_slope=-0.766 h1_slope=1.875 h2_slope=-0.766 mk_p=0.00000 heap_slope=0.217 handles_slope=0.000 p95_slope=-16.393 ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=237749 err=0.0131 db_rows=752 flags=E1_erros_5xx_da_app
+arm=baseline_artigo valid=True score_rss_mb_per_h=NA rss_slope=0.323 robust_slope=0.360 h1_slope=0.992 h2_slope=0.360 mk_p=0.00000 heap_slope=-0.059 handles_slope=0.000 p95_slope=-17.494 ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=385772 err=0.0219 db_rows=3 flags=E1_erros_5xx_da_app
+arm=erro_500_controlado_4pct valid=True score_rss_mb_per_h=NA rss_slope=1.187 robust_slope=1.602 h1_slope=2.691 h2_slope=1.602 mk_p=0.00000 heap_slope=0.151 handles_slope=0.000 p95_slope=1.880 ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=1045682 err=0.0400 db_rows=601 flags=E1_erros_5xx_da_app
+arm=frag_misto_erro500_associate valid=True score_rss_mb_per_h=NA rss_slope=2.603 robust_slope=1.070 h1_slope=4.236 h2_slope=1.070 mk_p=0.00000 heap_slope=0.118 handles_slope=0.000 p95_slope=0.861 ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=1521237 err=0.0400 db_rows=934 flags=E1_erros_5xx_da_app
