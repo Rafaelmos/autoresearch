@@ -1,0 +1,89 @@
+{
+ "arm": "rep_join_912_having_vazio_404",
+ "warmup_s": 300.0,
+ "requests": 2251509,
+ "max_children": 0,
+ "error_rate": 0.00045480608782820763,
+ "server_error_rate": 0.0004410375441537209,
+ "exception_rate": 1.3768543674486755e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 2245120,
+  "/associate_card": 6389
+ },
+ "rss_mb": {
+  "n": 715,
+  "mk_s": 131680,
+  "mk_z": 20.6408,
+  "mk_p_two_sided": 1.1818398846138403e-94,
+  "mk_p_upward": 5.9091994230692014e-95,
+  "sen_slope_per_h": 9.021576532613356,
+  "first": 122.51953125,
+  "last": 128.37890625,
+  "sen_halves_per_h": [
+   0.80822305019588,
+   12.153296610101028
+  ],
+  "sen_min_halves_per_h": 0.80822305019588
+ },
+ "heap_mb": {
+  "n": 715,
+  "mk_s": 105950,
+  "mk_z": 16.6075,
+  "mk_p_two_sided": 6.1470196631606576e-62,
+  "mk_p_upward": 3.0735098315803288e-62,
+  "sen_slope_per_h": 0.1374399096810434,
+  "first": 8.163673400878906,
+  "last": 8.053497314453125
+ },
+ "external_mb": {
+  "n": 715,
+  "mk_s": -5954,
+  "mk_z": -0.9331,
+  "mk_p_two_sided": 0.35074815520839075,
+  "mk_p_upward": 0.8246259223958046,
+  "sen_slope_per_h": -0.011960236143054059,
+  "first": 2.287325859069824,
+  "last": 2.0986928939819336
+ },
+ "handles": {
+  "n": 715,
+  "mk_s": -1427,
+  "mk_z": -2.4443,
+  "mk_p_two_sided": 0.014511375125814801,
+  "mk_p_upward": 0.9927443124370926,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 660,
+  "mk_s": 60941,
+  "mk_z": 10.77,
+  "mk_p_two_sided": 4.769136966891857e-27,
+  "mk_p_upward": 2.3845684834459285e-27,
+  "sen_slope_per_h": 0.7178251687667196
+ },
+ "throughput": {
+  "n": 660,
+  "mk_s": -60694,
+  "mk_z": -10.7266,
+  "mk_p_two_sided": 7.635401819990688e-27,
+  "mk_p_upward": 1.0,
+  "sen_slope_per_h": -35.4345549738219
+ },
+ "throughput_mean_rps": 627.2675757575757,
+ "p95_ms_median": 7.3394775390625,
+ "db_rows": 912,
+ "db_state_counts": {
+  "credit_cards": 91,
+  "phones": 10,
+  "card_phone_associations": 811
+ },
+ "time_to_detect_min": 40.0,
+ "rss_upward_significant": true,
+ "flags": [],
+ "valid": true,
+ "spec_name": "rep_join_912_having_vazio_404",
+ "hypothesis": "Réplica de D3 (det-out30, 6,25 MB/h): /retrieve_cards com 10 telefones sobre 811 associações (912 linhas) e interseção vazia no HAVING (404) maximiza B-trees temporárias no SQLite.",
+ "seed": 2,
+ "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card/original"
+}

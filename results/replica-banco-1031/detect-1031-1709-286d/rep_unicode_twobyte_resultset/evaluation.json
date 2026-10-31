@@ -1,0 +1,89 @@
+{
+ "arm": "rep_unicode_twobyte_resultset",
+ "warmup_s": 300.0,
+ "requests": 662871,
+ "max_children": 0,
+ "error_rate": 0.0013351013998198745,
+ "server_error_rate": 0.0012898437252497092,
+ "exception_rate": 4.5257674570165234e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 660852,
+  "/associate_card": 2019
+ },
+ "rss_mb": {
+  "n": 715,
+  "mk_s": 137801,
+  "mk_z": 21.6002,
+  "mk_p_two_sided": 1.7865382451515477e-103,
+  "mk_p_upward": 8.932691225757739e-104,
+  "sen_slope_per_h": 6.213385008604557,
+  "first": 139.58203125,
+  "last": 144.65625,
+  "sen_halves_per_h": [
+   2.4964177404166024,
+   9.1879180571385
+  ],
+  "sen_min_halves_per_h": 2.4964177404166024
+ },
+ "heap_mb": {
+  "n": 715,
+  "mk_s": 110758,
+  "mk_z": 17.3612,
+  "mk_p_two_sided": 1.623343749113603e-67,
+  "mk_p_upward": 8.116718745568015e-68,
+  "sen_slope_per_h": 0.1545038043360699,
+  "first": 8.115524291992188,
+  "last": 8.069602966308594
+ },
+ "external_mb": {
+  "n": 715,
+  "mk_s": -26374,
+  "mk_z": -4.1341,
+  "mk_p_two_sided": 3.5639912433574045e-05,
+  "mk_p_upward": 0.9999821800437833,
+  "sen_slope_per_h": -2.3881126873152243,
+  "first": 6.164389610290527,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 715,
+  "mk_s": -1426,
+  "mk_z": -2.4426,
+  "mk_p_two_sided": 0.014580329375129094,
+  "mk_p_upward": 0.9927098353124355,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 660,
+  "mk_s": 58517,
+  "mk_z": 10.3416,
+  "mk_p_two_sided": 4.567773909250703e-25,
+  "mk_p_upward": 2.2838869546253515e-25,
+  "sen_slope_per_h": 3.408380745794959
+ },
+ "throughput": {
+  "n": 660,
+  "mk_s": -68119,
+  "mk_z": -12.0393,
+  "mk_p_two_sided": 2.2089330625919905e-33,
+  "mk_p_upward": 1.0,
+  "sen_slope_per_h": -15.78492514197211
+ },
+ "throughput_mean_rps": 182.99636363636364,
+ "p95_ms_median": 54.62956428527832,
+ "db_rows": 901,
+ "db_state_counts": {
+  "credit_cards": 450,
+  "phones": 1,
+  "card_phone_associations": 450
+ },
+ "time_to_detect_min": 15.0,
+ "rss_upward_significant": true,
+ "flags": [],
+ "valid": true,
+ "spec_name": "rep_unicode_twobyte_resultset",
+ "hypothesis": "Réplica de D1 (det-out30, 10,38 MB/h): 450 cartões Unicode \\u3000 (901 linhas) forçam TwoByteString no V8 e transcodificação UTF-8 no N-API/sqlite3 a cada /retrieve_cards. Se o efeito for real, slope e menor metade >= 5 MB/h de novo.",
+ "seed": 2,
+ "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card/original"
+}

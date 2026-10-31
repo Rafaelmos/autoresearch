@@ -1,0 +1,91 @@
+{
+ "arm": "rep_erro500_45pct_resultset_971",
+ "warmup_s": 300.0,
+ "requests": 841009,
+ "max_children": 0,
+ "error_rate": 0.045448978548386525,
+ "server_error_rate": 0.0454370880692121,
+ "exception_rate": 1.189047917442025e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 840524,
+  "/associate_card": 485
+ },
+ "rss_mb": {
+  "n": 714,
+  "mk_s": 132530,
+  "mk_z": 20.8177,
+  "mk_p_two_sided": 2.9950903144424153e-96,
+  "mk_p_upward": 1.4975451572212077e-96,
+  "sen_slope_per_h": 10.165745687120184,
+  "first": 192.46875,
+  "last": 212.60546875,
+  "sen_halves_per_h": [
+   48.87511999587285,
+   -0.6473245141272803
+  ],
+  "sen_min_halves_per_h": -0.6473245141272803
+ },
+ "heap_mb": {
+  "n": 714,
+  "mk_s": 119967,
+  "mk_z": 18.8442,
+  "mk_p_two_sided": 3.279321142168445e-79,
+  "mk_p_upward": 1.6396605710842226e-79,
+  "sen_slope_per_h": 0.09501893710568624,
+  "first": 8.163009643554688,
+  "last": 8.077079772949219
+ },
+ "external_mb": {
+  "n": 714,
+  "mk_s": -691,
+  "mk_z": -0.1084,
+  "mk_p_two_sided": 0.9136901184818657,
+  "mk_p_upward": 0.5431549407590671,
+  "sen_slope_per_h": -0.000227600719764884,
+  "first": 11.210415840148926,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 714,
+  "mk_s": -1424,
+  "mk_z": -2.4426,
+  "mk_p_two_sided": 0.014580716960345292,
+  "mk_p_upward": 0.9927096415198273,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 660,
+  "mk_s": -99990,
+  "mk_z": -17.6712,
+  "mk_p_two_sided": 6.990113558852138e-70,
+  "mk_p_upward": 1.0,
+  "sen_slope_per_h": -9.937223464713002
+ },
+ "throughput": {
+  "n": 660,
+  "mk_s": 65585,
+  "mk_z": 11.591,
+  "mk_p_two_sided": 4.578269719660929e-31,
+  "mk_p_upward": 2.2891348598304644e-31,
+  "sen_slope_per_h": 35.80540540540537
+ },
+ "throughput_mean_rps": 235.84636363636363,
+ "p95_ms_median": 47.1949577331543,
+ "db_rows": 971,
+ "db_state_counts": {
+  "credit_cards": 485,
+  "phones": 1,
+  "card_phone_associations": 485
+ },
+ "time_to_detect_min": 15.0,
+ "rss_upward_significant": true,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "rep_erro500_45pct_resultset_971",
+ "hypothesis": "Réplica de E1 (det-out30, 7,66 MB/h): result sets de ~950 KB (971 linhas, sem escritas após o preenchimento) + 4,54% de TypeError 500 em validation.js -> errorHandler.js.",
+ "seed": 2,
+ "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card/original"
+}
