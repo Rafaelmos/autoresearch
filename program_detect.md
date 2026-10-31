@@ -51,19 +51,25 @@ em 50 h, mas não identificou a causa.
 
 ## Métrica
 
-- **Referência de ruído (teste A/A, 20/10, 60 min, 4 cópias da baseline):**
-  depois do aquecimento, o RSS fica plano em torno de 112–115 MB. Inclinações
-  de 0,6 a 1,2 MB/h, com uma cópia em −8,5 MB/h (queda pontual do alocador).
-  Heap de cerca de 0,25 MB/h em todas, 0,2% de CPU, cerca de 130 req/s,
-  1,7% de 5xx. **A baseline do artigo não envelhece de forma relevante em
-  60 min.** Sua tarefa é achar uma carga legítima que envelheça.
-- **Principal:** `score_rss_mb_per_h`, o Sen's slope do RSS do processo Node
-  medido logo após um GC forçado, descartando o aquecimento. A métrica só existe
-  se o braço for válido, se o Mann-Kendall de alta tiver p < 0,01, se a
-  inclinação for de **pelo menos 5 MB/h** (cerca de 4 vezes o ruído do A/A) e se o braço
-  não tiver a flag D2. Maior é melhor.
-- **Secundárias**, para a sua interpretação e para o resumo: `ratio` (contra a
-  baseline da mesma rodada), `ttd_min` (tempo até a detecção estável), e as
+- **Referência de ruído (teste A/A + braços nulos de `det-out20`):**
+  somando todos os braços sem envelhecimento real (incluindo a própria baseline
+  em 8 rodadas), a inclinação do RSS variou de **−8,5 a +7,8 MB/h** por saltos
+  esporádicos (degraus) do alocador nativo. Por isso, o piso foi recalibrado
+  acima do percentil 95 dos braços nulos para **10,0 MB/h**.
+- **Principal:** `score_rss_mb_per_h`, calculada como a **inclinação robusta a
+  degraus** (`robust_slope_per_h = min(sen_slope_1a_metade, sen_slope_2a_metade)`)
+  do RSS pós-GC, descartando o aquecimento. A métrica só existe se o braço for
+  válido, se **tanto a inclinação global (`rss_slope`) quanto a inclinação
+  robusta (`robust_slope`) forem de pelo menos 10,0 MB/h**, e se o braço não
+  tiver as flags D2, D4 ou E2. Maior é melhor.
+- **Mann-Kendall (`mk_p`) apenas descritivo:** devido à autocorrelação entre
+  amostras consecutivas, o p-valor do Mann-Kendall dá $p \approx 0$ mesmo em
+  séries quase planas. Use `mk_p` apenas como informação; a decisão depende do
+  **tamanho do efeito** ($\ge 10{,}0$ MB/h) e da **réplica em 2 sementes**.
+- **Secundárias**, para a sua interpretação e para o resumo: `rss_slope` (Sen's
+  slope global), `h1_slope` e `h2_slope` (1ª e 2ª metade), `ratio` (contra a
+  baseline da mesma rodada), `ttd_min` (primeiro checkpoint a partir do qual a
+  inclinação global e a robusta superam 10 MB/h e assim permanecem), e as
   inclinações de `heap`, `handles` e `p95`.
 - Um RSS que sobe e um heap que não sobe indicam retenção **nativa** (por
   exemplo, objetos do sqlite3), não de objetos JavaScript. Anote isso, porque
@@ -71,15 +77,17 @@ em 50 h, mas não identificou a causa.
 
 ## Travas contra reward hacking (o juiz aplica, você respeita)
 
-Estas regras vêm da reunião de 15/10 com o Artur: o agente tende a pegar o
-atalho mais fácil para o número subir.
+Estas regras vêm da reunião de 15/10 com o Artur e da revisão do Cesar: o
+agente tende a pegar o atalho mais fácil para o número subir. O juiz executa
+`workload.py` em um **subprocesso isolado** e confere os hashes e constantes do
+harness a cada rodada.
 
 | Flag | O que é | Efeito |
 |---|---|---|
 | D1_saturacao | Exceções ou timeouts acima de 1%: a máquina saturou, não envelheceu | Braço inválido |
 | D2_crescimento_de_estado_legitimo | Mais de 1000 linhas no banco: memória sobe porque há mais dados | Medido, sem pontuar |
 | D3_fora_do_contrato | Rota, payload ou limites fora do contrato | Braço inválido |
-| D4_copia_da_baseline | Candidato que gera a mesma sequência da baseline: a diferença é só ruído | Medido, sem pontuar |
+| D4_copia_da_baseline | Candidato com mesma proporção de operações, parâmetros (threads, think_time) e perfil de payload da baseline (mesmo invertendo a ordem) | Medido, sem pontuar |
 | E1_erros_5xx_da_app | 5xx da própria app acima de 1% | Pontua, mas exige explicação sua no ledger |
 | E2_erro_dominante_revisao_humana | 5xx acima de 5%: a carga está quebrando a app, não envelhecendo-a | Medido, sem pontuar; descreva no summary como achado para o humano |
 | H4_processo_reiniciado_ou_morto | O processo morreu ou mudou de PID | Braço inválido |
@@ -94,31 +102,33 @@ O Bash do Claude Code tem limite de 10 minutos por chamada. Por isso a rodada
 roda em segundo plano:
 
 ```
-python prepare.py detect --background      # imprime run_id
-python prepare.py wait <run_id>             # bloqueia até 9 min; repita até sair o resumo
+python prepare.py detect --seed 1 --background   # imprime run_id
+python prepare.py wait <run_id>                  # bloqueia até 9 min; repita até sair o resumo
 ```
 
-A saída final traz uma linha por braço, no formato
-`arm=... valid=... score_rss_mb_per_h=... mk_p=... heap_slope=... handles_slope=... ttd_min=... ratio=... flags=...`.
-Os detalhes ficam em `results/<run_id>/<arm>/evaluation.json`. Use `--smoke`
-(2 min) só para testar se `workload.py` roda. Smoke nunca entra no ranking.
+A saída final traz uma linha por braço, incluindo sempre `rss_slope` e
+`robust_slope` (mesmo quando `score_rss_mb_per_h=NA`), além de
+`keep_eligible=True|False` e `confirmed_seeds=...`. Use `--smoke` (2 min) só
+para testar se `workload.py` roda. Smoke nunca entra no ranking.
 
 ## Registro
 
-`results.tsv`, separado por tabulação, com estas colunas:
+`results.tsv`, separado por tabulação, com estas colunas (**registre sempre
+`rss_slope_mb_per_h` e `robust_slope_mb_per_h` numericamente em todos os braços,
+mesmo quando `score_rss_mb_per_h` for `NA`**, para não perder dados na análise):
 
 ```
-commit	run_id	arm	score_rss_mb_per_h	mk_p	ratio_vs_baseline	ttd_min	status	flags	hypothesis
+commit	run_id	seed	arm	rss_slope_mb_per_h	robust_slope_mb_per_h	score_rss_mb_per_h	mk_p	ratio_vs_baseline	ttd_min	status	flags	hypothesis
 ```
 
-`status` é `keep`, `discard`, `invalid` ou `baseline`. Registre uma linha por
-braço, incluindo a baseline.
+`status` é `keep`, `needs_replica`, `discard`, `invalid` ou `baseline`. Registre
+uma linha por braço, incluindo a baseline.
 
 `ledger.jsonl` recebe uma linha **antes** de cada rodada, com
 `{"run_id": null, "commit": ..., "status": "started", "candidates": [{"name", "hypothesis", "operacao_suspeita"}], "ts"}`,
 e outra **depois**, com `{"run_id", "status": "completed"|"failed", "interpretacao", "operacao_suspeita", "atalho": bool, "ts"}`.
 
-## O laço
+## O laço (com réplica obrigatória em 2 sementes para `keep`)
 
 Orçamento: **8 rodadas**, cerca de 8,5 h numa noite, ou até o humano
 interromper. Rodadas que falham também contam.
@@ -128,17 +138,24 @@ interromper. Rodadas que falham também contam.
    **falsificável** e da operação suspeita.
 3. `git commit -am "<resumo das hipóteses>"`
 4. Registre `started` no ledger.
-5. Rode `detect --background` e `wait` até sair o resumo.
-6. Registre o resultado no `results.tsv` e `completed` no ledger, com a sua
-   interpretação.
-7. **Primeira rodada:** se o `workload.py` não mudou desde o commit base, ela
-   serve como referência. O melhor candidato elegível vira o "melhor
-   anterior" (keep), e não há commit para desfazer.
-   **Keep** (nas demais): se algum candidato elegível tiver `score` maior que o melhor
-   anterior por pelo menos max(10%, 2 MB/h), mantenha o commit. A margem de 10%
-   evita selecionar ruído, que foi uma lição do Piloto 2.
-8. **Discard**: caso contrário, `git reset --hard HEAD~1`. As linhas no
-   `results.tsv` e no ledger continuam lá.
+5. Rode `detect --seed 1 --background` e `wait` até sair o resumo.
+6. Registre o resultado no `results.tsv` (preenchendo sempre `rss_slope_mb_per_h`
+   e `robust_slope_mb_per_h`) e `completed` no ledger, com a sua interpretação.
+7. **Regra de `keep` (exige 2 sementes acima de 10,0 MB/h):**
+   - Um único resultado acima do limite em 1 semente **NÃO vira `keep` direto**
+     (status `needs_replica`, `keep_eligible=False`). Para promovê-lo a `keep`,
+     você deve replicar o candidato com uma **2ª semente distinta** (por exemplo,
+     rodando `python prepare.py detect --seed 2 --background` ou incluindo o
+     mesmo candidato na rodada seguinte com `--seed 2`).
+   - Quando um candidato tiver `keep_eligible=True` (**pelo menos 2 sementes**
+     com `score_rss_mb_per_h >= 10.0` MB/h) e a média das duas sementes superar
+     o melhor confirmado anterior por pelo menos `max(10%, 2 MB/h)`, mantenha o
+     commit (`keep`).
+   - Se a réplica na 2ª semente falhar (ficar abaixo de 10,0 MB/h), o resultado
+     da 1ª semente era ruído: descarte o commit (`discard`).
+8. **Discard**: quando nenhum candidato da rodada obtiver `keep` nem exigir
+   réplica imediata, rode `git reset --hard HEAD~1`. As linhas no `results.tsv`
+   e no ledger continuam lá.
 9. Repita até acabar o orçamento.
 
 **Critério de simplicidade** (como no autoresearch original): com resultados

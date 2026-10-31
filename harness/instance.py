@@ -28,11 +28,36 @@ def free_port():
         return s.getsockname()[1]
 
 
-def copy_app(src, dst):
+def _force_writable(root_path):
+    """Garante permissão de leitura e escrita do dono em toda a árvore copiada."""
+    root_path = Path(root_path)
+    if not root_path.exists():
+        return
+    for p in [root_path] + list(root_path.rglob("*")):
+        if p.is_symlink():
+            continue
+        try:
+            mode = p.stat().st_mode
+            p.chmod(mode | (0o700 if p.is_dir() else 0o600))
+        except OSError:
+            pass
+
+
+def copy_tree_writable(src, dst, ignore=None):
+    """Copia árvore usando copyfile (sem herdar chmod a-w de apps/) e restaura u+w."""
     src, dst = Path(src), Path(dst)
     if dst.exists():
+        _force_writable(dst)
         shutil.rmtree(dst)
-    shutil.copytree(src, dst, ignore=shutil.ignore_patterns("node_modules", DB_NAME, ".git"))
+    shutil.copytree(src, dst, ignore=ignore, copy_function=shutil.copyfile)
+    _force_writable(dst)
+    return dst
+
+
+def copy_app(src, dst):
+    dst = copy_tree_writable(
+        src, dst, ignore=shutil.ignore_patterns("node_modules", DB_NAME, ".git")
+    )
     (dst / "node_modules").symlink_to(NODE_MODULES, target_is_directory=True)
     return dst
 

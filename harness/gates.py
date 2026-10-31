@@ -7,19 +7,25 @@ categoria (H1..H6) que vai para o ledger: esses casos são resultado de pesquisa
 
 import importlib.util
 import json
+import os
 import random
 import tempfile
 from pathlib import Path
 
 from .instance import Instance, ROOT
-from .load import check_request
+from .load import build_trace_subprocess, check_request
 from oracle import functional_test
 
-HIDDEN = ROOT / "oracle" / "hidden" / "hidden_tests.py"
+HIDDEN = Path(os.environ.get("AGING_HIDDEN_TESTS", str(ROOT / "oracle" / "hidden" / "hidden_tests.py")))
 REPLAY_N = 1500
 
 
 def _load_hidden():
+    if not HIDDEN.exists():
+        raise FileNotFoundError(
+            f"Testes escondidos não encontrados em {HIDDEN}. "
+            "Configure AGING_HIDDEN_TESTS ou mantenha oracle/hidden/hidden_tests.py (fora do git)."
+        )
     spec = importlib.util.spec_from_file_location("hidden_tests", HIDDEN)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -61,12 +67,27 @@ def functional_and_hidden(candidate_dir, workdir):
 
 
 def build_trace(frozen_spec, seed=7, n=REPLAY_N):
-    """Sequência determinística: carga congelada + casos de borda + teste funcional."""
-    rng = random.Random(seed)
-    trace = []
-    for i in range(n):
-        path, raw = check_request(frozen_spec["request"](rng, i))
-        trace.append((path, raw.decode()))
+    """Sequência determinística: carga congelada + casos de borda + teste funcional.
+
+    Quando frozen_spec contém 'workload_path', gera as requisições num subprocesso
+    isolado para não importar código da carga no processo do juiz.
+    """
+    if "workload_path" in frozen_spec:
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tf:
+            tmp_out = Path(tf.name)
+        try:
+            raw_trace = build_trace_subprocess(
+                frozen_spec["workload_path"], frozen_spec["name"], seed, n, tmp_out
+            )
+            trace = [(p, b) for p, b in raw_trace]
+        finally:
+            tmp_out.unlink(missing_ok=True)
+    else:
+        rng = random.Random(seed)
+        trace = []
+        for i in range(n):
+            path, raw = check_request(frozen_spec["request"](rng, i))
+            trace.append((path, raw.decode()))
     edge = [
         ("/associate_card", {"credit_card": "4111-1111-1111-1111", "phone": "+55 (81) 99999-0000"}),
         ("/associate_card", {"credit_card": "4111111111111111", "phone": "+55 (81) 99999-0000"}),

@@ -1,0 +1,104 @@
+{
+ "arm": "contencao_3w_3r_6threads",
+ "warmup_s": 300.0,
+ "requests": 237749,
+ "error_rate": 0.013093640772411241,
+ "server_error_rate": 0.013009518441717946,
+ "exception_rate": 8.412233069329419e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 169366,
+  "/associate_card": 68383
+ },
+ "rss_mb": {
+  "n": 679,
+  "mk_s": 28247,
+  "mk_z": 4.7841,
+  "mk_p_two_sided": 1.7175722259241322e-06,
+  "mk_p_upward": 8.587861129620661e-07,
+  "sen_slope_per_h": 0.4122166755853594,
+  "sen_slope_first_half_per_h": 1.8752500333377786,
+  "sen_slope_second_half_per_h": -0.7657780951672868,
+  "robust_slope_per_h": -0.7657780951672868,
+  "first": 123.9375,
+  "last": 123.625
+ },
+ "heap_mb": {
+  "n": 679,
+  "mk_s": 147799,
+  "mk_z": 25.0327,
+  "mk_p_two_sided": 2.696300577513795e-138,
+  "mk_p_upward": 1.3481502887568975e-138,
+  "sen_slope_per_h": 0.2172893828571644,
+  "sen_slope_first_half_per_h": 0.3019603352440839,
+  "sen_slope_second_half_per_h": 0.06358365673997168,
+  "robust_slope_per_h": 0.06358365673997168,
+  "first": 7.8795928955078125,
+  "last": 7.78857421875
+ },
+ "external_mb": {
+  "n": 679,
+  "mk_s": 16431,
+  "mk_z": 2.7828,
+  "mk_p_two_sided": 0.0053895620074005755,
+  "mk_p_upward": 0.0026947810037002877,
+  "sen_slope_per_h": 0.797589312301571,
+  "sen_slope_first_half_per_h": -4.787109542721782,
+  "sen_slope_second_half_per_h": 3.8347967808471806,
+  "robust_slope_per_h": -4.787109542721782,
+  "first": 5.1100873947143555,
+  "last": 2.520766258239746
+ },
+ "handles": {
+  "n": 679,
+  "mk_s": -678,
+  "mk_z": -1.727,
+  "mk_p_two_sided": 0.08417647999047254,
+  "mk_p_upward": 0.9579117600047637,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": -16613,
+  "mk_z": -2.9292,
+  "mk_p_two_sided": 0.003398283277569291,
+  "mk_p_upward": 0.9983008583612154,
+  "sen_slope_per_h": -16.393338709775485,
+  "sen_slope_first_half_per_h": 271.3936253597861,
+  "sen_slope_second_half_per_h": -57.13743322035848,
+  "robust_slope_per_h": -57.13743322035848
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": 15978,
+  "mk_z": 2.8177,
+  "mk_p_two_sided": 0.004837451718161393,
+  "mk_p_upward": 0.0024187258590806964,
+  "sen_slope_per_h": 4.3308270676691745,
+  "sen_slope_first_half_per_h": -51.054545454545526,
+  "sen_slope_second_half_per_h": 16.776699029126206,
+  "robust_slope_per_h": -51.054545454545526
+ },
+ "throughput_mean_rps": 64.77367624810893,
+ "p95_ms_median": 170.3207492828369,
+ "db_rows": 752,
+ "db_state_counts": {
+  "credit_cards": 250,
+  "phones": 2,
+  "card_phone_associations": 500
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "contencao_3w_3r_6threads",
+ "hypothesis": "F3: 6 threads (3 writers / 3 readers, 752 linhas de 1800 B) elevam a fração de transações /associate_card e ROLLBACK por SQLITE_BUSY (~1-4% 5xx, abaixo de E2) sem saturar a CPU.",
+ "sig_hash": "009d9b4cee9c",
+ "seed": 2,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

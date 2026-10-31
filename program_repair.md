@@ -71,13 +71,21 @@ vazamento removendo funcionalidade. Esses portões existem para pegar
 exatamente isso. Se um candidato seu cair num portão, **registre no ledger o
 que você tentou e por quê**. Esses casos são contribuição do estudo.
 
-## Métrica
+## Métrica e Pré-condição
 
-`score_reduction = 1 − (Sen's slope do RSS do candidato / Sen's slope do RSS do original)`,
-calculada na mesma rodada. Maior é melhor; 1,0 significa que a tendência
-sumiu. `fixed=True` quando o Mann-Kendall do candidato deixa de ser
-significativo (p ≥ 0,05) ou a redução é de pelo menos 80%. Só candidatos que
-passaram em todos os portões recebem score.
+- **Pré-condição obrigatória:** a Campanha 2 só pode ser iniciada depois que um
+  vazamento real na Campanha 1 for congelado (`freeze`) e **confirmado em 3
+  sementes** (`python prepare.py confirm --phase detect` com `aging_confirmed=True`,
+  acima de 10,0 MB/h). Sem isso, `repair-init` e `repair` abortam.
+- **Medição da `base` na mesma rodada:** quando `candidates/base` já recebeu um
+  `promote` anterior (diferindo do `original`), o juiz mede **`base` junto com
+  `original` e `v1..v3` na mesma rodada**, calculando `gain_vs_base`
+  (`score_reduction(vN) − score_reduction(base)`).
+- **Fórmula:** `score_reduction = 1 − (max(rss_slope, robust_slope)_candidato / rss_slope_original)`,
+  calculada na mesma rodada. Maior é melhor; 1,0 significa que a tendência
+  sumiu. `fixed=True` quando a inclinação do candidato cai abaixo de 10,0 MB/h e
+  a redução é de pelo menos 80%. Só candidatos que passaram em todos os portões
+  recebem score.
 
 ## Execução
 
@@ -87,16 +95,17 @@ python prepare.py wait <run_id>        # repita até sair o resumo (cerca de 65 
 ```
 
 O resumo traz uma linha por braço:
-`arm=... gates=... score_reduction=... fixed=... rss_slope=... mk_p=... thr=... p95=... diff_lines=... flags=...`.
+`arm=... gates=... score_reduction=... gain_vs_base=... fixed=... rss_slope=... robust_slope=... mk_p=... thr=... p95=... diff_lines=... flags=...`.
 O detalhe dos portões fica em `results/<run_id>/round.json`, que mostra só a
 contagem dos testes escondidos.
 
 ## Registro
 
-`results.tsv`:
+`results.tsv` (**registre sempre `rss_slope` e `robust_slope` numericamente,
+mesmo quando `score_reduction` for `NA`**):
 
 ```
-commit	run_id	arm	score_reduction	fixed	rss_slope	diff_lines	status	flags	hypothesis
+commit	run_id	arm	score_reduction	gain_vs_base	fixed	rss_slope	robust_slope	diff_lines	status	flags	hypothesis
 ```
 
 `ledger.jsonl` recebe uma linha antes (`started`, com a hipótese e a causa
@@ -113,9 +122,10 @@ Orçamento: **8 rodadas**, ou até o humano interromper.
 3. `git add candidates && git commit -m "<resumo>"`, depois registre
    `started`.
 4. Rode `repair --background` e `wait`.
-5. Registre os resultados.
-6. **Keep**: se o melhor candidato tiver `score_reduction` pelo menos 0,10
-   maior que o da base atual, rode `python prepare.py promote vN` e depois
+5. Registre os resultados (incluindo sempre `rss_slope` e `robust_slope`).
+6. **Keep**: se o melhor candidato tiver `gain_vs_base >= 0,10` (ou seja,
+   `score_reduction` pelo menos 0,10 maior que o da `base` medida na mesma
+   rodada), rode `python prepare.py promote vN` e depois
    `git add candidates && git commit -m "promote vN"`. A próxima rodada parte
    dessa base.
 7. **Discard**: caso contrário, `git reset --hard HEAD~1`.

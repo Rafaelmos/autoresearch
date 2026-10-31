@@ -60,15 +60,33 @@ def sen_slope(x, y):
 
 
 def trend(x, y):
-    """Resumo de tendência de uma série. x em horas."""
+    """Resumo de tendência de uma série. x em horas.
+
+    Inclui métricas robustas a degraus (1ª metade, 2ª metade e menor das duas
+    inclinações) para evitar que saltos pontuais do alocador contem como aging.
+    """
     s, z, p_two, p_up = mann_kendall(y)
+    full_slope = sen_slope(x, y)
+    n = len(y)
+    if n >= 4:
+        mid = n // 2
+        slope_h1 = sen_slope(x[:mid], y[:mid])
+        slope_h2 = sen_slope(x[mid:], y[mid:])
+        robust_slope = min(slope_h1, slope_h2)
+    else:
+        slope_h1 = full_slope
+        slope_h2 = full_slope
+        robust_slope = full_slope
     return {
-        "n": len(y),
+        "n": n,
         "mk_s": s,
         "mk_z": round(z, 4),
         "mk_p_two_sided": p_two,
         "mk_p_upward": p_up,
-        "sen_slope_per_h": sen_slope(x, y),
+        "sen_slope_per_h": full_slope,
+        "sen_slope_first_half_per_h": slope_h1,
+        "sen_slope_second_half_per_h": slope_h2,
+        "robust_slope_per_h": robust_slope,
     }
 
 

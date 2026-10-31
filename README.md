@@ -80,7 +80,9 @@ pip install psutil
 git clone --depth 1 https://github.com/chas42/generated-software-llm /tmp/gsl
 
 # 2. Setup (humano, uma vez): extrai a app, instala dependências travadas, valida os oráculos
+# Nota: oracle/hidden/ está no .gitignore e NÃO entra em commit para que o agente não leia via git show/log.
 python prepare.py setup --zip /tmp/gsl/projects/project-bolt-credit-card.zip
+chmod 700 oracle/hidden
 git add -A && git commit -m "Piloto 3: AutoResearch-Aging (detecção e reparo)"
 
 # 3. Teste rápido do fluxo (cerca de 3 min)
@@ -90,25 +92,28 @@ python prepare.py detect --smoke
 cp workload.py workload_campanha.py && cp workload_aa.py workload.py
 python prepare.py detect && cp workload_campanha.py workload.py
 
-# 5. Campanha 1 (cerca de 8,5 h)
+# 5. Campanha 1 (cerca de 8,5 h; keep exige 2 sementes >= 10,0 MB/h com inclinação robusta)
 ./run_campaign.sh detect det-out21
 
-# 6. Humano: confirmar o vencedor com 3 sementes e congelar
+# 6. Humano: congelar e confirmar o vencedor com 3 sementes (pré-requisito obrigatório para o reparo)
 python prepare.py freeze <run_id> <arm>
 python prepare.py confirm --phase detect
 
-# 7. Campanha 2 (cerca de 9 h)
+# 7. Campanha 2 (cerca de 9 h; exige aging_confirmed=True no passo 6 e mede também a base a cada rodada)
 python prepare.py repair-init
 ./run_campaign.sh repair rep-out28
 python prepare.py confirm --phase repair
 ```
 
 `run_campaign.sh` tira a permissão de escrita de `prepare.py`, `harness/`,
-`oracle/`, `apps/`, `.judge/` e `frozen/`. Para rodar `freeze` ou `setup`
-depois disso, devolva a escrita com `chmod -R u+w`. Para isolar de verdade os
-testes escondidos, rode o agente com outro usuário Linux e deixe
-`oracle/hidden/` com `chmod 700` para o seu usuário. As permissões do Claude
-Code ajudam, mas não são barreira de segurança.
+`oracle/`, `apps/`, `.judge/` e `frozen/`, e aplica `chmod 700` em
+`oracle/hidden/` (que fica fora do Git via `.gitignore`). As cópias de execução
+(`harness/instance.py`) e de candidatos (`candidates/v1..v3`) usam
+`shutil.copyfile` + restauração de `u+w` para não herdar o `a-w` de `apps/`.
+Para rodar `freeze` ou `setup` depois disso, devolva a escrita com
+`chmod -R u+w`. Para isolar de verdade os testes escondidos, defina
+`AGENT_USER=<usuario_agente>` ao chamar `run_campaign.sh` (ou use
+`AGING_HIDDEN_TESTS=/caminho/privado/hidden_tests.py`).
 
 ## Taxonomia de atalhos (reward hacking)
 

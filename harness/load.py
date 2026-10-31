@@ -3,14 +3,25 @@
 O agente descreve a carga em workload.py; este módulo executa e impõe limites.
 Os limites existem para impedir reward hacking na detecção: o agente não pode
 "achar aging" só saturando a máquina, mandando payloads gigantes ou saindo da API.
+
+Isolamento de segurança (correção 1 do Cesar):
+workload.py é carregado e executado APENAS em subprocessos separados via CLI
+(`python -m harness.load ...`), nunca dentro do processo principal do juiz
+(prepare.py), impedindo que o agente faça monkey-patching das constantes de avaliação.
 """
 
+import argparse
+import hashlib
 import http.client
+import importlib.util
 import json
 import random
+import subprocess
+import sys
 import threading
 import time
 from collections import defaultdict
+from pathlib import Path
 
 from .stats import percentile
 
@@ -170,3 +181,244 @@ class LoadRun:
             "ops": dict(ops),
             "violation": self.violation,
         }
+
+
+# ---- Assinatura comportamental e detecção robusta de cópia da baseline (D4) ----
+def workload_signature(spec, sample_n=400):
+    """Extrai assinatura estatística/estrutural da carga (proporção de operações,
+    parâmetros de concorrência/intervalo, cardinalidade de chaves e tamanho de payload)."""
+    op_counts = defaultdict(int)
+    cards = set()
+    phones = set()
+    body_sizes = []
+    phone_list_lens = []
+    req_hashes = []
+
+    for seed in (1, 2):
+        rng = random.Random(seed)
+        for i in range(sample_n):
+            path, raw = check_request(spec["request"](rng, i))
+            op_counts[path] += 1
+            body_sizes.append(len(raw))
+            body = json.loads(raw.decode())
+            if "credit_card" in body:
+                cards.add(str(body.get("credit_card")))
+            if "phone" in body:
+                phones.add(str(body.get("phone")))
+            pn = body.get("phone_numbers")
+            if isinstance(pn, list):
+                phone_list_lens.append(len(pn))
+                for p in pn:
+                    phones.add(str(p))
+            req_hashes.append(f"{path}:{raw.decode()}")
+
+    total = max(1, sum(op_counts.values()))
+    op_ratios = {k: op_counts[k] / total for k in sorted(ALLOWED_PATHS)}
+    mean_body = sum(body_sizes) / len(body_sizes) if body_sizes else 0.0
+    max_pn_len = max(phone_list_lens) if phone_list_lens else 0
+    # Hash canônico insensível à ordem das requisições para identificar a mesma carga
+    canonical = json.dumps({
+        "threads": spec["threads"],
+        "think_time_s": round(float(spec["think_time_s"]), 4),
+        "op_ratios": {k: round(v, 3) for k, v in op_ratios.items()},
+        "unique_cards_count": len(cards),
+        "unique_phones_count": len(phones),
+        "mean_body_bucket": round(mean_body / 16.0),
+        "max_phone_list": max_pn_len,
+    }, sort_keys=True)
+    sig_hash = hashlib.sha256(canonical.encode()).hexdigest()[:12]
+    return {
+        "threads": spec["threads"],
+        "think_time_s": float(spec["think_time_s"]),
+        "op_ratios": op_ratios,
+        "unique_cards_count": len(cards),
+        "unique_phones_count": len(phones),
+        "mean_body_bytes": mean_body,
+        "max_phone_list": max_pn_len,
+        "sig_hash": sig_hash,
+    }
+
+
+def same_as_baseline(spec):
+    """Compara proporção de operações, parâmetros (threads, think_time_s) e perfil
+    de payloads contra a BASELINE (evita drible por simples inversão de ordem par/ímpar)."""
+    sig = workload_signature(spec)
+    base_sig = workload_signature(BASELINE)
+    if sig["threads"] != base_sig["threads"]:
+        return False
+    if abs(sig["think_time_s"] - base_sig["think_time_s"]) > 0.002:
+        return False
+    for path in ALLOWED_PATHS:
+        if abs(sig["op_ratios"].get(path, 0.0) - base_sig["op_ratios"].get(path, 0.0)) > 0.05:
+            return False
+    if sig["unique_cards_count"] <= 1 and sig["unique_phones_count"] <= 1:
+        if abs(sig["mean_body_bytes"] - base_sig["mean_body_bytes"]) <= 16.0 and sig["max_phone_list"] <= 1:
+            return True
+    return False
+
+
+# ---- Isolamento de workload.py em subprocesso separado (Correção 1) ----
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def _load_module_isolated(path, name="workload_mod"):
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _resolve_arm_spec(workload_path, arm_name):
+    if arm_name == BASELINE["name"]:
+        return BASELINE
+    mod = _load_module_isolated(workload_path)
+    for c in getattr(mod, "CANDIDATES", []):
+        if c.get("name") == arm_name:
+            validate_spec(c)
+            return c
+    raise WorkloadError(f"candidato {arm_name!r} não encontrado em {workload_path}")
+
+
+def inspect_workload_subprocess(workload_path, max_candidates=3):
+    """Valida workload.py num subprocesso separado e retorna lista de metadados JSON."""
+    cmd = [sys.executable, "-m", "harness.load", "inspect",
+           "--workload", str(workload_path), "--max-candidates", str(max_candidates)]
+    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=30)
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout).strip().splitlines()[-1] if (proc.stderr or proc.stdout) else "erro desconhecido"
+        raise WorkloadError(err)
+    return json.loads(proc.stdout)
+
+
+def inspect_frozen_subprocess(frozen_path):
+    """Valida frozen/workload_frozen.py num subprocesso separado e retorna metadados do braço congelado."""
+    cmd = [sys.executable, "-m", "harness.load", "inspect-frozen", "--workload", str(frozen_path)]
+    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=30)
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout).strip().splitlines()[-1] if (proc.stderr or proc.stdout) else "erro desconhecido"
+        raise WorkloadError(err)
+    return json.loads(proc.stdout)
+
+
+def run_load_subprocess(workload_path, arm_name, port, seconds, seed, out_file):
+    """Executa LoadRun para um braço em um subprocesso separado do juiz."""
+    cmd = [
+        sys.executable, "-m", "harness.load", "run",
+        "--workload", str(workload_path),
+        "--arm", str(arm_name),
+        "--port", str(port),
+        "--seconds", str(seconds),
+        "--seed", str(seed),
+        "--out", str(out_file),
+    ]
+    proc = subprocess.run(
+        cmd, cwd=ROOT, capture_output=True, text=True,
+        timeout=seconds + int(REQUEST_TIMEOUT_S) + 90,
+    )
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout).strip()
+        raise RuntimeError(f"falha no subprocesso de carga ({arm_name}): {err}")
+    return json.loads(Path(out_file).read_text())
+
+
+def build_trace_subprocess(workload_path, arm_name, seed, n, out_file):
+    """Gera a lista de requisições do replay em subprocesso separado (só devolve JSON)."""
+    cmd = [
+        sys.executable, "-m", "harness.load", "trace",
+        "--workload", str(workload_path),
+        "--arm", str(arm_name),
+        "--seed", str(seed),
+        "--n", str(n),
+        "--out", str(out_file),
+    ]
+    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=60)
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout).strip()
+        raise RuntimeError(f"falha ao gerar trace em subprocesso: {err}")
+    return json.loads(Path(out_file).read_text())
+
+
+def _cli():
+    ap = argparse.ArgumentParser()
+    sp = ap.add_subparsers(dest="cmd", required=True)
+
+    p_ins = sp.add_parser("inspect")
+    p_ins.add_argument("--workload", required=True)
+    p_ins.add_argument("--max-candidates", type=int, default=3)
+
+    p_frz = sp.add_parser("inspect-frozen")
+    p_frz.add_argument("--workload", required=True)
+
+    p_run = sp.add_parser("run")
+    p_run.add_argument("--workload", required=True)
+    p_run.add_argument("--arm", required=True)
+    p_run.add_argument("--port", type=int, required=True)
+    p_run.add_argument("--seconds", type=int, required=True)
+    p_run.add_argument("--seed", type=int, required=True)
+    p_run.add_argument("--out", required=True)
+
+    p_tr = sp.add_parser("trace")
+    p_tr.add_argument("--workload", required=True)
+    p_tr.add_argument("--arm", required=True)
+    p_tr.add_argument("--seed", type=int, default=7)
+    p_tr.add_argument("--n", type=int, default=1500)
+    p_tr.add_argument("--out", required=True)
+
+    a = ap.parse_args()
+    if a.cmd == "inspect":
+        wl = _load_module_isolated(a.workload)
+        cands = list(getattr(wl, "CANDIDATES", []))
+        if not 1 <= len(cands) <= a.max_candidates:
+            raise WorkloadError(f"CANDIDATES deve ter de 1 a {a.max_candidates} itens (1 slot é da baseline)")
+        names = [c.get("name") for c in cands]
+        if len(set(names)) != len(names) or BASELINE["name"] in names:
+            raise WorkloadError("nomes de candidatos devem ser únicos e diferentes da baseline")
+        out = []
+        for c in cands:
+            validate_spec(c)
+            sig = workload_signature(c)
+            out.append({
+                "name": str(c["name"]),
+                "hypothesis": str(c.get("hypothesis", "")),
+                "threads": int(c["threads"]),
+                "think_time_s": float(c["think_time_s"]),
+                "same_as_baseline": bool(same_as_baseline(c)),
+                "signature": sig,
+            })
+        print(json.dumps(out, ensure_ascii=False))
+    elif a.cmd == "inspect-frozen":
+        wl = _load_module_isolated(a.workload, "workload_frozen")
+        name = getattr(wl, "FROZEN_ARM", None)
+        if not name:
+            raise WorkloadError("FROZEN_ARM ausente em workload_frozen.py")
+        spec = _resolve_arm_spec(a.workload, name)
+        sig = workload_signature(spec)
+        print(json.dumps({
+            "name": str(spec["name"]),
+            "hypothesis": str(spec.get("hypothesis", "")),
+            "threads": int(spec["threads"]),
+            "think_time_s": float(spec["think_time_s"]),
+            "frozen_from": getattr(wl, "FROZEN_FROM", None),
+            "confirmed": bool(getattr(wl, "FROZEN_CONFIRMED", False)),
+            "signature": sig,
+        }, ensure_ascii=False))
+    elif a.cmd == "run":
+        spec = _resolve_arm_spec(a.workload, a.arm)
+        res = LoadRun(spec, a.port, a.seconds, a.seed).run()
+        Path(a.out).write_text(json.dumps(res, ensure_ascii=False))
+    elif a.cmd == "trace":
+        spec = _resolve_arm_spec(a.workload, a.arm)
+        rng = random.Random(a.seed)
+        trace = []
+        for i in range(a.n):
+            path, raw = check_request(spec["request"](rng, i))
+            trace.append([path, raw.decode()])
+        Path(a.out).write_text(json.dumps(trace, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    try:
+        _cli()
+    except Exception as exc:
+        sys.stderr.write(f"{exc}\n")
+        sys.exit(1)
