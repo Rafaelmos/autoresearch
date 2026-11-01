@@ -1,0 +1,6 @@
+---
+run_id: detect-luna-1031
+arm=baseline_artigo valid=True score_rss_mb_per_h=NA rss_slope=9.316 mk_p=0.00000 heap_slope=0.192 handles_slope=0.000 p95_slope=-12.973 ttd_min=15.000 ratio=1.000 req=692630 err=0.0094 db_rows=3 flags=-
+arm=rep_unicode_twobyte_resultset valid=True score_rss_mb_per_h=NA rss_slope=0.901 mk_p=0.00000 heap_slope=0.268 handles_slope=0.000 p95_slope=-13.694 ttd_min=10.000 ratio=NA req=621369 err=0.0001 db_rows=901 flags=-
+arm=rep_join_912_having_vazio_404 valid=True score_rss_mb_per_h=8.497 rss_slope=8.497 mk_p=0.00000 heap_slope=0.206 handles_slope=0.000 p95_slope=-2.017 ttd_min=35.000 ratio=0.912 req=2234489 err=0.0000 db_rows=912 flags=-
+arm=rep_erro500_45pct_resultset_971 valid=True score_rss_mb_per_h=NA rss_slope=2.630 mk_p=0.00000 heap_slope=0.103 handles_slope=0.000 p95_slope=-11.155 ttd_min=10.000 ratio=NA req=683394 err=0.0454 db_rows=971 flags=E1_erros_5xx_da_app

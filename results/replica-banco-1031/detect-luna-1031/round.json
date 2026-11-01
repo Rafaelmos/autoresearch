@@ -1,0 +1,376 @@
+{
+ "event": "detect",
+ "run_id": "detect-luna-1031",
+ "commit": "e59b1a9",
+ "smoke": false,
+ "minutes": 60.0,
+ "seed": 3,
+ "arms": [
+  {
+   "arm": "baseline_artigo",
+   "warmup_s": 300.0,
+   "requests": 692630,
+   "max_children": 0,
+   "error_rate": 0.009426389269884353,
+   "server_error_rate": 0.00942494549759612,
+   "exception_rate": 1.4437722882346996e-06,
+   "client_error_rate": 0.0,
+   "ops": {
+    "/retrieve_cards": 572377,
+    "/associate_card": 120253
+   },
+   "rss_mb": {
+    "n": 679,
+    "mk_s": 127630,
+    "mk_z": 21.6167,
+    "mk_p_two_sided": 1.250349035282247e-103,
+    "mk_p_upward": 6.251745176411235e-104,
+    "sen_slope_per_h": 9.31605689786636,
+    "first": 108.01953125,
+    "last": 115.2734375,
+    "sen_halves_per_h": [
+     2.3031004796298142,
+     -0.029296127338488406
+    ],
+    "sen_min_halves_per_h": -0.029296127338488406
+   },
+   "heap_mb": {
+    "n": 679,
+    "mk_s": 105980,
+    "mk_z": 17.9498,
+    "mk_p_two_sided": 4.820429019193998e-72,
+    "mk_p_upward": 2.410214509596999e-72,
+    "sen_slope_per_h": 0.19213101660519966,
+    "first": 8.232978820800781,
+    "last": 8.1259765625
+   },
+   "external_mb": {
+    "n": 679,
+    "mk_s": -25179,
+    "mk_z": -4.2645,
+    "mk_p_two_sided": 2.0039404871488402e-05,
+    "mk_p_upward": 0.9999899802975643,
+    "sen_slope_per_h": -0.005903606585744207,
+    "first": 2.098968505859375,
+    "last": 2.0908803939819336
+   },
+   "handles": {
+    "n": 679,
+    "mk_s": -1354,
+    "mk_z": -2.4423,
+    "mk_p_two_sided": 0.014595007948792448,
+    "mk_p_upward": 0.9927024960256038,
+    "sen_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 661,
+    "mk_s": -44070,
+    "mk_z": -7.7707,
+    "mk_p_two_sided": 7.80409206720953e-15,
+    "mk_p_upward": 0.9999999999999961,
+    "sen_slope_per_h": -12.972748147030138
+   },
+   "throughput": {
+    "n": 661,
+    "mk_s": 23102,
+    "mk_z": 4.0734,
+    "mk_p_two_sided": 4.632315367853846e-05,
+    "mk_p_upward": 2.316157683926923e-05,
+    "sen_slope_per_h": 23.34005444097185
+   },
+   "throughput_mean_rps": 193.39878971255675,
+   "p95_ms_median": 52.66976356506348,
+   "db_rows": 3,
+   "db_state_counts": {
+    "credit_cards": 1,
+    "phones": 1,
+    "card_phone_associations": 1
+   },
+   "time_to_detect_min": 15.0,
+   "rss_upward_significant": true,
+   "flags": [],
+   "valid": true,
+   "spec_name": "baseline_artigo",
+   "hypothesis": "Carga do artigo: alterna associate/retrieve com o mesmo par cartão/telefone.",
+   "seed": 3,
+   "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card/original",
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": 1.0
+  },
+  {
+   "arm": "rep_unicode_twobyte_resultset",
+   "warmup_s": 300.0,
+   "requests": 621369,
+   "max_children": 0,
+   "error_rate": 7.563943486076712e-05,
+   "server_error_rate": 7.403008518287845e-05,
+   "exception_rate": 1.609349677888662e-06,
+   "client_error_rate": 0.0,
+   "ops": {
+    "/retrieve_cards": 619451,
+    "/associate_card": 1918
+   },
+   "rss_mb": {
+    "n": 678,
+    "mk_s": 36466,
+    "mk_z": 6.1898,
+    "mk_p_two_sided": 6.024310970760035e-10,
+    "mk_p_upward": 3.0121554853800174e-10,
+    "sen_slope_per_h": 0.9006589548425973,
+    "first": 148.02734375,
+    "last": 150.91015625,
+    "sen_halves_per_h": [
+     2.5469611115423425,
+     0.6793948695320291
+    ],
+    "sen_min_halves_per_h": 0.6793948695320291
+   },
+   "heap_mb": {
+    "n": 678,
+    "mk_s": 134735,
+    "mk_z": 22.8705,
+    "mk_p_two_sided": 9.142400925708121e-116,
+    "mk_p_upward": 4.5712004628540605e-116,
+    "sen_slope_per_h": 0.2684297030082798,
+    "first": 8.025047302246094,
+    "last": 8.0443115234375
+   },
+   "external_mb": {
+    "n": 678,
+    "mk_s": 3094,
+    "mk_z": 0.525,
+    "mk_p_two_sided": 0.5995575708676504,
+    "mk_p_upward": 0.2997787854338252,
+    "sen_slope_per_h": 0.00032476443473069237,
+    "first": 13.088591575622559,
+    "last": 2.0908803939819336
+   },
+   "handles": {
+    "n": 678,
+    "mk_s": -1352,
+    "mk_z": -2.4423,
+    "mk_p_two_sided": 0.014595438132550003,
+    "mk_p_upward": 0.992702280933725,
+    "sen_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 661,
+    "mk_s": -45811,
+    "mk_z": -8.0777,
+    "mk_p_two_sided": 6.59929630204706e-16,
+    "mk_p_upward": 0.9999999999999997,
+    "sen_slope_per_h": -13.693610416836895
+   },
+   "throughput": {
+    "n": 661,
+    "mk_s": 25650,
+    "mk_z": 4.5228,
+    "mk_p_two_sided": 6.103725258728734e-06,
+    "mk_p_upward": 3.051862629364367e-06,
+    "sen_slope_per_h": 14.661225832990532
+   },
+   "throughput_mean_rps": 172.40121028744326,
+   "p95_ms_median": 65.2472972869873,
+   "db_rows": 901,
+   "db_state_counts": {
+    "credit_cards": 450,
+    "phones": 1,
+    "card_phone_associations": 450
+   },
+   "time_to_detect_min": 10.0,
+   "rss_upward_significant": false,
+   "flags": [],
+   "valid": true,
+   "spec_name": "rep_unicode_twobyte_resultset",
+   "hypothesis": "Réplica de D1 (det-out30, 10,38 MB/h): 450 cartões Unicode \\u3000 (901 linhas) forçam TwoByteString no V8 e transcodificação UTF-8 no N-API/sqlite3 a cada /retrieve_cards. Se o efeito for real, slope e menor metade >= 5 MB/h de novo.",
+   "seed": 3,
+   "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card/original",
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null
+  },
+  {
+   "arm": "rep_join_912_having_vazio_404",
+   "warmup_s": 300.0,
+   "requests": 2234489,
+   "max_children": 0,
+   "error_rate": 3.2222132219044264e-05,
+   "server_error_rate": 3.177460260489087e-05,
+   "exception_rate": 4.4752961415339255e-07,
+   "client_error_rate": 0.0,
+   "ops": {
+    "/retrieve_cards": 2228148,
+    "/associate_card": 6341
+   },
+   "rss_mb": {
+    "n": 679,
+    "mk_s": 118248,
+    "mk_z": 20.0276,
+    "mk_p_two_sided": 3.163988686045041e-89,
+    "mk_p_upward": 1.5819943430225207e-89,
+    "sen_slope_per_h": 8.497022936499288,
+    "first": 122.15234375,
+    "last": 127.26171875,
+    "sen_halves_per_h": [
+     3.715372902108994,
+     0.3119831537721498
+    ],
+    "sen_min_halves_per_h": 0.3119831537721498
+   },
+   "heap_mb": {
+    "n": 679,
+    "mk_s": 129850,
+    "mk_z": 21.9926,
+    "mk_p_two_sided": 3.3874034915858046e-107,
+    "mk_p_upward": 1.6937017457929023e-107,
+    "sen_slope_per_h": 0.20565530234379678,
+    "first": 8.145675659179688,
+    "last": 8.22344970703125
+   },
+   "external_mb": {
+    "n": 679,
+    "mk_s": 4925,
+    "mk_z": 0.834,
+    "mk_p_two_sided": 0.4042897754529968,
+    "mk_p_upward": 0.2021448877264984,
+    "sen_slope_per_h": 0.012265211310397458,
+    "first": 2.156723976135254,
+    "last": 2.0908803939819336
+   },
+   "handles": {
+    "n": 679,
+    "mk_s": -1354,
+    "mk_z": -2.4423,
+    "mk_p_two_sided": 0.014595007948792448,
+    "mk_p_upward": 0.9927024960256038,
+    "sen_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 661,
+    "mk_s": -37502,
+    "mk_z": -6.6126,
+    "mk_p_two_sided": 3.776766670995529e-11,
+    "mk_p_upward": 0.9999999999811162,
+    "sen_slope_per_h": -2.0169699675712494
+   },
+   "throughput": {
+    "n": 661,
+    "mk_s": 22075,
+    "mk_z": 3.8923,
+    "mk_p_two_sided": 9.927981651038697e-05,
+    "mk_p_upward": 4.9639908255193484e-05,
+    "sen_slope_per_h": 26.33349952061384
+   },
+   "throughput_mean_rps": 624.5878971255673,
+   "p95_ms_median": 9.208440780639648,
+   "db_rows": 912,
+   "db_state_counts": {
+    "credit_cards": 91,
+    "phones": 10,
+    "card_phone_associations": 811
+   },
+   "time_to_detect_min": 35.0,
+   "rss_upward_significant": true,
+   "flags": [],
+   "valid": true,
+   "spec_name": "rep_join_912_having_vazio_404",
+   "hypothesis": "Réplica de D3 (det-out30, 6,25 MB/h): /retrieve_cards com 10 telefones sobre 811 associações (912 linhas) e interseção vazia no HAVING (404) maximiza B-trees temporárias no SQLite.",
+   "seed": 3,
+   "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card/original",
+   "score_rss_mb_per_h": 8.497022936499288,
+   "ratio_vs_baseline": 0.9120836239681346
+  },
+  {
+   "arm": "rep_erro500_45pct_resultset_971",
+   "warmup_s": 300.0,
+   "requests": 683394,
+   "max_children": 0,
+   "error_rate": 0.0454232843718265,
+   "server_error_rate": 0.0454232843718265,
+   "exception_rate": 0.0,
+   "client_error_rate": 0.0,
+   "ops": {
+    "/retrieve_cards": 682909,
+    "/associate_card": 485
+   },
+   "rss_mb": {
+    "n": 678,
+    "mk_s": 92367,
+    "mk_z": 15.6788,
+    "mk_p_two_sided": 2.1133760100061737e-55,
+    "mk_p_upward": 1.0566880050030869e-55,
+    "sen_slope_per_h": 2.6303323921157533,
+    "first": 175.875,
+    "last": 190.06640625,
+    "sen_halves_per_h": [
+     6.031741931848066,
+     0.09238504180238372
+    ],
+    "sen_min_halves_per_h": 0.09238504180238372
+   },
+   "heap_mb": {
+    "n": 678,
+    "mk_s": 96981,
+    "mk_z": 16.4619,
+    "mk_p_two_sided": 6.889011516611783e-61,
+    "mk_p_upward": 3.4445057583058915e-61,
+    "sen_slope_per_h": 0.10261708683001886,
+    "first": 8.142250061035156,
+    "last": 7.976554870605469
+   },
+   "external_mb": {
+    "n": 678,
+    "mk_s": -8547,
+    "mk_z": -1.4507,
+    "mk_p_two_sided": 0.14687669039979015,
+    "mk_p_upward": 0.926561654800105,
+    "sen_slope_per_h": -0.03762328180329529,
+    "first": 7.548443794250488,
+    "last": 2.0908803939819336
+   },
+   "handles": {
+    "n": 678,
+    "mk_s": -1352,
+    "mk_z": -2.4423,
+    "mk_p_two_sided": 0.014595438132550003,
+    "mk_p_upward": 0.992702280933725,
+    "sen_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 661,
+    "mk_s": -45207,
+    "mk_z": -7.9712,
+    "mk_p_two_sided": 1.5712986839577005e-15,
+    "mk_p_upward": 0.9999999999999992,
+    "sen_slope_per_h": -11.155247446489625
+   },
+   "throughput": {
+    "n": 661,
+    "mk_s": 26195,
+    "mk_z": 4.6189,
+    "mk_p_two_sided": 3.8583868651384385e-06,
+    "mk_p_upward": 1.9291934325692193e-06,
+    "sen_slope_per_h": 15.018404907975452
+   },
+   "throughput_mean_rps": 189.92768532526475,
+   "p95_ms_median": 59.31496620178223,
+   "db_rows": 971,
+   "db_state_counts": {
+    "credit_cards": 485,
+    "phones": 1,
+    "card_phone_associations": 485
+   },
+   "time_to_detect_min": 10.0,
+   "rss_upward_significant": false,
+   "flags": [
+    "E1_erros_5xx_da_app"
+   ],
+   "valid": true,
+   "spec_name": "rep_erro500_45pct_resultset_971",
+   "hypothesis": "Réplica de E1 (det-out30, 7,66 MB/h): result sets de ~950 KB (971 linhas, sem escritas após o preenchimento) + 4,54% de TypeError 500 em validation.js -> errorHandler.js.",
+   "seed": 3,
+   "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card/original",
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null
+  }
+ ]
+}
