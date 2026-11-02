@@ -17,11 +17,14 @@ em 50 h, mas não identificou a causa.
    `harness/load.py` (o contrato), `harness/evaluate.py` (a métrica) e
    `oracle/functional_test.py`. Leia também o código da aplicação em
    `apps/credit-card/original/`, só para leitura.
-4. `python prepare.py verify` precisa responder `ok`. Se não responder, pare e
+4. **Se existir `findings/*.yaml`** (cards da pré-fase estática, ver `static/`), leia-os: cada card é uma
+   hipótese inicial com `operacao_suspeita`. Use-os para desenhar os candidatos da rodada 1 e cite o `id` do
+   card em `hypothesis` e no ledger. Cards são hipóteses, nunca evidência de aging.
+5. `python prepare.py verify` precisa responder `ok`. Se não responder, pare e
    avise o humano.
-5. Crie `results.tsv` (só o cabeçalho) e `ledger.jsonl` (vazio). Nenhum dos
+6. Crie `results.tsv` (só o cabeçalho) e `ledger.jsonl` (vazio). Nenhum dos
    dois entra em commit.
-6. Confirme com o humano e comece. A partir daí, não pergunte mais nada.
+7. Confirme com o humano e comece. A partir daí, não pergunte mais nada.
 
 ## O que você PODE fazer
 
