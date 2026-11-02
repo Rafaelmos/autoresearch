@@ -60,12 +60,14 @@ em 50 h, mas não identificou a causa.
 
 ## Métrica
 
-- **Referência de ruído (teste A/A, 20/10, 60 min, 4 cópias da baseline):**
+- **Referência histórica de ruído (teste A/A, 20/10, 60 min, 4 cópias da baseline):**
   depois do aquecimento, o RSS fica plano em torno de 112–115 MB. Inclinações
   de 0,6 a 1,2 MB/h, com uma cópia em −8,5 MB/h (queda pontual do alocador).
   Heap de cerca de 0,25 MB/h em todas, 0,2% de CPU, cerca de 130 req/s,
-  1,7% de 5xx. **A baseline do artigo não envelhece de forma relevante em
-  60 min.** Sua tarefa é achar uma carga legítima que envelheça.
+  1,7% de 5xx. Resultados posteriores também mostraram degraus na baseline.
+  Trate a medição de 60 min como referência histórica, não como calibração
+  suficiente para a nova janela de 120 min. Compare cada braço com a baseline
+  simultânea e com as duas metades da janela.
 - **Principal:** `score_rss_mb_per_h`, o Sen's slope do RSS do processo Node
   medido logo após um GC forçado, descartando o aquecimento. A métrica só existe
   se o braço for válido, se o Mann-Kendall de alta tiver p < 0,01, se a
@@ -74,6 +76,13 @@ em 50 h, mas não identificou a causa.
 - **Secundárias**, para a sua interpretação e para o resumo: `ratio` (contra a
   baseline da mesma rodada), `ttd_min` (tempo até a detecção estável), e as
   inclinações de `heap`, `handles` e `p95`.
+- **Critério robusto da campanha, além do score oficial:** para considerar um
+  candidato promissor, exija `sen_min_halves_per_h >= 5 MB/h`,
+  e `candidate_slope - baseline_slope >= max(2 MB/h, 25% de |baseline_slope|)`.
+  A razão contra a baseline continua sendo secundária. Uma inclinação global
+  alta que falha nessas verificações é um degrau ou ruído até que uma réplica
+  independente a confirme. Só congele um candidato depois da confirmação em 3
+  sementes.
 - Um RSS que sobe e um heap que não sobe indicam retenção **nativa** (por
   exemplo, objetos do sqlite3), não de objetos JavaScript. Anote isso, porque
   orienta a campanha de reparo.
@@ -97,13 +106,13 @@ Se você perceber que uma ideia sua só melhora o número por um desses
 caminhos, **não insista**. Registre no ledger com `"atalho": true`. Esses casos
 são resultado de pesquisa.
 
-## Execução (cada rodada leva cerca de 62 min)
+## Execução (cada rodada leva cerca de 125 min)
 
 O Bash do Claude Code tem limite de 10 minutos por chamada. Por isso a rodada
 roda em segundo plano:
 
 ```
-python prepare.py detect --background      # imprime run_id
+python prepare.py detect --minutes 120 --seed <101..108> --background  # imprime run_id
 python prepare.py wait <run_id>             # bloqueia até 9 min; repita até sair o resumo
 ```
 
@@ -129,23 +138,24 @@ e outra **depois**, com `{"run_id", "status": "completed"|"failed", "interpretac
 
 ## O laço
 
-Orçamento: **8 rodadas**, cerca de 8,5 h numa noite, ou até o humano
-interromper. Rodadas que falham também contam.
+Orçamento: **8 rodadas de até 120 min** (cerca de 16 h 40 min com aquecimento,
+além de pausas e análise), ou até o humano interromper. Rodadas que falham
+também contam. Use e registre sementes diferentes por rodada: 101 a 108.
 
 1. Veja o estado do git e o histórico em `results.tsv` e `ledger.jsonl`.
 2. Escreva até 3 candidatos em `workload.py`. Cada um precisa de uma hipótese
    **falsificável** e da operação suspeita.
 3. `git commit -am "<resumo das hipóteses>"`
 4. Registre `started` no ledger.
-5. Rode `detect --background` e `wait` até sair o resumo.
+5. Rode `detect --minutes 120 --seed <semente da rodada> --background` e `wait`
+   até sair o resumo.
 6. Registre o resultado no `results.tsv` e `completed` no ledger, com a sua
    interpretação.
-7. **Primeira rodada:** se o `workload.py` não mudou desde o commit base, ela
-   serve como referência. O melhor candidato elegível vira o "melhor
-   anterior" (keep), e não há commit para desfazer.
-   **Keep** (nas demais): se algum candidato elegível tiver `score` maior que o melhor
-   anterior por pelo menos max(10%, 2 MB/h), mantenha o commit. A margem de 10%
-   evita selecionar ruído, que foi uma lição do Piloto 2.
+7. **Keep:** mantenha um candidato somente se passar no critério robusto acima
+   e superar o melhor anterior por pelo menos max(10%, 2 MB/h). Se o score
+   global for alto, mas falhar no critério robusto, registre a hipótese como
+   pista no ledger e descarte o commit. Nunca use apenas o score global para
+   congelar ou iniciar reparo.
 8. **Discard**: caso contrário, `git reset --hard HEAD~1`. As linhas no
    `results.tsv` e no ledger continuam lá.
 9. Repita até acabar o orçamento.
@@ -172,9 +182,9 @@ Pare e escreva `summary_detect.md` com:
 - **a operação suspeita e a evidência das ablações**;
 - se o crescimento é de heap ou nativo;
 - todos os atalhos observados;
-- as limitações: janela de 60 min, uma semente por rodada, cliente e app na
+- as limitações: janela de 120 min, uma semente por rodada, cliente e app na
   mesma máquina.
 
-Não declare aging confirmado. A confirmação é humana: `prepare.py confirm`
-com 3 sementes, e depois `prepare.py freeze`, que gera a carga congelada para a
-Campanha 2.
+Não declare aging confirmado. A confirmação é humana: `prepare.py confirm
+--phase detect --minutes 120` com 3 sementes, e depois `prepare.py freeze`, que
+gera a carga congelada para a Campanha 2.

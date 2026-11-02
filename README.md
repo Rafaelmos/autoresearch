@@ -17,7 +17,7 @@ e Artur Andrzejak (Heidelberg).
 | Reunião de 15/10 (consenso) | Primeiro teste em apps geradas por LLM; depois, apps reais | Alvo: `credit-card`; apps reais ficam como trabalho futuro |
 | Reunião de 15/10 (consenso) | Experimentos de **detecção** e de **reparo** | `program_detect.md` → `program_repair.md` |
 | Artur | Reward hacking: o agente remove funcionalidade para melhorar a métrica | Portões H1–H7 em `harness/gates.py` e flags D1–D3 em `harness/load.py` e `harness/evaluate.py` |
-| Artur | Feedback curto: sinal em cerca de 1 h, não 48 h | `DEFAULT_MINUTES = 60` |
+| Artur (configuração original) | Feedback curto: sinal em cerca de 1 h, não 48 h | `DEFAULT_MINUTES = 60`; campanhas novas passam `--minutes 120` explicitamente |
 | Artur | Várias versões em paralelo | `SLOTS = 4`: 3 candidatos + 1 referência por rodada |
 | Fumio | Documentar os atalhos do agente já é contribuição | Toda flag vai para `results/judge_log.jsonl`, e o agente registra `"atalho"` no `ledger.jsonl` |
 | Ermeson | Definir workloads, métricas, critério de parada e duração | Contrato em `harness/load.py`; métrica em `harness/evaluate.py`; orçamento de 8 rodadas nos `program_*.md` |
@@ -28,8 +28,8 @@ e Artur Andrzejak (Heidelberg).
 ## Por que a `credit-card` primeiro
 
 No artigo, ela tem a maior tendência de memória: Sen ≈ 37,7e-3, cerca de
-1,5 GB em 50 h. É a única com sinal plausível numa janela de 60 min. No smoke
-test que fizemos (2 min, 4 instâncias), a baseline já mostrou RSS subindo com
+1,5 GB em 50 h. As campanhas novas usam janelas de 120 min para reduzir a
+ambiguidade observada em execuções curtas. No smoke test que fizemos (2 min, 4 instâncias), a baseline já mostrou RSS subindo com
 Mann-Kendall p < 0,001, e o heap subindo bem menos. Isso sugere retenção
 **nativa**, possivelmente do sqlite3, que abre uma conexão nova por
 requisição. Também apareceram erros `SQLITE_BUSY` sob concorrência. É uma
@@ -43,7 +43,7 @@ hipótese, não uma conclusão.
 | `train.py` | Detecção: `workload.py`. Reparo: `candidates/v1..v3/` | Agente |
 | `program.md` | `program_detect.md`, `program_repair.md` | Humano |
 | `val_bpb` | Detecção: Sen's slope do RSS pós-GC (MB/h). Reparo: redução da inclinação em relação ao original | Juiz |
-| Execução de 5 min | Execução de 60 min, 4 em paralelo | Juiz |
+| Execução de 5 min | Execução de 120 min, 4 em paralelo nas campanhas novas | Juiz, com `--minutes 120` |
 
 ```
 aging-autoresearch/
@@ -92,25 +92,25 @@ git add -A && git commit -m "Piloto 3: AutoResearch-Aging (detecção e reparo)"
 # 3. Teste rápido do fluxo (cerca de 3 min)
 python prepare.py detect --smoke
 
-# 4. Teste A/A (uma vez, 60 min): 3 cópias da baseline medem o ruído
+# 4. Teste A/A (uma vez, 120 min): 3 cópias da baseline medem o ruído
 cp workload.py workload_campanha.py && cp workload_aa.py workload.py
-python prepare.py detect && cp workload_campanha.py workload.py
+python prepare.py detect --minutes 120 --seed 100 && cp workload_campanha.py workload.py
 
-# 4b. Controle positivo (uma vez, 60 min): baseline com vazamento sintético de 0, 2,5, 5 e 10 MiB/h.
-#     Mede a menor taxa que o juiz detecta em 60 min. Sem isso, "não achamos aging" não é conclusivo.
-python prepare.py control
+# 4b. Controle positivo (uma vez, 120 min): baseline com vazamento sintético de 0, 2,5, 5 e 10 MiB/h.
+#     Mede a menor taxa que o juiz detecta em 120 min. Sem isso, "não achamos aging" não é conclusivo.
+python prepare.py control --minutes 120
 
-# 5. Campanha 1 (cerca de 8,5 h)
-./run_campaign.sh detect det-out21
+# 5. Campanha 1 (até 8 rodadas de 120 min: ~16 h 40 min + overhead)
+./run_campaign.sh detect det-2h
 
 # 6. Humano: confirmar o vencedor com 3 sementes e congelar
 python prepare.py freeze <run_id> <arm>
-python prepare.py confirm --phase detect
+python prepare.py confirm --phase detect --minutes 120
 
-# 7. Campanha 2 (cerca de 9 h)
+# 7. Campanha 2 (somente com aging confirmado; até 8 rodadas de 120 min)
 python prepare.py repair-init
-./run_campaign.sh repair rep-out28
-python prepare.py confirm --phase repair
+./run_campaign.sh repair rep-2h
+python prepare.py confirm --phase repair --minutes 120
 ```
 
 `run_campaign.sh` tira a permissão de escrita de `prepare.py`, `harness/`,

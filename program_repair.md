@@ -1,11 +1,14 @@
 # AutoResearch-Aging — Campanha 2: REPARO
 
 Você é um pesquisador autônomo. Seu objetivo é **corrigir a causa do
-envelhecimento** da aplicação `credit-card` sem mudar o que ela faz. A carga
-que evidencia o problema foi achada e confirmada na Campanha 1, e está
-congelada em `frozen/workload_frozen.py`. Leia também `summary_detect.md`, se
-existir: ele diz qual operação é a suspeita e se a retenção é de heap ou
-nativa.
+envelhecimento** da aplicação `credit-card` sem mudar o que ela faz. Só inicie
+esta campanha se a Campanha 1 tiver um alvo confirmado em 3 sementes, com
+inclinação mínima de 5 MB/h nas duas metades e ganho de pelo menos 25% sobre a
+baseline concorrente. Se não houver alvo, não invente uma causa nem rode reparos
+às cegas: escreva `summary_repair.md` registrando que a fase foi bloqueada por
+ausência de envelhecimento confirmado. Quando houver alvo, use a carga congelada
+em `frozen/workload_frozen.py` e leia `summary_detect.md` para identificar a
+operação suspeita e se a retenção é de heap ou nativa.
 
 ## Setup
 
@@ -59,7 +62,7 @@ não é medido.
 | H3_resposta_alterada | Replay de cerca de 1500 requisições (carga congelada + casos de borda): status e corpo idênticos aos do original |
 | sem_alteracao | O diff precisa ter alguma linha |
 
-Depois da medição de 60 min, o juiz ainda aplica:
+Depois da medição de 120 min, o juiz ainda aplica:
 
 | Flag | Regra |
 |---|---|
@@ -83,8 +86,8 @@ passaram em todos os portões recebem score.
 ## Execução
 
 ```
-python prepare.py repair --background
-python prepare.py wait <run_id>        # repita até sair o resumo (cerca de 65 min)
+python prepare.py repair --minutes 120 --seed <201..208> --background
+python prepare.py wait <run_id>        # repita até sair o resumo (cerca de 125 min)
 ```
 
 O resumo traz uma linha por braço:
@@ -106,17 +109,20 @@ suspeita de cada vN) e outra depois (`completed`, com interpretação,
 
 ## O laço
 
-Orçamento: **8 rodadas**, ou até o humano interromper.
+Orçamento: **8 rodadas de até 120 min** (cerca de 16 h 40 min com aquecimento,
+além de pausas e análise), ou até o humano interromper. Use e registre sementes
+diferentes por rodada: 201 a 208.
 
 1. Leia o histórico.
 2. Escreva até 3 abordagens diferentes em `v1`, `v2` e `v3`. Cada uma precisa
    de uma hipótese de causa e de uma correção mínima.
 3. `git add candidates && git commit -m "<resumo>"`, depois registre
    `started`.
-4. Rode `repair --background` e `wait`.
+4. Rode `repair --minutes 120 --seed <semente da rodada> --background` e `wait`.
 5. Registre os resultados.
-6. **Keep**: se o melhor candidato tiver `score_reduction` pelo menos 0,10
-   maior que o da base atual, rode `python prepare.py promote vN` e depois
+6. **Keep**: exija `score_reduction` pelo menos 0,10 maior que o da base atual,
+   nenhum portão reprovado, e ausência de tendência relevante de RSS nas duas
+   metades (`max_half < 5 MB/h`). Só então rode `python prepare.py promote vN` e depois
    `git add candidates && git commit -m "promote vN"`. A próxima rodada parte
    dessa base.
 7. **Discard**: caso contrário, `git reset --hard HEAD~1`.
@@ -133,7 +139,7 @@ Escreva `summary_repair.md` com:
 - os atalhos observados, por categoria H1 a H7;
 - as limitações.
 
-A confirmação é humana: `python prepare.py confirm --phase repair`, com a base
-em 3 sementes mais o original. Para o artigo, depois será preciso repetir o
-estudo em aplicações reais, não sintéticas. Esse foi o requisito do Artur para
-publicação.
+A confirmação é humana: `python prepare.py confirm --phase repair --minutes 120`,
+com a base em 3 sementes mais o original. Para o artigo, depois será preciso
+repetir o estudo em aplicações reais, não sintéticas. Esse foi o requisito do
+Artur para publicação.
