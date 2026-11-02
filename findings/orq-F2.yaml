@@ -1,0 +1,59 @@
+id: orq-F2
+app: prepare.py + harness/ (orquestrador)
+entrypoint: prepare.py (setup, detect, repair, confirm, control)
+source_report: orq_findings.json; extras indicados pelo solicitante
+source_findings: ["semgrep-aging:aging-py-tempfile-without-cleanup (harness/gates.py:158)", "extra:mkdtemp prepare.py:129,135,146,363"]
+provenance:
+  ai_reviews: []
+  tools: ["semgrep-aging:aging-py-tempfile-without-cleanup"]
+classification: conditional
+
+mechanism:
+  summary: >
+    O orquestrador cria diretorios temporarios e de resultados e nunca os remove: mkdtemp em prepare.py
+    (129 extracao do zip, 135 build do npm, 146 oraculos, 363 replay de referencia), gates-* em
+    harness/gates.py:158 e, por execucao, results/<run_id>/<arm>/app (copia do app) mais snapshot/ no reparo.
+    Cada campanha deixa copias do codigo e logs em disco; so vira esgotamento de disco/inodes apos muitas
+    execucoes. Parte e one-off (setup) ou cacheada (reference_replay), portanto o custo por execucao e
+    constante e o acumulo e entre execucoes.
+  resource: espaco em disco e inodes em /tmp e results/ (diretorios temporarios, copias de app, logs)
+  trigger: repetir detect/repair/confirm/control (e repair-init/promote) muitas vezes na mesma maquina; run_gates cria um gates-* por candidato por rodada de reparo
+  gap: nenhum rmtree/TemporaryDirectory para os mkdtemp; results/ sem retencao ou rotacao; copias de app mantidas apos o fim do braco
+  suspect_code:
+    - function: cmd_setup
+      file: prepare.py
+      lines: 129-146
+    - function: reference_replay
+      file: prepare.py
+      lines: 363
+    - function: run_gates
+      file: harness/gates.py
+      lines: 158
+    - function: Instance.prepare / copy_app
+      file: harness/instance.py
+      lines: 45-51,73-75
+
+aging_elements:
+  repeatable_trigger: "Cada execucao chama Instance.prepare() (copy_app) por braco e run_gates (mkdtemp gates-) por candidato; repetivel via CLI."
+  accumulation_or_exhaustion: "Diretorios e copias persistem em disco; results/<run>/ e /tmp/tmp* so crescem (sem remocao no arquivo todo: unico rmtree em copy_app remove o destino anterior, nao os de runs passadas)."
+  insufficient_bounding: "missing: nenhum cleanup no ciclo de vida; reference_replay mitiga apenas o mkdtemp 363 via cache por hash; setup roda uma vez."
+  plausible_degradation: "Condicional: falha por ENOSPC/inodes ou I/O mais lento apos dezenas de campanhas; efeito no app medido e nulo (instancias em copia limpa), afeta a continuidade do orquestrador."
+
+controllability:
+  level: environment
+  notes: >
+    Depende de quantas campanhas o humano roda, nao de trafego HTTP. Cresce por execucao (constante por run),
+    entao so aparece em uso repetido e prolongado do orquestrador.
+
+activation_criteria:
+  path_executed: contagem de entradas em /tmp (tmp*, gates-*) e em results/ aumentando a cada execucao de prepare.py
+  resource_growth: uso de disco de results/ e /tmp aumentando por execucao (ordem do tamanho do app sem node_modules x bracos); inodes usados idem
+  control_contrast: apos o fim de uma execucao, nenhum diretorio temporario novo deveria permanecer alem de results/<run_id>; execucoes repetidas com cache de reference_replay nao devem criar novo mkdtemp 363
+
+operacao_suspeita: prepare.py detect|repair|confirm|control (repetidos) e prepare.py setup
+expected_symptoms:
+  - "db_bytes/handles nao afetados; sintoma e disk usage de results/ e /tmp (fora das metricas do juiz)"
+  - "Eventual falha de copy_app ou escrita de probe.jsonl (ENOSPC) como erro de braco invalido"
+
+priority: 4
+stability: "tools 1 regra (gates.py:158) + extras; 0 reviews de IA"

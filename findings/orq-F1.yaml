@@ -1,0 +1,57 @@
+id: orq-F1
+app: prepare.py + harness/ (orquestrador)
+entrypoint: prepare.py (detect|repair|confirm|control) -> harness/load.py:LoadRun
+source_report: extras indicados pelo solicitante (regra nao pegou); orq_findings.json sem item correspondente
+source_findings: ["extra:latency-lists-unbounded (harness/load.py ~89,129)"]
+provenance:
+  ai_reviews: []
+  tools: []
+classification: conditional
+
+mechanism:
+  summary: >
+    Cada requisicao do gerador de carga acrescenta um float a bk["lat"] do balde de 5 s e os baldes nunca
+    sao descartados nem agregados em streaming; os percentis so sao calculados em summary(), ao fim da
+    execucao. A memoria do processo Python do juiz cresce linearmente com (requisicoes totais) e so e
+    liberada quando o processo termina. Em execucoes de 60 min o custo e limitado e transitorio; vira
+    aging do orquestrador apenas se a janela for estendida (o proprio cabecalho cita 48 h) ou se o
+    processo do juiz for reutilizado entre execucoes.
+  resource: memoria (heap Python) do processo do juiz - listas de latencia e dicionario de baldes em LoadRun.buckets
+  trigger: --minutes grande (horas) com 10 threads e think_time 0,01 s; 4 bracos em paralelo na mesma execucao de run_arms (cada LoadRun tem suas listas)
+  gap: nenhuma agregacao incremental (histograma/reservoir), nenhum limite de amostras por balde, buckets mantidos ate summary()
+  suspect_code:
+    - function: LoadRun.__init__ (buckets defaultdict com "lat": [])
+      file: harness/load.py
+      lines: 89-90
+    - function: LoadRun._worker (bk["lat"].append(lat))
+      file: harness/load.py
+      lines: 125-130
+    - function: LoadRun.summary (percentile sobre a lista completa)
+      file: harness/load.py
+      lines: 144-152
+
+aging_elements:
+  repeatable_trigger: "Cada requisicao executa bk[\"lat\"].append(lat) (load.py:129) sob self.lock; repete a cada ciclo do laco ate o deadline."
+  accumulation_or_exhaustion: "As listas so crescem: 1 float por requisicao em self.buckets; nada remove entradas antes de summary() (load.py:329-346)."
+  insufficient_bounding: "missing no codigo: sem teto de amostras. O limite efetivo e apenas a duracao da execucao (seconds) e o tempo de vida do processo."
+  plausible_degradation: "Condicional: so em janelas longas (ordem de dezenas de milhoes de amostras, GB por braco) ou processo de juiz de longa vida; em 60 min o custo e dezenas de MB e transitorio."
+
+controllability:
+  level: environment
+  notes: >
+    Nao e controlavel por trafego HTTP do agente (a carga e limitada por MAX_THREADS e think_time); depende do
+    parametro --minutes escolhido pelo humano e da taxa de requisicoes do app. Confirmar medindo RSS do proprio
+    processo `python prepare.py` (nao da instancia node).
+
+activation_criteria:
+  path_executed: LoadRun._worker executando por mais de ~10 min; len(bk["lat"]) somada crescendo com o numero de requisicoes
+  resource_growth: RSS do processo prepare.py cresce proporcionalmente a requests totais (ordem de dezenas de bytes por requisicao)
+  control_contrast: execucao curta (--smoke 2 min) ou lista com teto nao deve mostrar crescimento sustentado alem do esperado; RSS da instancia node nao e afetado
+
+operacao_suspeita: prepare.py detect/confirm/control (LoadRun.run, 10 threads, janela longa)
+expected_symptoms:
+  - "rss_slope up no processo do juiz (nao na instancia), heap Python up"
+  - "p95 up no cliente (GC e alocacao do gerador) so em janelas muito longas"
+
+priority: 3
+stability: "extras indicados pelo solicitante; 0 reviews de IA; 0 regras de ferramenta"
