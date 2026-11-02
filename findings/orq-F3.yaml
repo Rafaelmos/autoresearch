@@ -41,7 +41,7 @@ controllability:
 
 activation_criteria:
   path_executed: stop() chamado com children nao vazios, ou prepare.py encerrado antes de stop()
-  resource_growth: psutil: numero de processos node remanescentes apos o fim/queda de uma execucao > 0 e crescente entre campanhas
+  resource_growth: "psutil: numero de processos node remanescentes apos o fim/queda de uma execucao > 0 e crescente entre campanhas"
   control_contrast: execucao normal sem filhos deve terminar com 0 processos node remanescentes (max_children == 0)
 
 operacao_suspeita: prepare.py detect|repair|confirm|control (parada de instancia, Instance.stop)

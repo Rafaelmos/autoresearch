@@ -20,7 +20,7 @@ mechanism:
   trigger: --minutes grande (horas) com 10 threads e think_time 0,01 s; 4 bracos em paralelo na mesma execucao de run_arms (cada LoadRun tem suas listas)
   gap: nenhuma agregacao incremental (histograma/reservoir), nenhum limite de amostras por balde, buckets mantidos ate summary()
   suspect_code:
-    - function: LoadRun.__init__ (buckets defaultdict com "lat": [])
+    - function: 'LoadRun.__init__ (buckets defaultdict com "lat": [])'
       file: harness/load.py
       lines: 89-90
     - function: LoadRun._worker (bk["lat"].append(lat))
