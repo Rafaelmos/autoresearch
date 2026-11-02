@@ -26,3 +26,20 @@ Inputs: source read in full (index.js, db/init.js, models/card.js, controllers, 
 - No AI reviews, so no AI vs. AI disagreement.
 - Tools vs. README hypothesis: tools flag db/init.js:72 as C3 connection-per-call (INFO, explicitly "check closes"). Verified closed on all paths, so the RSS-up/heap-flat native-retention hypothesis via leaked connections is not supported by the code. If RSS rises at runtime, look to sqlite page cache/allocator behavior or DB growth effects (cc-F1) instead.
 - Tools rated the insert-without-retention hits WARNING; downgraded to conditional because the UNIQUE constraints and INSERT OR IGNORE make growth depend on distinct keys.
+
+## EXPLAIN QUERY PLAN de `getCardsByPhoneNumbers` (verificação de cc-F1, lado da leitura)
+
+Esquema de `db/init.js` em memória, SQLite 3.45.1 do Python (o pacote `sqlite3` do Node embute outra
+versão: confirmar no runtime). A app nunca roda `ANALYZE`, então vale o plano "vazio":
+
+    SCAN cc                                   <- varre credit_cards inteira a cada chamada
+    SEARCH p USING COVERING INDEX sqlite_autoindex_phones_1 (phone_number=?)
+    SEARCH cpa USING COVERING INDEX sqlite_autoindex_card_phone_associations_1 (card_id=? AND phone_id=?)
+    USE TEMP B-TREE FOR count(DISTINCT)
+
+Com 1000 linhas e ANALYZE o plano continua com `SCAN cc` (cpa por `card_id=?`, mais um BLOOM FILTER em p).
+Leitura: o custo de `POST /retrieve_cards` é O(cartões), não O(cartões associados ao telefone), porque
+`card_phone_associations` não tem índice com `phone_id` na frente (o UNIQUE é `(card_id, phone_id)`).
+Não há índice automático por chamada; há um temp B-tree transitório para `count(DISTINCT)`.
+Isso sustenta a parte de leitura de cc-F1 (latência sobe com o número de cartões) e dá um alvo de
+reparo (índice em `phone_id`), mas não explica RSS alto com heap plano.
