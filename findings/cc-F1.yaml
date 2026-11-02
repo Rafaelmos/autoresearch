@@ -1,0 +1,54 @@
+id: cc-F1
+app: apps/credit-card/original
+entrypoint: "node index.js (Express, PORT env or 3000)"
+source_report: "static_findings.json (cc_findings.json); no AI reviews available"
+source_findings:
+  - "semgrep-aging:aging-js-insert-without-retention models/card.js:18-95"
+  - "semgrep-aging:aging-js-insert-without-retention models/card.js:42-91"
+  - "semgrep-aging:aging-js-insert-without-retention models/card.js:66-87"
+provenance:
+  ai_reviews: []
+  tools:
+    - "semgrep-aging:aging-js-insert-without-retention (3 hits, same function createCardPhoneAssociation)"
+classification: conditional
+
+mechanism:
+  summary: "Every POST /associate_card with a new card or phone inserts rows into credit_cards, phones and card_phone_associations (SQLite file uptime_db); nothing in the code ever deletes or caps them. POST /retrieve_cards joins these tables per request, and the join on cpa.phone_id has no index with phone_id as leading column (only UNIQUE(card_id, phone_id)), so its cost grows with table size; the result set (db.all, no LIMIT) also grows if many cards share one phone. Write-side accumulation and read-side unbounded cost form one causal chain validated by the same workload."
+  resource: "Rows and file size of the SQLite database (3 tables, unbounded), and per-request query time/result size of the read path"
+  trigger: "Many distinct (credit_card, phone) values over time via POST /associate_card (valid format: 13-19 digits; +optional 10-15 digit phone), interleaved with POST /retrieve_cards. Repeating the same pair does not grow anything."
+  gap: "No retention, TTL, cap, or cleanup; no LIMIT on the retrieve query; no index on card_phone_associations(phone_id). The only bound is idempotence via UNIQUE/INSERT OR IGNORE, which bounds repeated keys but not distinct ones."
+  suspect_code:
+    - function: createCardPhoneAssociation
+      file: models/card.js
+      lines: 9-98
+    - function: getCardsByPhoneNumbers
+      file: models/card.js
+      lines: 105-148
+    - function: initDatabase
+      file: db/init.js
+      lines: 15-68
+
+aging_elements:
+  repeatable_trigger: "POST /associate_card is stateless and repeatable; each new pair runs three INSERT OR IGNORE statements (models/card.js:18-19, 42-43, 66-67). Validation (middleware/validation.js:37-62) only checks format, so unlimited distinct values are accepted (stored raw, so even spacing/dash variants of the same card count as distinct)."
+  accumulation_or_exhaustion: "Rows persist in the on-disk SQLite file across requests (db/init.js:12, 30-58); AUTOINCREMENT ids and table/index pages only grow. Rows are never deleted anywhere in the code base."
+  insufficient_bounding: "No DELETE/TTL/cap in any file; UNIQUE on card_number, phone_number and (card_id, phone_id) only deduplicates identical keys. Retrieve query (models/card.js:115-123) has no LIMIT and cpa has no phone_id-leading index, so it scans or builds an automatic index proportional to table size on each call (the exact plan is for runtime EXPLAIN QUERY PLAN to confirm)."
+  plausible_degradation: "Growing DB file, rising p95 of POST /retrieve_cards (and slower writes/longer lock hold time, more SQLITE_BUSY since no busy_timeout), larger response bodies and event-loop/GC pressure for hot-phone queries. Whether this appears within the experiment horizon depends on insert rate; this is a hypothesis, not a confirmed effect."
+
+controllability:
+  level: workload
+  notes: "HTTP traffic alone suffices, but the workload must generate unique card/phone values (e.g. counter-based 16-digit cards and 11-digit phones); a fixed key pool saturates and shows no growth. To exercise the response-size variant, associate many distinct cards with one phone and retrieve with that phone. The DB file must start from a known size for a fair control. Note SQLITE_BUSY under concurrent writers (no busy_timeout, deferred BEGIN) appears from the first request and must not be confused with aging; keep write concurrency low or separate error codes in the judge."
+
+activation_criteria:
+  path_executed: "createCardPhoneAssociation reaches COMMIT (201 responses) for new pairs; getCardsByPhoneNumbers returns after db.all on a populated DB."
+  resource_growth: "Row counts of credit_cards/phones/card_phone_associations and uptime_db file size grow linearly with distinct inserts (e.g. 100k+ rows); p95 of POST /retrieve_cards grows monotonically with row count (e.g. >2x between early and late windows at equal request mix)."
+  control_contrast: "With a fixed small key pool (same pairs repeated), row count and file size stay flat and POST /retrieve_cards p95 stays flat; no slope in rss or heap beyond warm-up."
+
+operacao_suspeita: "POST /associate_card (accumulation) and POST /retrieve_cards (read-side cost)"
+expected_symptoms:
+  - "p95 up on POST /retrieve_cards (latency slope vs. row count)"
+  - "db file size / row count up linearly (outside the process heap), heap_slope flat"
+  - "rss_slope mildly up from sqlite page-cache and sort/auto-index buffers while heap_slope flat (native, weaker; page cache is released on each connection close)"
+  - "error rate up from SQLITE_BUSY (500) as write transactions lengthen under concurrency"
+
+priority: 1
+stability: "tools only (3 hits of one rule on the same function; 0 AI reviews)"
