@@ -1,0 +1,89 @@
+{
+ "arm": "so_invalidas",
+ "warmup_s": 12.0,
+ "requests": 110425,
+ "max_children": 0,
+ "error_rate": 0.0,
+ "server_error_rate": 0.0,
+ "exception_rate": 0.0,
+ "client_error_rate": 1.0,
+ "ops": {
+  "/associate_card": 55206,
+  "/retrieve_cards": 55219
+ },
+ "rss_mb": {
+  "n": 63,
+  "mk_s": 208,
+  "mk_z": 1.2278,
+  "mk_p_two_sided": 0.21950570935969857,
+  "mk_p_upward": 0.10975285467984928,
+  "sen_slope_per_h": 5.9428723566103745,
+  "first": 100.6484375,
+  "last": 100.3515625,
+  "sen_halves_per_h": [
+   -42.613636363636395,
+   8.517754539686365
+  ],
+  "sen_min_halves_per_h": -42.613636363636395
+ },
+ "heap_mb": {
+  "n": 63,
+  "mk_s": 543,
+  "mk_z": 3.2147,
+  "mk_p_two_sided": 0.0013060340131011575,
+  "mk_p_upward": 0.0006530170065505787,
+  "sen_slope_per_h": 1.174818468007303,
+  "first": 8.785140991210938,
+  "last": 7.78765869140625
+ },
+ "external_mb": {
+  "n": 63,
+  "mk_s": -30,
+  "mk_z": -0.172,
+  "mk_p_two_sided": 0.8634227926065069,
+  "mk_p_upward": 0.5682886036967465,
+  "sen_slope_per_h": -0.007374336143063715,
+  "first": 2.1122303009033203,
+  "last": 2.089797019958496
+ },
+ "handles": {
+  "n": 63,
+  "mk_s": -122,
+  "mk_z": -2.3718,
+  "mk_p_two_sided": 0.017702184948129515,
+  "mk_p_upward": 0.9911489075259352,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 22,
+  "mk_s": 55,
+  "mk_z": 1.5227,
+  "mk_p_two_sided": 0.127836729451499,
+  "mk_p_upward": 0.0639183647257495,
+  "sen_slope_per_h": 25.001253400530132
+ },
+ "throughput": {
+  "n": 22,
+  "mk_s": -42,
+  "mk_z": -1.1566,
+  "mk_p_two_sided": 0.24744603198720705,
+  "mk_p_upward": 0.8762769840063964,
+  "sen_slope_per_h": -1326.8571428571404
+ },
+ "throughput_mean_rps": 927.1090909090909,
+ "p95_ms_median": 2.368450164794922,
+ "db_rows": 0,
+ "db_state_counts": {
+  "credit_cards": 0,
+  "phones": 0,
+  "card_phone_associations": 0
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "so_invalidas",
+ "hypothesis": "A3: controle sem banco. Requisições barradas na validação não abrem conexão; espera-se tendência nula.",
+ "seed": 1,
+ "app_dir": "/mnt/c/Users/rafae/Documents/GitHub/autoresearch/apps/credit-card/original"
+}

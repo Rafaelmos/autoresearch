@@ -1,0 +1,87 @@
+{
+ "arm": "aa_copia_2",
+ "warmup_s": 300.0,
+ "requests": 3396140,
+ "max_children": 0,
+ "error_rate": 0.00017166547904385568,
+ "server_error_rate": 8.391880193396032e-05,
+ "exception_rate": 8.774667710989536e-05,
+ "client_error_rate": 2.944519366103871e-06,
+ "ops": {
+  "/retrieve_cards": 3035201,
+  "/associate_card": 360939
+ },
+ "rss_mb": {
+  "n": 1384,
+  "mk_s": 886845,
+  "mk_z": 51.7634,
+  "mk_p_two_sided": 0.0,
+  "mk_p_upward": 0.0,
+  "sen_slope_per_h": 0.1306633779735834,
+  "first": 58.828125,
+  "last": 59.43359375,
+  "sen_halves_per_h": [
+   0.185719289876986,
+   0.045031561688937474
+  ],
+  "sen_min_halves_per_h": 0.045031561688937474
+ },
+ "heap_mb": {
+  "n": 1384,
+  "mk_s": 403940,
+  "mk_z": 23.5233,
+  "mk_p_two_sided": 2.3539678830251106e-122,
+  "mk_p_upward": 1.1769839415125553e-122,
+  "sen_slope_per_h": 0.021296806352924212,
+  "first": 13.9361572265625,
+  "last": 13.9249267578125
+ },
+ "external_mb": {
+  "n": 1384,
+  "mk_s": 758389,
+  "mk_z": 44.1646,
+  "mk_p_two_sided": 0.0,
+  "mk_p_upward": 0.0,
+  "sen_slope_per_h": 0.11664549663017645,
+  "first": 44.8919677734375,
+  "last": 45.5086669921875
+ },
+ "handles": {
+  "n": 1384,
+  "mk_s": 76054,
+  "mk_z": 4.6125,
+  "mk_p_two_sided": 3.978412643075851e-06,
+  "mk_p_upward": 1.9892063215379255e-06,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 1381,
+  "mk_s": 49941,
+  "mk_z": 2.9177,
+  "mk_p_two_sided": 0.0035259905533081355,
+  "mk_p_upward": 0.0017629952766540678,
+  "sen_slope_per_h": 0.39372408300414125
+ },
+ "throughput": {
+  "n": 1381,
+  "mk_s": -103412,
+  "mk_z": -6.0421,
+  "mk_p_two_sided": 1.5210146445118512e-09,
+  "mk_p_upward": 0.9999999992394927,
+  "sen_slope_per_h": -2.0970873786407567
+ },
+ "throughput_mean_rps": 471.60333091962343,
+ "p95_ms_median": 28.763532638549805,
+ "db_rows": 1,
+ "db_state_counts": {
+  "associations": 1
+ },
+ "time_to_detect_min": 10.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "aa_copia_2",
+ "hypothesis": "A/A: cópia idêntica da baseline; mede ruído.",
+ "seed": 100,
+ "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card-fastapi/original"
+}

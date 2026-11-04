@@ -1,0 +1,87 @@
+{
+ "arm": "leak_0",
+ "warmup_s": 300.0,
+ "requests": 3301333,
+ "max_children": 0,
+ "error_rate": 0.00014630453819714642,
+ "server_error_rate": 7.178918333897248e-05,
+ "exception_rate": 7.451535485817396e-05,
+ "client_error_rate": 2.1203556260456003e-06,
+ "ops": {
+  "/retrieve_cards": 2945898,
+  "/associate_card": 355435
+ },
+ "rss_mb": {
+  "n": 1353,
+  "mk_s": 808278,
+  "mk_z": 49.0245,
+  "mk_p_two_sided": 0.0,
+  "mk_p_upward": 0.0,
+  "sen_slope_per_h": 0.126424792054052,
+  "first": 58.7890625,
+  "last": 59.44921875,
+  "sen_halves_per_h": [
+   0.0595321380540636,
+   0.11641044612635207
+  ],
+  "sen_min_halves_per_h": 0.0595321380540636
+ },
+ "heap_mb": {
+  "n": 1353,
+  "mk_s": 347280,
+  "mk_z": 20.9225,
+  "mk_p_two_sided": 3.341049603282144e-97,
+  "mk_p_upward": 1.670524801641072e-97,
+  "sen_slope_per_h": 0.018067578476807837,
+  "first": 13.9678955078125,
+  "last": 13.9119873046875
+ },
+ "external_mb": {
+  "n": 1353,
+  "mk_s": 638075,
+  "mk_z": 38.442,
+  "mk_p_two_sided": 2.5e-323,
+  "mk_p_upward": 1e-323,
+  "sen_slope_per_h": 0.11094503059051578,
+  "first": 44.8211669921875,
+  "last": 45.5372314453125
+ },
+ "handles": {
+  "n": 1353,
+  "mk_s": 5931,
+  "mk_z": 0.3723,
+  "mk_p_two_sided": 0.709666386383226,
+  "mk_p_upward": 0.354833193191613,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 1381,
+  "mk_s": -15878,
+  "mk_z": -0.9276,
+  "mk_p_two_sided": 0.35361175379668863,
+  "mk_p_upward": 0.8231941231016557,
+  "sen_slope_per_h": -0.13202720359234438
+ },
+ "throughput": {
+  "n": 1381,
+  "mk_s": 294664,
+  "mk_z": 17.2162,
+  "mk_p_two_sided": 2.0064122396578014e-66,
+  "mk_p_upward": 1.0032061198289007e-66,
+  "sen_slope_per_h": 9.434482758620717
+ },
+ "throughput_mean_rps": 460.51180304127445,
+ "p95_ms_median": 28.4883975982666,
+ "db_rows": 1,
+ "db_state_counts": {
+  "associations": 1
+ },
+ "time_to_detect_min": 10.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "baseline_artigo",
+ "hypothesis": "Carga do artigo: alterna associate/retrieve com o mesmo par cartão/telefone.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card-fastapi/original"
+}

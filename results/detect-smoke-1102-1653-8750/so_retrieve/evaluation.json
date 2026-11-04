@@ -1,0 +1,88 @@
+{
+ "arm": "so_retrieve",
+ "warmup_s": 12.0,
+ "requests": 43102,
+ "max_children": 0,
+ "error_rate": 0.0,
+ "server_error_rate": 0.0,
+ "exception_rate": 0.0,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 43102
+ },
+ "rss_mb": {
+  "n": 63,
+  "mk_s": 934,
+  "mk_z": 5.5344,
+  "mk_p_two_sided": 3.123168325863482e-08,
+  "mk_p_upward": 1.561584162931741e-08,
+  "sen_slope_per_h": 29.718509816885273,
+  "first": 101.64453125,
+  "last": 104.4375,
+  "sen_halves_per_h": [
+   50.943553156883034,
+   10.589285801293109
+  ],
+  "sen_min_halves_per_h": 10.589285801293109
+ },
+ "heap_mb": {
+  "n": 63,
+  "mk_s": 387,
+  "mk_z": 2.2894,
+  "mk_p_two_sided": 0.02205608804500828,
+  "mk_p_upward": 0.01102804402250414,
+  "sen_slope_per_h": 2.620186371044339,
+  "first": 8.558464050292969,
+  "last": 9.022773742675781
+ },
+ "external_mb": {
+  "n": 63,
+  "mk_s": -351,
+  "mk_z": -2.076,
+  "mk_p_two_sided": 0.03789141439942516,
+  "mk_p_upward": 0.9810542928002874,
+  "sen_slope_per_h": -0.15323799119370055,
+  "first": 2.100351333618164,
+  "last": 2.0924129486083984
+ },
+ "handles": {
+  "n": 63,
+  "mk_s": -122,
+  "mk_z": -2.3718,
+  "mk_p_two_sided": 0.017702184948129515,
+  "mk_p_upward": 0.9911489075259352,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 22,
+  "mk_s": 43,
+  "mk_z": 1.1843,
+  "mk_p_two_sided": 0.23628916450237414,
+  "mk_p_upward": 0.11814458225118707,
+  "sen_slope_per_h": 199.36752319335943
+ },
+ "throughput": {
+  "n": 22,
+  "mk_s": -37,
+  "mk_z": -1.0151,
+  "mk_p_two_sided": 0.31004602085382316,
+  "mk_p_upward": 0.8449769895730884,
+  "sen_slope_per_h": -1623.9999999999986
+ },
+ "throughput_mean_rps": 360.04545454545456,
+ "p95_ms_median": 25.37989616394043,
+ "db_rows": 0,
+ "db_state_counts": {
+  "credit_cards": 0,
+  "phones": 0,
+  "card_phone_associations": 0
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": true,
+ "flags": [],
+ "valid": true,
+ "spec_name": "so_retrieve",
+ "hypothesis": "A2: a retenção vem do caminho de leitura (db.all + conexão nova por requisição).",
+ "seed": 1,
+ "app_dir": "/mnt/c/Users/rafae/Documents/GitHub/autoresearch/apps/credit-card/original"
+}

@@ -1,0 +1,378 @@
+{
+ "event": "detect",
+ "run_id": "detect-smoke-1102-1653-8750",
+ "commit": "31dee5d",
+ "smoke": true,
+ "minutes": 2,
+ "seed": 1,
+ "arms": [
+  {
+   "arm": "so_retrieve",
+   "warmup_s": 12.0,
+   "requests": 43102,
+   "max_children": 0,
+   "error_rate": 0.0,
+   "server_error_rate": 0.0,
+   "exception_rate": 0.0,
+   "client_error_rate": 0.0,
+   "ops": {
+    "/retrieve_cards": 43102
+   },
+   "rss_mb": {
+    "n": 63,
+    "mk_s": 934,
+    "mk_z": 5.5344,
+    "mk_p_two_sided": 3.123168325863482e-08,
+    "mk_p_upward": 1.561584162931741e-08,
+    "sen_slope_per_h": 29.718509816885273,
+    "first": 101.64453125,
+    "last": 104.4375,
+    "sen_halves_per_h": [
+     50.943553156883034,
+     10.589285801293109
+    ],
+    "sen_min_halves_per_h": 10.589285801293109
+   },
+   "heap_mb": {
+    "n": 63,
+    "mk_s": 387,
+    "mk_z": 2.2894,
+    "mk_p_two_sided": 0.02205608804500828,
+    "mk_p_upward": 0.01102804402250414,
+    "sen_slope_per_h": 2.620186371044339,
+    "first": 8.558464050292969,
+    "last": 9.022773742675781
+   },
+   "external_mb": {
+    "n": 63,
+    "mk_s": -351,
+    "mk_z": -2.076,
+    "mk_p_two_sided": 0.03789141439942516,
+    "mk_p_upward": 0.9810542928002874,
+    "sen_slope_per_h": -0.15323799119370055,
+    "first": 2.100351333618164,
+    "last": 2.0924129486083984
+   },
+   "handles": {
+    "n": 63,
+    "mk_s": -122,
+    "mk_z": -2.3718,
+    "mk_p_two_sided": 0.017702184948129515,
+    "mk_p_upward": 0.9911489075259352,
+    "sen_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 22,
+    "mk_s": 43,
+    "mk_z": 1.1843,
+    "mk_p_two_sided": 0.23628916450237414,
+    "mk_p_upward": 0.11814458225118707,
+    "sen_slope_per_h": 199.36752319335943
+   },
+   "throughput": {
+    "n": 22,
+    "mk_s": -37,
+    "mk_z": -1.0151,
+    "mk_p_two_sided": 0.31004602085382316,
+    "mk_p_upward": 0.8449769895730884,
+    "sen_slope_per_h": -1623.9999999999986
+   },
+   "throughput_mean_rps": 360.04545454545456,
+   "p95_ms_median": 25.37989616394043,
+   "db_rows": 0,
+   "db_state_counts": {
+    "credit_cards": 0,
+    "phones": 0,
+    "card_phone_associations": 0
+   },
+   "time_to_detect_min": null,
+   "rss_upward_significant": true,
+   "flags": [],
+   "valid": true,
+   "spec_name": "so_retrieve",
+   "hypothesis": "A2: a retenção vem do caminho de leitura (db.all + conexão nova por requisição).",
+   "seed": 1,
+   "app_dir": "/mnt/c/Users/rafae/Documents/GitHub/autoresearch/apps/credit-card/original",
+   "score_rss_mb_per_h": 29.718509816885273,
+   "ratio_vs_baseline": 0.164497336179214
+  },
+  {
+   "arm": "so_invalidas",
+   "warmup_s": 12.0,
+   "requests": 110425,
+   "max_children": 0,
+   "error_rate": 0.0,
+   "server_error_rate": 0.0,
+   "exception_rate": 0.0,
+   "client_error_rate": 1.0,
+   "ops": {
+    "/associate_card": 55206,
+    "/retrieve_cards": 55219
+   },
+   "rss_mb": {
+    "n": 63,
+    "mk_s": 208,
+    "mk_z": 1.2278,
+    "mk_p_two_sided": 0.21950570935969857,
+    "mk_p_upward": 0.10975285467984928,
+    "sen_slope_per_h": 5.9428723566103745,
+    "first": 100.6484375,
+    "last": 100.3515625,
+    "sen_halves_per_h": [
+     -42.613636363636395,
+     8.517754539686365
+    ],
+    "sen_min_halves_per_h": -42.613636363636395
+   },
+   "heap_mb": {
+    "n": 63,
+    "mk_s": 543,
+    "mk_z": 3.2147,
+    "mk_p_two_sided": 0.0013060340131011575,
+    "mk_p_upward": 0.0006530170065505787,
+    "sen_slope_per_h": 1.174818468007303,
+    "first": 8.785140991210938,
+    "last": 7.78765869140625
+   },
+   "external_mb": {
+    "n": 63,
+    "mk_s": -30,
+    "mk_z": -0.172,
+    "mk_p_two_sided": 0.8634227926065069,
+    "mk_p_upward": 0.5682886036967465,
+    "sen_slope_per_h": -0.007374336143063715,
+    "first": 2.1122303009033203,
+    "last": 2.089797019958496
+   },
+   "handles": {
+    "n": 63,
+    "mk_s": -122,
+    "mk_z": -2.3718,
+    "mk_p_two_sided": 0.017702184948129515,
+    "mk_p_upward": 0.9911489075259352,
+    "sen_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 22,
+    "mk_s": 55,
+    "mk_z": 1.5227,
+    "mk_p_two_sided": 0.127836729451499,
+    "mk_p_upward": 0.0639183647257495,
+    "sen_slope_per_h": 25.001253400530132
+   },
+   "throughput": {
+    "n": 22,
+    "mk_s": -42,
+    "mk_z": -1.1566,
+    "mk_p_two_sided": 0.24744603198720705,
+    "mk_p_upward": 0.8762769840063964,
+    "sen_slope_per_h": -1326.8571428571404
+   },
+   "throughput_mean_rps": 927.1090909090909,
+   "p95_ms_median": 2.368450164794922,
+   "db_rows": 0,
+   "db_state_counts": {
+    "credit_cards": 0,
+    "phones": 0,
+    "card_phone_associations": 0
+   },
+   "time_to_detect_min": null,
+   "rss_upward_significant": false,
+   "flags": [],
+   "valid": true,
+   "spec_name": "so_invalidas",
+   "hypothesis": "A3: controle sem banco. Requisições barradas na validação não abrem conexão; espera-se tendência nula.",
+   "seed": 1,
+   "app_dir": "/mnt/c/Users/rafae/Documents/GitHub/autoresearch/apps/credit-card/original",
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null
+  },
+  {
+   "arm": "baseline_artigo",
+   "warmup_s": 12.0,
+   "requests": 2309,
+   "max_children": 0,
+   "error_rate": 0.18492854049372023,
+   "server_error_rate": 0.18492854049372023,
+   "exception_rate": 0.0,
+   "client_error_rate": 0.0,
+   "ops": {
+    "/retrieve_cards": 1738,
+    "/associate_card": 571
+   },
+   "rss_mb": {
+    "n": 63,
+    "mk_s": 1293,
+    "mk_z": 7.664,
+    "mk_p_two_sided": 1.8016494883651225e-14,
+    "mk_p_upward": 9.008247441825613e-15,
+    "sen_slope_per_h": 180.66255969341663,
+    "first": 70.953125,
+    "last": 77.328125,
+    "sen_halves_per_h": [
+     375.13666180758014,
+     4.192657265558754
+    ],
+    "sen_min_halves_per_h": 4.192657265558754
+   },
+   "heap_mb": {
+    "n": 63,
+    "mk_s": 1591,
+    "mk_z": 9.4304,
+    "mk_p_two_sided": 4.084015795599853e-21,
+    "mk_p_upward": 2.0420078977999264e-21,
+    "sen_slope_per_h": 10.739575211564064,
+    "first": 8.306205749511719,
+    "last": 8.509803771972656
+   },
+   "external_mb": {
+    "n": 63,
+    "mk_s": -399,
+    "mk_z": -2.3616,
+    "mk_p_two_sided": 0.018196337873314213,
+    "mk_p_upward": 0.9909018310633428,
+    "sen_slope_per_h": -0.02106095728787465,
+    "first": 2.10244083404541,
+    "last": 2.093496322631836
+   },
+   "handles": {
+    "n": 63,
+    "mk_s": -122,
+    "mk_z": -2.3718,
+    "mk_p_two_sided": 0.017702184948129515,
+    "mk_p_upward": 0.9911489075259352,
+    "sen_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 22,
+    "mk_s": 47,
+    "mk_z": 1.2971,
+    "mk_p_two_sided": 0.19459514049618598,
+    "mk_p_upward": 0.09729757024809299,
+    "sen_slope_per_h": 1571.7744827270512
+   },
+   "throughput": {
+    "n": 22,
+    "mk_s": -5,
+    "mk_z": -0.113,
+    "mk_p_two_sided": 0.9100293149666137,
+    "mk_p_upward": 0.5449853425166932,
+    "sen_slope_per_h": -12.000000000000062
+   },
+   "throughput_mean_rps": 19.572727272727274,
+   "p95_ms_median": 1133.2223415374756,
+   "db_rows": 3,
+   "db_state_counts": {
+    "credit_cards": 1,
+    "phones": 1,
+    "card_phone_associations": 1
+   },
+   "time_to_detect_min": null,
+   "rss_upward_significant": true,
+   "flags": [
+    "E1_erros_5xx_da_app",
+    "E2_erro_dominante_revisao_humana"
+   ],
+   "valid": true,
+   "spec_name": "baseline_artigo",
+   "hypothesis": "Carga do artigo: alterna associate/retrieve com o mesmo par cartão/telefone.",
+   "seed": 1,
+   "app_dir": "/mnt/c/Users/rafae/Documents/GitHub/autoresearch/apps/credit-card/original",
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null
+  },
+  {
+   "arm": "so_associate",
+   "warmup_s": 12.0,
+   "requests": 540,
+   "max_children": 0,
+   "error_rate": 0.9074074074074074,
+   "server_error_rate": 0.9074074074074074,
+   "exception_rate": 0.0,
+   "client_error_rate": 0.0,
+   "ops": {
+    "/associate_card": 540
+   },
+   "rss_mb": {
+    "n": 63,
+    "mk_s": 1619,
+    "mk_z": 9.6278,
+    "mk_p_two_sided": 6.100651734447045e-22,
+    "mk_p_upward": 3.0503258672235224e-22,
+    "sen_slope_per_h": 69.36469237141351,
+    "first": 69.55859375,
+    "last": 72.41015625,
+    "sen_halves_per_h": [
+     61.34690538943923,
+     38.62607088426033
+    ],
+    "sen_min_halves_per_h": 38.62607088426033
+   },
+   "heap_mb": {
+    "n": 63,
+    "mk_s": 1543,
+    "mk_z": 9.1457,
+    "mk_p_two_sided": 5.922289925994421e-20,
+    "mk_p_upward": 2.9611449629972104e-20,
+    "sen_slope_per_h": 3.157403249510124,
+    "first": 8.267463684082031,
+    "last": 8.285606384277344
+   },
+   "external_mb": {
+    "n": 63,
+    "mk_s": -154,
+    "mk_z": -0.9361,
+    "mk_p_two_sided": 0.34920998137150716,
+    "mk_p_upward": 0.8253950093142464,
+    "sen_slope_per_h": 0.0,
+    "first": 2.101835250854492,
+    "last": 2.101308822631836
+   },
+   "handles": {
+    "n": 63,
+    "mk_s": -123,
+    "mk_z": -2.3909,
+    "mk_p_two_sided": 0.016805686701050454,
+    "mk_p_upward": 0.9915971566494748,
+    "sen_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 22,
+    "mk_s": 11,
+    "mk_z": 0.282,
+    "mk_p_two_sided": 0.777959384381542,
+    "mk_p_upward": 0.388979692190771,
+    "sen_slope_per_h": 5105.080604553223
+   },
+   "throughput": {
+    "n": 22,
+    "mk_s": -28,
+    "mk_z": -0.7779,
+    "mk_p_two_sided": 0.4366210555639752,
+    "mk_p_upward": 0.7816894722180124,
+    "sen_slope_per_h": 0.0
+   },
+   "throughput_mean_rps": 4.481818181818182,
+   "p95_ms_median": 3291.5501594543457,
+   "db_rows": 3,
+   "db_state_counts": {
+    "credit_cards": 1,
+    "phones": 1,
+    "card_phone_associations": 1
+   },
+   "time_to_detect_min": null,
+   "rss_upward_significant": true,
+   "flags": [
+    "E1_erros_5xx_da_app",
+    "E2_erro_dominante_revisao_humana"
+   ],
+   "valid": true,
+   "spec_name": "so_associate",
+   "hypothesis": "A1: a retenção vem do caminho de escrita (transação + conexão nova por requisição).",
+   "seed": 1,
+   "app_dir": "/mnt/c/Users/rafae/Documents/GitHub/autoresearch/apps/credit-card/original",
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null
+  }
+ ]
+}

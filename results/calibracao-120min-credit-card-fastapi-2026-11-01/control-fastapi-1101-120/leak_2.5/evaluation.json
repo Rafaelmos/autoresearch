@@ -1,0 +1,87 @@
+{
+ "arm": "leak_2.5",
+ "warmup_s": 300.0,
+ "requests": 3302161,
+ "max_children": 0,
+ "error_rate": 0.00014869050903332695,
+ "server_error_rate": 7.298251054385295e-05,
+ "exception_rate": 7.570799848947402e-05,
+ "client_error_rate": 2.4226559516631685e-06,
+ "ops": {
+  "/retrieve_cards": 2946996,
+  "/associate_card": 355165
+ },
+ "rss_mb": {
+  "n": 1353,
+  "mk_s": 914378,
+  "mk_z": 55.0883,
+  "mk_p_two_sided": 0.0,
+  "mk_p_upward": 0.0,
+  "sen_slope_per_h": 2.616467235111134,
+  "first": 59.0703125,
+  "last": 64.41796875,
+  "sen_halves_per_h": [
+   2.561398385980537,
+   2.5943753217766643
+  ],
+  "sen_min_halves_per_h": 2.561398385980537
+ },
+ "heap_mb": {
+  "n": 1353,
+  "mk_s": 664525,
+  "mk_z": 40.0355,
+  "mk_p_two_sided": 0.0,
+  "mk_p_upward": 0.0,
+  "sen_slope_per_h": 0.061197645616879306,
+  "first": 13.93359375,
+  "last": 13.998779296875
+ },
+ "external_mb": {
+  "n": 1353,
+  "mk_s": 908612,
+  "mk_z": 54.7409,
+  "mk_p_two_sided": 0.0,
+  "mk_p_upward": 0.0,
+  "sen_slope_per_h": 2.5625058183378413,
+  "first": 45.13671875,
+  "last": 50.419189453125
+ },
+ "handles": {
+  "n": 1353,
+  "mk_s": 18705,
+  "mk_z": 1.1769,
+  "mk_p_two_sided": 0.23921787490909252,
+  "mk_p_upward": 0.11960893745454626,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 1381,
+  "mk_s": -19465,
+  "mk_z": -1.1372,
+  "mk_p_two_sided": 0.2554650247098595,
+  "mk_p_upward": 0.8722674876450702,
+  "sen_slope_per_h": -0.16721346791341182
+ },
+ "throughput": {
+  "n": 1381,
+  "mk_s": 303075,
+  "mk_z": 17.7077,
+  "mk_p_two_sided": 3.6547552453121315e-70,
+  "mk_p_upward": 1.8273776226560658e-70,
+  "sen_slope_per_h": 9.769335142469469
+ },
+ "throughput_mean_rps": 460.57986965966694,
+ "p95_ms_median": 28.495311737060547,
+ "db_rows": 1,
+ "db_state_counts": {
+  "associations": 1
+ },
+ "time_to_detect_min": 10.0,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "baseline_artigo",
+ "hypothesis": "Carga do artigo: alterna associate/retrieve com o mesmo par cartão/telefone.",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card-fastapi/original"
+}

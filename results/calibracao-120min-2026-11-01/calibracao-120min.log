@@ -1,0 +1,19 @@
+2026-11-01T11:12:18-03:00
+== controle positivo 120 min
+---
+run_id: control-1101-120
+arm=leak_0 injected=0.0 valid=True detected=False rss_slope=-0.166 min_halves=-0.266 mk_p=1.00000 external_slope=-0.001 heap_slope=0.044 flags=E1_erros_5xx_da_app
+arm=leak_2.5 injected=2.5 valid=True detected=False rss_slope=2.711 min_halves=2.626 mk_p=0.00000 external_slope=2.386 heap_slope=0.164 flags=E1_erros_5xx_da_app
+arm=leak_5 injected=5.0 valid=True detected=True rss_slope=5.548 min_halves=5.102 mk_p=0.00000 external_slope=4.772 heap_slope=0.173 flags=E1_erros_5xx_da_app
+arm=leak_10 injected=10.0 valid=True detected=True rss_slope=10.031 min_halves=9.613 mk_p=0.00000 external_slope=9.546 heap_slope=0.178 flags=E1_erros_5xx_da_app
+2026-11-01T13:12:47-03:00
+== A/A 120 min
+---
+run_id: aa-1101-120
+arm=aa_copia_2 valid=True score_rss_mb_per_h=NA rss_slope=3.251 mk_p=0.00000 heap_slope=0.054 handles_slope=0.000 p95_slope=-0.148 ttd_min=50.000 ratio=NA req=984370 err=0.0163 db_rows=3 flags=E1_erros_5xx_da_app,D4_copia_da_baseline
+arm=aa_copia_3 valid=True score_rss_mb_per_h=NA rss_slope=2.838 mk_p=0.00000 heap_slope=-0.503 handles_slope=0.000 p95_slope=1.514 ttd_min=35.000 ratio=NA req=987262 err=0.0162 db_rows=3 flags=E1_erros_5xx_da_app,D4_copia_da_baseline
+arm=aa_copia_1 valid=True score_rss_mb_per_h=NA rss_slope=3.088 mk_p=0.00000 heap_slope=-0.511 handles_slope=0.000 p95_slope=-0.226 ttd_min=15.000 ratio=NA req=994076 err=0.0159 db_rows=3 flags=E1_erros_5xx_da_app,D4_copia_da_baseline
+arm=baseline_artigo valid=True score_rss_mb_per_h=NA rss_slope=-0.192 mk_p=1.00000 heap_slope=0.078 handles_slope=0.000 p95_slope=1.500 ttd_min=NA ratio=NA req=993227 err=0.0160 db_rows=3 flags=E1_erros_5xx_da_app
+Updated 1 path from the index
+2026-11-01T15:13:18-03:00
+FIM

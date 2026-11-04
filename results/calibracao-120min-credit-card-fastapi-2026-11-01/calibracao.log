@@ -1,0 +1,19 @@
+2026-11-01T23:29:02-03:00
+== controle positivo 120 min (credit-card-fastapi)
+---
+run_id: control-fastapi-1101-120
+arm=leak_0 injected=0.0 valid=True detected=False rss_slope=0.126 min_halves=0.060 mk_p=0.00000 external_slope=0.111 heap_slope=0.018 flags=-
+arm=leak_2.5 injected=2.5 valid=True detected=False rss_slope=2.616 min_halves=2.561 mk_p=0.00000 external_slope=2.563 heap_slope=0.061 flags=-
+arm=leak_5 injected=5.0 valid=True detected=True rss_slope=5.096 min_halves=5.055 mk_p=0.00000 external_slope=5.034 heap_slope=0.061 flags=-
+arm=leak_10 injected=10.0 valid=True detected=True rss_slope=10.112 min_halves=9.920 mk_p=0.00000 external_slope=10.050 heap_slope=0.061 flags=-
+2026-11-02T01:29:32-03:00
+== A/A 120 min (credit-card-fastapi)
+---
+run_id: aa-fastapi-1101-120
+arm=aa_copia_2 valid=True score_rss_mb_per_h=NA rss_slope=0.131 mk_p=0.00000 heap_slope=0.021 handles_slope=0.000 p95_slope=0.394 ttd_min=10.000 ratio=NA req=3396140 err=0.0002 db_rows=1 flags=D4_copia_da_baseline
+arm=aa_copia_3 valid=True score_rss_mb_per_h=NA rss_slope=0.099 mk_p=0.00000 heap_slope=0.017 handles_slope=0.000 p95_slope=0.172 ttd_min=10.000 ratio=NA req=3396077 err=0.0002 db_rows=1 flags=D4_copia_da_baseline
+arm=aa_copia_1 valid=True score_rss_mb_per_h=NA rss_slope=0.105 mk_p=0.00000 heap_slope=0.018 handles_slope=0.000 p95_slope=0.357 ttd_min=10.000 ratio=NA req=3396659 err=0.0002 db_rows=1 flags=D4_copia_da_baseline
+arm=baseline_artigo valid=True score_rss_mb_per_h=NA rss_slope=0.142 mk_p=0.00000 heap_slope=0.015 handles_slope=0.000 p95_slope=0.272 ttd_min=10.000 ratio=NA req=3396176 err=0.0002 db_rows=1 flags=-
+Updated 1 path from the index
+2026-11-02T03:30:00-03:00
+FIM

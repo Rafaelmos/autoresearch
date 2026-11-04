@@ -1,0 +1,91 @@
+{
+ "arm": "so_associate",
+ "warmup_s": 12.0,
+ "requests": 540,
+ "max_children": 0,
+ "error_rate": 0.9074074074074074,
+ "server_error_rate": 0.9074074074074074,
+ "exception_rate": 0.0,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/associate_card": 540
+ },
+ "rss_mb": {
+  "n": 63,
+  "mk_s": 1619,
+  "mk_z": 9.6278,
+  "mk_p_two_sided": 6.100651734447045e-22,
+  "mk_p_upward": 3.0503258672235224e-22,
+  "sen_slope_per_h": 69.36469237141351,
+  "first": 69.55859375,
+  "last": 72.41015625,
+  "sen_halves_per_h": [
+   61.34690538943923,
+   38.62607088426033
+  ],
+  "sen_min_halves_per_h": 38.62607088426033
+ },
+ "heap_mb": {
+  "n": 63,
+  "mk_s": 1543,
+  "mk_z": 9.1457,
+  "mk_p_two_sided": 5.922289925994421e-20,
+  "mk_p_upward": 2.9611449629972104e-20,
+  "sen_slope_per_h": 3.157403249510124,
+  "first": 8.267463684082031,
+  "last": 8.285606384277344
+ },
+ "external_mb": {
+  "n": 63,
+  "mk_s": -154,
+  "mk_z": -0.9361,
+  "mk_p_two_sided": 0.34920998137150716,
+  "mk_p_upward": 0.8253950093142464,
+  "sen_slope_per_h": 0.0,
+  "first": 2.101835250854492,
+  "last": 2.101308822631836
+ },
+ "handles": {
+  "n": 63,
+  "mk_s": -123,
+  "mk_z": -2.3909,
+  "mk_p_two_sided": 0.016805686701050454,
+  "mk_p_upward": 0.9915971566494748,
+  "sen_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 22,
+  "mk_s": 11,
+  "mk_z": 0.282,
+  "mk_p_two_sided": 0.777959384381542,
+  "mk_p_upward": 0.388979692190771,
+  "sen_slope_per_h": 5105.080604553223
+ },
+ "throughput": {
+  "n": 22,
+  "mk_s": -28,
+  "mk_z": -0.7779,
+  "mk_p_two_sided": 0.4366210555639752,
+  "mk_p_upward": 0.7816894722180124,
+  "sen_slope_per_h": 0.0
+ },
+ "throughput_mean_rps": 4.481818181818182,
+ "p95_ms_median": 3291.5501594543457,
+ "db_rows": 3,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 1,
+  "card_phone_associations": 1
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": true,
+ "flags": [
+  "E1_erros_5xx_da_app",
+  "E2_erro_dominante_revisao_humana"
+ ],
+ "valid": true,
+ "spec_name": "so_associate",
+ "hypothesis": "A1: a retenção vem do caminho de escrita (transação + conexão nova por requisição).",
+ "seed": 1,
+ "app_dir": "/mnt/c/Users/rafae/Documents/GitHub/autoresearch/apps/credit-card/original"
+}

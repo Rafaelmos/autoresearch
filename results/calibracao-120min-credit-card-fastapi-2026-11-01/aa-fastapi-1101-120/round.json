@@ -1,0 +1,372 @@
+{
+ "event": "detect",
+ "run_id": "aa-fastapi-1101-120",
+ "commit": "7c2efff",
+ "smoke": false,
+ "minutes": 120.0,
+ "seed": 100,
+ "arms": [
+  {
+   "arm": "aa_copia_2",
+   "warmup_s": 300.0,
+   "requests": 3396140,
+   "max_children": 0,
+   "error_rate": 0.00017166547904385568,
+   "server_error_rate": 8.391880193396032e-05,
+   "exception_rate": 8.774667710989536e-05,
+   "client_error_rate": 2.944519366103871e-06,
+   "ops": {
+    "/retrieve_cards": 3035201,
+    "/associate_card": 360939
+   },
+   "rss_mb": {
+    "n": 1384,
+    "mk_s": 886845,
+    "mk_z": 51.7634,
+    "mk_p_two_sided": 0.0,
+    "mk_p_upward": 0.0,
+    "sen_slope_per_h": 0.1306633779735834,
+    "first": 58.828125,
+    "last": 59.43359375,
+    "sen_halves_per_h": [
+     0.185719289876986,
+     0.045031561688937474
+    ],
+    "sen_min_halves_per_h": 0.045031561688937474
+   },
+   "heap_mb": {
+    "n": 1384,
+    "mk_s": 403940,
+    "mk_z": 23.5233,
+    "mk_p_two_sided": 2.3539678830251106e-122,
+    "mk_p_upward": 1.1769839415125553e-122,
+    "sen_slope_per_h": 0.021296806352924212,
+    "first": 13.9361572265625,
+    "last": 13.9249267578125
+   },
+   "external_mb": {
+    "n": 1384,
+    "mk_s": 758389,
+    "mk_z": 44.1646,
+    "mk_p_two_sided": 0.0,
+    "mk_p_upward": 0.0,
+    "sen_slope_per_h": 0.11664549663017645,
+    "first": 44.8919677734375,
+    "last": 45.5086669921875
+   },
+   "handles": {
+    "n": 1384,
+    "mk_s": 76054,
+    "mk_z": 4.6125,
+    "mk_p_two_sided": 3.978412643075851e-06,
+    "mk_p_upward": 1.9892063215379255e-06,
+    "sen_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 1381,
+    "mk_s": 49941,
+    "mk_z": 2.9177,
+    "mk_p_two_sided": 0.0035259905533081355,
+    "mk_p_upward": 0.0017629952766540678,
+    "sen_slope_per_h": 0.39372408300414125
+   },
+   "throughput": {
+    "n": 1381,
+    "mk_s": -103412,
+    "mk_z": -6.0421,
+    "mk_p_two_sided": 1.5210146445118512e-09,
+    "mk_p_upward": 0.9999999992394927,
+    "sen_slope_per_h": -2.0970873786407567
+   },
+   "throughput_mean_rps": 471.60333091962343,
+   "p95_ms_median": 28.763532638549805,
+   "db_rows": 1,
+   "db_state_counts": {
+    "associations": 1
+   },
+   "time_to_detect_min": 10.0,
+   "rss_upward_significant": false,
+   "flags": [
+    "D4_copia_da_baseline"
+   ],
+   "valid": true,
+   "spec_name": "aa_copia_2",
+   "hypothesis": "A/A: cópia idêntica da baseline; mede ruído.",
+   "seed": 100,
+   "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card-fastapi/original",
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null
+  },
+  {
+   "arm": "aa_copia_3",
+   "warmup_s": 300.0,
+   "requests": 3396077,
+   "max_children": 0,
+   "error_rate": 0.00017314095057326437,
+   "server_error_rate": 8.450927349409333e-05,
+   "exception_rate": 8.863167707917105e-05,
+   "client_error_rate": 3.239031388275354e-06,
+   "ops": {
+    "/retrieve_cards": 3035750,
+    "/associate_card": 360327
+   },
+   "rss_mb": {
+    "n": 1384,
+    "mk_s": 827908,
+    "mk_z": 48.6645,
+    "mk_p_two_sided": 0.0,
+    "mk_p_upward": 0.0,
+    "sen_slope_per_h": 0.0991830320935866,
+    "first": 58.87109375,
+    "last": 59.3828125,
+    "sen_halves_per_h": [
+     0.11957243775083279,
+     0.10404526694582644
+    ],
+    "sen_min_halves_per_h": 0.10404526694582644
+   },
+   "heap_mb": {
+    "n": 1384,
+    "mk_s": 342549,
+    "mk_z": 19.9482,
+    "mk_p_two_sided": 1.5526358323989414e-88,
+    "mk_p_upward": 7.763179161994707e-89,
+    "sen_slope_per_h": 0.01684188957612992,
+    "first": 13.96630859375,
+    "last": 13.904296875
+   },
+   "external_mb": {
+    "n": 1384,
+    "mk_s": 683169,
+    "mk_z": 39.7842,
+    "mk_p_two_sided": 0.0,
+    "mk_p_upward": 0.0,
+    "sen_slope_per_h": 0.08733501851243824,
+    "first": 44.90478515625,
+    "last": 45.478515625
+   },
+   "handles": {
+    "n": 1384,
+    "mk_s": 61096,
+    "mk_z": 3.7132,
+    "mk_p_two_sided": 0.00020465124491067028,
+    "mk_p_upward": 0.00010232562245533514,
+    "sen_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 1381,
+    "mk_s": 22468,
+    "mk_z": 1.3126,
+    "mk_p_two_sided": 0.18930962588400296,
+    "mk_p_upward": 0.09465481294200148,
+    "sen_slope_per_h": 0.1722588666126168
+   },
+   "throughput": {
+    "n": 1381,
+    "mk_s": -118912,
+    "mk_z": -6.9478,
+    "mk_p_two_sided": 3.710850096765349e-12,
+    "mk_p_upward": 0.9999999999981446,
+    "sen_slope_per_h": -2.3300970873786406
+   },
+   "throughput_mean_rps": 471.59942070963075,
+   "p95_ms_median": 28.81765365600586,
+   "db_rows": 1,
+   "db_state_counts": {
+    "associations": 1
+   },
+   "time_to_detect_min": 10.0,
+   "rss_upward_significant": false,
+   "flags": [
+    "D4_copia_da_baseline"
+   ],
+   "valid": true,
+   "spec_name": "aa_copia_3",
+   "hypothesis": "A/A: cópia idêntica da baseline; mede ruído.",
+   "seed": 100,
+   "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card-fastapi/original",
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null
+  },
+  {
+   "arm": "aa_copia_1",
+   "warmup_s": 300.0,
+   "requests": 3396659,
+   "max_children": 0,
+   "error_rate": 0.00016898958653194213,
+   "server_error_rate": 8.272835159490546e-05,
+   "exception_rate": 8.626123493703666e-05,
+   "client_error_rate": 1.7664416710655972e-06,
+   "ops": {
+    "/retrieve_cards": 3036200,
+    "/associate_card": 360459
+   },
+   "rss_mb": {
+    "n": 1385,
+    "mk_s": 865310,
+    "mk_z": 50.5667,
+    "mk_p_two_sided": 0.0,
+    "mk_p_upward": 0.0,
+    "sen_slope_per_h": 0.10497463424464323,
+    "first": 58.73828125,
+    "last": 59.3203125,
+    "sen_halves_per_h": [
+     0.15158526090822497,
+     0.1071222786231513
+    ],
+    "sen_min_halves_per_h": 0.1071222786231513
+   },
+   "heap_mb": {
+    "n": 1385,
+    "mk_s": 356955,
+    "mk_z": 20.7647,
+    "mk_p_two_sided": 9.034544616159552e-96,
+    "mk_p_upward": 4.517272308079776e-96,
+    "sen_slope_per_h": 0.018454412052648493,
+    "first": 13.93658447265625,
+    "last": 13.924072265625
+   },
+   "external_mb": {
+    "n": 1385,
+    "mk_s": 732874,
+    "mk_z": 42.6325,
+    "mk_p_two_sided": 0.0,
+    "mk_p_upward": 0.0,
+    "sen_slope_per_h": 0.09146703048127583,
+    "first": 44.80169677734375,
+    "last": 45.396240234375
+   },
+   "handles": {
+    "n": 1385,
+    "mk_s": 25477,
+    "mk_z": 1.5434,
+    "mk_p_two_sided": 0.12273477448251384,
+    "mk_p_upward": 0.06136738724125692,
+    "sen_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 1381,
+    "mk_s": 46145,
+    "mk_z": 2.6959,
+    "mk_p_two_sided": 0.007018988499580848,
+    "mk_p_upward": 0.003509494249790424,
+    "sen_slope_per_h": 0.3566741943359375
+   },
+   "throughput": {
+    "n": 1381,
+    "mk_s": -110922,
+    "mk_z": -6.4809,
+    "mk_p_two_sided": 9.11884264798083e-11,
+    "mk_p_upward": 0.9999999999544058,
+    "sen_slope_per_h": -2.275395033860008
+   },
+   "throughput_mean_rps": 471.6767559739319,
+   "p95_ms_median": 28.84197235107422,
+   "db_rows": 1,
+   "db_state_counts": {
+    "associations": 1
+   },
+   "time_to_detect_min": 10.0,
+   "rss_upward_significant": false,
+   "flags": [
+    "D4_copia_da_baseline"
+   ],
+   "valid": true,
+   "spec_name": "aa_copia_1",
+   "hypothesis": "A/A: cópia idêntica da baseline; mede ruído.",
+   "seed": 100,
+   "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card-fastapi/original",
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null
+  },
+  {
+   "arm": "baseline_artigo",
+   "warmup_s": 300.0,
+   "requests": 3396176,
+   "max_children": 0,
+   "error_rate": 0.00017460814751650092,
+   "server_error_rate": 8.539015645832254e-05,
+   "exception_rate": 8.921799105817838e-05,
+   "client_error_rate": 2.061141707614682e-06,
+   "ops": {
+    "/retrieve_cards": 3035956,
+    "/associate_card": 360220
+   },
+   "rss_mb": {
+    "n": 1384,
+    "mk_s": 888329,
+    "mk_z": 51.8531,
+    "mk_p_two_sided": 0.0,
+    "mk_p_upward": 0.0,
+    "sen_slope_per_h": 0.14191007988734927,
+    "first": 58.875,
+    "last": 59.4453125,
+    "sen_halves_per_h": [
+     0.10581266803236014,
+     0.12559717993468078
+    ],
+    "sen_min_halves_per_h": 0.10581266803236014
+   },
+   "heap_mb": {
+    "n": 1384,
+    "mk_s": 319373,
+    "mk_z": 18.5986,
+    "mk_p_two_sided": 3.298637422904396e-77,
+    "mk_p_upward": 1.649318711452198e-77,
+    "sen_slope_per_h": 0.015487335491382186,
+    "first": 13.931396484375,
+    "last": 13.90838623046875
+   },
+   "external_mb": {
+    "n": 1384,
+    "mk_s": 759513,
+    "mk_z": 44.23,
+    "mk_p_two_sided": 0.0,
+    "mk_p_upward": 0.0,
+    "sen_slope_per_h": 0.13375712382836963,
+    "first": 44.943603515625,
+    "last": 45.53692626953125
+   },
+   "handles": {
+    "n": 1384,
+    "mk_s": 31521,
+    "mk_z": 1.9145,
+    "mk_p_two_sided": 0.05555843371375209,
+    "mk_p_upward": 0.027779216856876045,
+    "sen_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 1381,
+    "mk_s": 35250,
+    "mk_z": 2.0594,
+    "mk_p_two_sided": 0.039455299377688866,
+    "mk_p_upward": 0.019727649688844433,
+    "sen_slope_per_h": 0.27214608541349083
+   },
+   "throughput": {
+    "n": 1381,
+    "mk_s": -92451,
+    "mk_z": -5.4017,
+    "mk_p_two_sided": 6.601085580502032e-08,
+    "mk_p_upward": 0.999999966994572,
+    "sen_slope_per_h": -1.784386617100372
+   },
+   "throughput_mean_rps": 471.6314265025344,
+   "p95_ms_median": 28.895854949951172,
+   "db_rows": 1,
+   "db_state_counts": {
+    "associations": 1
+   },
+   "time_to_detect_min": 10.0,
+   "rss_upward_significant": false,
+   "flags": [],
+   "valid": true,
+   "spec_name": "baseline_artigo",
+   "hypothesis": "Carga do artigo: alterna associate/retrieve com o mesmo par cartão/telefone.",
+   "seed": 100,
+   "app_dir": "/home/rafae/pesquisa/autoresearch-juiz-v2/apps/credit-card-fastapi/original",
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null
+  }
+ ]
+}
