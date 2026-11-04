@@ -1,0 +1,6 @@
+---
+run_id: detect-1103-1450-59ca seed: 1
+arm=baseline_artigo valid=False score_rss_mb_per_h=NA rss_slope=0.000 robust_slope=0.000 h1_slope=0.000 h2_slope=0.000 mk_p=1.00000 heap_slope=0.000 handles_slope=0.000 p95_slope=-0.003 ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=3296807 err=1.0000 db_rows=0 flags=D1_saturacao,H4_processo_reiniciado_ou_morto,sem_amostras_suficientes
+arm=escrita_4_threads valid=True score_rss_mb_per_h=NA rss_slope=9.089 robust_slope=1.066 h1_slope=10.950 h2_slope=1.066 mk_p=0.00000 heap_slope=0.151 handles_slope=0.000 p95_slope=5.731 ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=102459 err=0.0156 db_rows=205 flags=E1_erros_5xx_da_app
+arm=leitura_10_telefones valid=True score_rss_mb_per_h=NA rss_slope=7.240 robust_slope=0.421 h1_slope=0.421 h2_slope=5.570 mk_p=0.00000 heap_slope=0.097 handles_slope=0.000 p95_slope=0.021 ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=1177261 err=0.0006 db_rows=45 flags=-
+arm=valores_diversos valid=True score_rss_mb_per_h=NA rss_slope=7.861 robust_slope=1.017 h1_slope=4.031 h2_slope=1.017 mk_p=0.00000 heap_slope=-1.314 handles_slope=0.000 p95_slope=1.938 ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=518454 err=0.0150 db_rows=205 flags=E1_erros_5xx_da_app

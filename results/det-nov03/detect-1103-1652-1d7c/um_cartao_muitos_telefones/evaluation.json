@@ -1,0 +1,102 @@
+{
+ "arm": "um_cartao_muitos_telefones",
+ "warmup_s": 300.0,
+ "requests": 151208,
+ "error_rate": 0.004550023808264113,
+ "server_error_rate": 0.004523570181471879,
+ "exception_rate": 2.6453626792233214e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 75603,
+  "/associate_card": 75605
+ },
+ "rss_mb": {
+  "n": 629,
+  "mk_s": 37024,
+  "mk_z": 7.0325,
+  "mk_p_two_sided": 2.0289223412721338e-12,
+  "mk_p_upward": 1.0144611706360669e-12,
+  "sen_slope_per_h": 0.44804946589098654,
+  "sen_slope_first_half_per_h": 2.1090256423172646,
+  "sen_slope_second_half_per_h": -1.152197088549256,
+  "robust_slope_per_h": -1.152197088549256,
+  "first": 99.7734375,
+  "last": 104.73828125
+ },
+ "heap_mb": {
+  "n": 629,
+  "mk_s": 86534,
+  "mk_z": 16.4366,
+  "mk_p_two_sided": 1.0466904373132433e-60,
+  "mk_p_upward": 5.233452186566216e-61,
+  "sen_slope_per_h": 0.10126764534694782,
+  "sen_slope_first_half_per_h": 0.24295213237933413,
+  "sen_slope_second_half_per_h": 0.030895555667743713,
+  "robust_slope_per_h": 0.030895555667743713,
+  "first": 8.733505249023438,
+  "last": 8.945823669433594
+ },
+ "external_mb": {
+  "n": 629,
+  "mk_s": 2635,
+  "mk_z": 0.5003,
+  "mk_p_two_sided": 0.616851632890553,
+  "mk_p_upward": 0.3084258164452765,
+  "sen_slope_per_h": 0.00011670968277390246,
+  "sen_slope_first_half_per_h": 0.0014749143494988215,
+  "sen_slope_second_half_per_h": -0.0004454456157799646,
+  "robust_slope_per_h": -0.0004454456157799646,
+  "first": 2.1043710708618164,
+  "last": 2.093496322631836
+ },
+ "handles": {
+  "n": 629,
+  "mk_s": -1254,
+  "mk_z": -2.4417,
+  "mk_p_two_sided": 0.014618208515886365,
+  "mk_p_upward": 0.9926908957420568,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 7175,
+  "mk_z": 1.265,
+  "mk_p_two_sided": 0.20587242716362972,
+  "mk_p_upward": 0.10293621358181486,
+  "sen_slope_per_h": 3.365029470860015,
+  "sen_slope_first_half_per_h": -13.523349514255274,
+  "sen_slope_second_half_per_h": 22.99293395011656,
+  "robust_slope_per_h": -13.523349514255274
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -7010,
+  "mk_z": -1.2361,
+  "mk_p_two_sided": 0.21641876906658175,
+  "mk_p_upward": 0.8917906154667091,
+  "sen_slope_per_h": -0.8622754491017985,
+  "sen_slope_first_half_per_h": 4.3857868020304664,
+  "sen_slope_second_half_per_h": -4.235294117647124,
+  "robust_slope_per_h": -4.235294117647124
+ },
+ "throughput_mean_rps": 42.98184568835099,
+ "p95_ms_median": 131.12974166870117,
+ "db_rows": 301,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 150,
+  "card_phone_associations": 150
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "um_cartao_muitos_telefones",
+ "hypothesis": "D2: um único cartão ligado a ~150 telefones torna o JOIN/GROUP BY pesado e retém memória por consulta; falsificada se < 10 MB/h.",
+ "sig_hash": "0d9002c8909d",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

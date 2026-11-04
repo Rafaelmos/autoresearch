@@ -1,0 +1,104 @@
+{
+ "arm": "strings_distintas",
+ "warmup_s": 300.0,
+ "requests": 491764,
+ "error_rate": 0.016036147420307303,
+ "server_error_rate": 0.016025979941598004,
+ "exception_rate": 1.0167478709299583e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 404385,
+  "/associate_card": 87379
+ },
+ "rss_mb": {
+  "n": 629,
+  "mk_s": 63089,
+  "mk_z": 11.9834,
+  "mk_p_two_sided": 4.3389913798937223e-33,
+  "mk_p_upward": 2.1694956899468612e-33,
+  "sen_slope_per_h": 0.8261304505463389,
+  "sen_slope_first_half_per_h": 1.1660447761194033,
+  "sen_slope_second_half_per_h": 1.0661556261701959,
+  "robust_slope_per_h": 1.0661556261701959,
+  "first": 114.046875,
+  "last": 114.45703125
+ },
+ "heap_mb": {
+  "n": 629,
+  "mk_s": 28489,
+  "mk_z": 5.4112,
+  "mk_p_two_sided": 6.261325459957047e-08,
+  "mk_p_upward": 3.1306627299785236e-08,
+  "sen_slope_per_h": 0.07054726661870742,
+  "sen_slope_first_half_per_h": 0.10317853220765943,
+  "sen_slope_second_half_per_h": 0.013248177627262934,
+  "robust_slope_per_h": 0.013248177627262934,
+  "first": 9.304039001464844,
+  "last": 8.232414245605469
+ },
+ "external_mb": {
+  "n": 629,
+  "mk_s": 3761,
+  "mk_z": 0.7142,
+  "mk_p_two_sided": 0.47510550415961117,
+  "mk_p_upward": 0.23755275207980558,
+  "sen_slope_per_h": 0.0006531304589846639,
+  "sen_slope_first_half_per_h": -0.001036503288550219,
+  "sen_slope_second_half_per_h": -0.0013092605219625925,
+  "robust_slope_per_h": -0.0013092605219625925,
+  "first": 2.116485595703125,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 629,
+  "mk_s": -1254,
+  "mk_z": -2.4417,
+  "mk_p_two_sided": 0.014618208515886365,
+  "mk_p_upward": 0.9926908957420568,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 10163,
+  "mk_z": 1.7919,
+  "mk_p_two_sided": 0.0731532686522257,
+  "mk_p_upward": 0.03657663432611285,
+  "sen_slope_per_h": 3.420320668614896,
+  "sen_slope_first_half_per_h": -6.921674821760268,
+  "sen_slope_second_half_per_h": 14.149388180503365,
+  "robust_slope_per_h": -6.921674821760268
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -8129,
+  "mk_z": -1.4332,
+  "mk_p_two_sided": 0.15179350124777716,
+  "mk_p_upward": 0.9241032493761114,
+  "sen_slope_per_h": -8.66320529116485,
+  "sen_slope_first_half_per_h": 29.999999999999993,
+  "sen_slope_second_half_per_h": -32.91428571428568,
+  "robust_slope_per_h": -32.91428571428568
+ },
+ "throughput_mean_rps": 140.4965204236006,
+ "p95_ms_median": 66.62678718566895,
+ "db_rows": 700,
+ "db_state_counts": {
+  "credit_cards": 100,
+  "phones": 300,
+  "card_phone_associations": 300
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "strings_distintas",
+ "hypothesis": "D1: 300 telefones em 4 formatos e 100 cartões com separadores (muitas strings distintas) fazem o sqlite3 reter memória nativa; falsificada se < 10 MB/h.",
+ "sig_hash": "34e969b8a7a9",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

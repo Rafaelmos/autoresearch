@@ -1,0 +1,104 @@
+{
+ "arm": "meia_concorrencia",
+ "warmup_s": 300.0,
+ "requests": 235442,
+ "error_rate": 0.025802533107941658,
+ "server_error_rate": 0.025794038446836164,
+ "exception_rate": 8.494661105495196e-06,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 131755,
+  "/associate_card": 103687
+ },
+ "rss_mb": {
+  "n": 630,
+  "mk_s": 94167,
+  "mk_z": 17.8441,
+  "mk_p_two_sided": 3.2143774467487444e-71,
+  "mk_p_upward": 1.6071887233743722e-71,
+  "sen_slope_per_h": 7.438745367464063,
+  "sen_slope_first_half_per_h": 2.9099476572292877,
+  "sen_slope_second_half_per_h": -0.9499147022127097,
+  "robust_slope_per_h": -0.9499147022127097,
+  "first": 101.91796875,
+  "last": 107.578125
+ },
+ "heap_mb": {
+  "n": 630,
+  "mk_s": -671,
+  "mk_z": -0.127,
+  "mk_p_two_sided": 0.8989712912251226,
+  "mk_p_upward": 0.5505143543874387,
+  "sen_slope_per_h": -0.005847204978194798,
+  "sen_slope_first_half_per_h": 0.2834893149051578,
+  "sen_slope_second_half_per_h": -2.584999097509936,
+  "robust_slope_per_h": -2.584999097509936,
+  "first": 8.980049133300781,
+  "last": 7.960716247558594
+ },
+ "external_mb": {
+  "n": 630,
+  "mk_s": -32263,
+  "mk_z": -6.1135,
+  "mk_p_two_sided": 9.748680120855804e-10,
+  "mk_p_upward": 0.999999999512566,
+  "sen_slope_per_h": -0.009072270591730346,
+  "sen_slope_first_half_per_h": -0.0033115026054528593,
+  "sen_slope_second_half_per_h": -0.008486309062088514,
+  "robust_slope_per_h": -0.008486309062088514,
+  "first": 2.1643667221069336,
+  "last": 2.1080923080444336
+ },
+ "handles": {
+  "n": 630,
+  "mk_s": -629,
+  "mk_z": -1.7266,
+  "mk_p_two_sided": 0.08424771986711986,
+  "mk_p_upward": 0.9578761400664401,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 27170,
+  "mk_z": 4.7907,
+  "mk_p_two_sided": 1.6617501556001225e-06,
+  "mk_p_upward": 8.308750778000612e-07,
+  "sen_slope_per_h": 59.734358132591005,
+  "sen_slope_first_half_per_h": -2.5062561035156237,
+  "sen_slope_second_half_per_h": 85.91391823508532,
+  "robust_slope_per_h": -2.5062561035156237
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -34006,
+  "mk_z": -5.9964,
+  "mk_p_two_sided": 2.0175529824938767e-09,
+  "mk_p_upward": 0.9999999989912235,
+  "sen_slope_per_h": -9.168539325842712,
+  "sen_slope_first_half_per_h": -3.3488372093023733,
+  "sen_slope_second_half_per_h": -11.520000000000065,
+  "robust_slope_per_h": -11.520000000000065
+ },
+ "throughput_mean_rps": 64.82723146747352,
+ "p95_ms_median": 172.5156307220459,
+ "db_rows": 41,
+ "db_state_counts": {
+  "credit_cards": 20,
+  "phones": 1,
+  "card_phone_associations": 20
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "meia_concorrencia",
+ "hypothesis": "E3: com 6 threads (menos BUSY que 10) o mix 50/50 mostra a retenção; falsificada se < 10 MB/h.",
+ "sig_hash": "a6f0241f1fef",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

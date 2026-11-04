@@ -1,0 +1,102 @@
+{
+ "arm": "telefones_duplicados",
+ "warmup_s": 300.0,
+ "requests": 577945,
+ "error_rate": 0.0005900215418422169,
+ "server_error_rate": 0.0005831004680376161,
+ "exception_rate": 6.9210738046007835e-06,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 549046,
+  "/associate_card": 28899
+ },
+ "rss_mb": {
+  "n": 634,
+  "mk_s": 71992,
+  "mk_z": 13.5132,
+  "mk_p_two_sided": 1.3067670728162538e-41,
+  "mk_p_upward": 6.533835364081269e-42,
+  "sen_slope_per_h": 0.9461365283096986,
+  "sen_slope_first_half_per_h": 2.5821758888284108,
+  "sen_slope_second_half_per_h": -0.09859201057223368,
+  "robust_slope_per_h": -0.09859201057223368,
+  "first": 108.7734375,
+  "last": 110.10546875
+ },
+ "heap_mb": {
+  "n": 634,
+  "mk_s": 50474,
+  "mk_z": 9.474,
+  "mk_p_two_sided": 2.6925065135838362e-21,
+  "mk_p_upward": 1.3462532567919181e-21,
+  "sen_slope_per_h": 0.07887988399151145,
+  "sen_slope_first_half_per_h": 0.14116329452395174,
+  "sen_slope_second_half_per_h": 0.07170350818885535,
+  "robust_slope_per_h": 0.07170350818885535,
+  "first": 8.072502136230469,
+  "last": 7.961021423339844
+ },
+ "external_mb": {
+  "n": 634,
+  "mk_s": -953,
+  "mk_z": -0.1787,
+  "mk_p_two_sided": 0.8581759241359093,
+  "mk_p_upward": 0.5709120379320454,
+  "sen_slope_per_h": -0.00018594359683243484,
+  "sen_slope_first_half_per_h": -0.006498369649772396,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": -0.006498369649772396,
+  "first": 2.1090593338012695,
+  "last": 2.1211376190185547
+ },
+ "handles": {
+  "n": 634,
+  "mk_s": -633,
+  "mk_z": -1.7266,
+  "mk_p_two_sided": 0.08424148981047486,
+  "mk_p_upward": 0.9578792550947626,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": -453,
+  "mk_z": -0.0797,
+  "mk_p_two_sided": 0.9364746106273554,
+  "mk_p_upward": 0.5317626946863223,
+  "sen_slope_per_h": -0.003984816057786916,
+  "sen_slope_first_half_per_h": 0.13318555108432112,
+  "sen_slope_second_half_per_h": 0.19789783194596072,
+  "robust_slope_per_h": 0.13318555108432112
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -2499,
+  "mk_z": -0.4405,
+  "mk_p_two_sided": 0.6595753922349555,
+  "mk_p_upward": 0.6702123038825223,
+  "sen_slope_per_h": -0.5338280766852461,
+  "sen_slope_first_half_per_h": -3.862068965517257,
+  "sen_slope_second_half_per_h": -4.199999999999931,
+  "robust_slope_per_h": -4.199999999999931
+ },
+ "throughput_mean_rps": 162.7555219364599,
+ "p95_ms_median": 34.61337089538574,
+ "db_rows": 3,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 1,
+  "card_phone_associations": 1
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "telefones_duplicados",
+ "hypothesis": "F2: 10 telefones iguais (COUNT DISTINCT nunca bate com 10) retornam vazio e retêm memória no plano da consulta; falsificada se < 10 MB/h.",
+ "sig_hash": "010255401bad",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}

@@ -1,0 +1,4 @@
+{"t":0.002,"pid":3404,"rss":43794432,"heapUsed":3549912,"heapTotal":6397952,"external":1236601,"arrayBuffers":10475,"handles":0}
+{"t":5.005,"pid":3404,"rss":72810496,"heapUsed":8496832,"heapTotal":17670144,"external":2187494,"arrayBuffers":18891,"handles":11}
+{"t":10.006,"pid":3404,"rss":73859072,"heapUsed":8634488,"heapTotal":10592256,"external":2212359,"arrayBuffers":27083,"handles":11}
+{"t":15.007,"pid":3404,"rss":74252288,"heapUsed":8646664,"heapTotal":10592256,"external":2203389,"arrayBuffers":27083,"handles":11}

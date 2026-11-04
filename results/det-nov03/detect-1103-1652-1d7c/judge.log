@@ -1,0 +1,6 @@
+---
+run_id: detect-1103-1652-1d7c seed: 1
+arm=resultado_grande valid=True score_rss_mb_per_h=NA rss_slope=0.523 robust_slope=-0.106 h1_slope=1.412 h2_slope=-0.106 mk_p=0.00000 heap_slope=0.046 handles_slope=0.000 p95_slope=0.801 ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=430934 err=0.0008 db_rows=670 flags=-
+arm=um_cartao_muitos_telefones valid=True score_rss_mb_per_h=NA rss_slope=0.448 robust_slope=-1.152 h1_slope=2.109 h2_slope=-1.152 mk_p=0.00000 heap_slope=0.101 handles_slope=0.000 p95_slope=3.365 ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=151208 err=0.0046 db_rows=301 flags=-
+arm=baseline_artigo valid=True score_rss_mb_per_h=NA rss_slope=0.052 robust_slope=-0.218 h1_slope=-0.218 h2_slope=0.718 mk_p=0.20438 heap_slope=0.073 handles_slope=0.000 p95_slope=4.854 ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=475885 err=0.0169 db_rows=3 flags=E1_erros_5xx_da_app
+arm=strings_distintas valid=True score_rss_mb_per_h=NA rss_slope=0.826 robust_slope=1.066 h1_slope=1.166 h2_slope=1.066 mk_p=0.00000 heap_slope=0.071 handles_slope=0.000 p95_slope=3.420 ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=491764 err=0.0160 db_rows=700 flags=E1_erros_5xx_da_app

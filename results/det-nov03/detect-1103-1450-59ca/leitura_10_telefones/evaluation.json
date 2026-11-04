@@ -1,0 +1,102 @@
+{
+ "arm": "leitura_10_telefones",
+ "warmup_s": 300.0,
+ "requests": 1177261,
+ "error_rate": 0.0006234811142134157,
+ "server_error_rate": 0.0006234811142134157,
+ "exception_rate": 0.0,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 1104721,
+  "/associate_card": 72540
+ },
+ "rss_mb": {
+  "n": 622,
+  "mk_s": 104307,
+  "mk_z": 20.1478,
+  "mk_p_two_sided": 2.8154423730568225e-90,
+  "mk_p_upward": 1.4077211865284112e-90,
+  "sen_slope_per_h": 7.24019018635603,
+  "sen_slope_first_half_per_h": 0.4207580785551083,
+  "sen_slope_second_half_per_h": 5.569628944363338,
+  "robust_slope_per_h": 0.4207580785551083,
+  "first": 111.0234375,
+  "last": 116.14453125
+ },
+ "heap_mb": {
+  "n": 622,
+  "mk_s": 60420,
+  "mk_z": 11.6705,
+  "mk_p_two_sided": 1.8046450701893431e-31,
+  "mk_p_upward": 9.023225350946716e-32,
+  "sen_slope_per_h": 0.09713743639618315,
+  "sen_slope_first_half_per_h": 0.1541966528811805,
+  "sen_slope_second_half_per_h": 0.036219136566737115,
+  "robust_slope_per_h": 0.036219136566737115,
+  "first": 8.227882385253906,
+  "last": 8.201377868652344
+ },
+ "external_mb": {
+  "n": 622,
+  "mk_s": -3752,
+  "mk_z": -0.7245,
+  "mk_p_two_sided": 0.4687350982654268,
+  "mk_p_upward": 0.7656324508672866,
+  "sen_slope_per_h": -0.0014787934624151968,
+  "sen_slope_first_half_per_h": 0.006280555611631601,
+  "sen_slope_second_half_per_h": -0.008436322793441682,
+  "robust_slope_per_h": -0.008436322793441682,
+  "first": 2.1380481719970703,
+  "last": 2.0908803939819336
+ },
+ "handles": {
+  "n": 622,
+  "mk_s": -1240,
+  "mk_z": -2.4416,
+  "mk_p_two_sided": 0.014621757083394516,
+  "mk_p_upward": 0.9926891214583028,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 661,
+  "mk_s": 2310,
+  "mk_z": 0.4071,
+  "mk_p_two_sided": 0.6838992384145092,
+  "mk_p_upward": 0.3419496192072546,
+  "sen_slope_per_h": 0.02068962434870008,
+  "sen_slope_first_half_per_h": 0.5060666567319398,
+  "sen_slope_second_half_per_h": -0.4232154702240564,
+  "robust_slope_per_h": -0.4232154702240564
+ },
+ "throughput": {
+  "n": 661,
+  "mk_s": -5642,
+  "mk_z": -0.9947,
+  "mk_p_two_sided": 0.31988583864526143,
+  "mk_p_upward": 0.8400570806773693,
+  "sen_slope_per_h": -3.832569161815456,
+  "sen_slope_first_half_per_h": -38.95081967213129,
+  "sen_slope_second_half_per_h": 28.981132075471855,
+  "robust_slope_per_h": -38.95081967213129
+ },
+ "throughput_mean_rps": 328.4565809379728,
+ "p95_ms_median": 35.25876998901367,
+ "db_rows": 45,
+ "db_state_counts": {
+  "credit_cards": 20,
+  "phones": 5,
+  "card_phone_associations": 20
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": false,
+ "flags": [],
+ "valid": true,
+ "spec_name": "leitura_10_telefones",
+ "hypothesis": "B2: consultas com 10 telefones (IN largo, JOIN/GROUP BY maior) retêm memória nativa do sqlite3; falsificada se < 10 MB/h.",
+ "sig_hash": "6b819752467a",
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original"
+}
