@@ -1,0 +1,104 @@
+{
+ "arm": "leak_20_mbh",
+ "warmup_s": 300.0,
+ "requests": 966492,
+ "error_rate": 0.016964444609991598,
+ "server_error_rate": 0.016948924564300583,
+ "exception_rate": 1.5520045691014513e-05,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 794279,
+  "/associate_card": 172213
+ },
+ "rss_mb": {
+  "n": 1361,
+  "mk_s": 907792,
+  "mk_z": 54.2102,
+  "mk_p_two_sided": 0.0,
+  "mk_p_upward": 0.0,
+  "sen_slope_per_h": 23.56268545025472,
+  "sen_slope_first_half_per_h": 23.641463542192227,
+  "sen_slope_second_half_per_h": 23.79908800299195,
+  "robust_slope_per_h": 23.641463542192227,
+  "first": 115.00390625,
+  "last": 160.359375
+ },
+ "heap_mb": {
+  "n": 1361,
+  "mk_s": 801144,
+  "mk_z": 47.8415,
+  "mk_p_two_sided": 0.0,
+  "mk_p_upward": 0.0,
+  "sen_slope_per_h": 0.7312493068549124,
+  "sen_slope_first_half_per_h": 0.7987533490079195,
+  "sen_slope_second_half_per_h": 0.7161390035580717,
+  "robust_slope_per_h": 0.7161390035580717,
+  "first": 9.362045288085938,
+  "last": 9.512016296386719
+ },
+ "external_mb": {
+  "n": 1361,
+  "mk_s": 925470,
+  "mk_z": 55.2659,
+  "mk_p_two_sided": 0.0,
+  "mk_p_upward": 0.0,
+  "sen_slope_per_h": 18.74437018567731,
+  "sen_slope_first_half_per_h": 18.709446841330454,
+  "sen_slope_second_half_per_h": 18.775637233319582,
+  "robust_slope_per_h": 18.709446841330454,
+  "first": 3.673870086669922,
+  "last": 39.647459983825684
+ },
+ "handles": {
+  "n": 1361,
+  "mk_s": -2718,
+  "mk_z": -2.4459,
+  "mk_p_two_sided": 0.014449493280759299,
+  "mk_p_upward": 0.9927752533596204,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 1381,
+  "mk_s": -114252,
+  "mk_z": -6.6751,
+  "mk_p_two_sided": 2.4712771707800418e-11,
+  "mk_p_upward": 0.9999999999876437,
+  "sen_slope_per_h": -7.322157759653731,
+  "sen_slope_first_half_per_h": -18.139554743181193,
+  "sen_slope_second_half_per_h": -9.484291076660156,
+  "robust_slope_per_h": -18.139554743181193
+ },
+ "throughput": {
+  "n": 1381,
+  "mk_s": 116101,
+  "mk_z": 6.7831,
+  "mk_p_two_sided": 1.17606307664854e-11,
+  "mk_p_upward": 5.8803153832427e-12,
+  "sen_slope_per_h": 12.855983511529036,
+  "sen_slope_first_half_per_h": 28.800000000000395,
+  "sen_slope_second_half_per_h": 18.000000000000032,
+  "robust_slope_per_h": 18.000000000000032
+ },
+ "throughput_mean_rps": 133.79927588703836,
+ "p95_ms_median": 79.06293869018555,
+ "db_rows": 3,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 1,
+  "card_phone_associations": 1
+ },
+ "time_to_detect_min": 10.0,
+ "rss_upward_significant": true,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "baseline_artigo",
+ "hypothesis": "controle positivo",
+ "sig_hash": null,
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/results/calibration-1104-2221/_app_leak_20"
+}

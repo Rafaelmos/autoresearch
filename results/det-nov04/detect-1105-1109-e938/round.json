@@ -1,0 +1,52 @@
+{
+ "event": "detect",
+ "run_id": "detect-1105-1109-e938",
+ "commit": "6708661",
+ "smoke": false,
+ "minutes": 120.0,
+ "seed": 1,
+ "arms": [
+  {
+   "arm": "misto_diverso_4t",
+   "valid": false,
+   "flags": [
+    "erro: Command '['/usr/bin/python', '-m', 'harness.load', 'run', '--workload', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1109-e938/workload.py', '--arm', 'misto_diverso_4t', '--port', '39953', '--seconds', '7200', '--seed', '1', '--out', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1109-e938/misto_diverso_4t/load_summary.json']' timed out after 7300 seconds"
+   ],
+   "rss_slope_mb_per_h": null,
+   "robust_slope_mb_per_h": null,
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null,
+   "confirmed_seeds": [],
+   "keep_eligible": false,
+   "replicated_score_mb_per_h": null
+  },
+  {
+   "arm": "baseline_artigo",
+   "valid": false,
+   "flags": [
+    "erro: Command '['/usr/bin/python', '-m', 'harness.load', 'run', '--workload', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1109-e938/workload.py', '--arm', 'baseline_artigo', '--port', '33127', '--seconds', '7200', '--seed', '1', '--out', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1109-e938/baseline_artigo/load_summary.json']' timed out after 7300 seconds"
+   ],
+   "rss_slope_mb_per_h": null,
+   "robust_slope_mb_per_h": null,
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null,
+   "confirmed_seeds": [],
+   "keep_eligible": false,
+   "replicated_score_mb_per_h": null
+  },
+  {
+   "arm": "leitura_10t_120",
+   "valid": false,
+   "flags": [
+    "erro: Command '['/usr/bin/python', '-m', 'harness.load', 'run', '--workload', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1109-e938/workload.py', '--arm', 'leitura_10t_120', '--port', '57049', '--seconds', '7200', '--seed', '1', '--out', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1109-e938/leitura_10t_120/load_summary.json']' timed out after 7300 seconds"
+   ],
+   "rss_slope_mb_per_h": null,
+   "robust_slope_mb_per_h": null,
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null,
+   "confirmed_seeds": [],
+   "keep_eligible": false,
+   "replicated_score_mb_per_h": null
+  }
+ ]
+}

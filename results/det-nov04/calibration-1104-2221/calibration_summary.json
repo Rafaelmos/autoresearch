@@ -1,0 +1,51 @@
+{
+ "minutes": 120.0,
+ "seed": 1,
+ "smoke": false,
+ "arms": [
+  {
+   "injetado_mb_h": 0,
+   "rss_slope": 0.30960630134790945,
+   "robust_slope": 0.159813590177103,
+   "valid": true,
+   "flags": [
+    "E1_erros_5xx_da_app"
+   ],
+   "detectado_pela_regra_do_juiz": false,
+   "recuperacao_robusta_pct": null
+  },
+  {
+   "injetado_mb_h": 10,
+   "rss_slope": 13.129068569982737,
+   "robust_slope": 12.672404626089474,
+   "valid": true,
+   "flags": [
+    "E1_erros_5xx_da_app"
+   ],
+   "detectado_pela_regra_do_juiz": true,
+   "recuperacao_robusta_pct": 126.72404626089474
+  },
+  {
+   "injetado_mb_h": 20,
+   "rss_slope": 23.56268545025472,
+   "robust_slope": 23.641463542192227,
+   "valid": true,
+   "flags": [
+    "E1_erros_5xx_da_app"
+   ],
+   "detectado_pela_regra_do_juiz": true,
+   "recuperacao_robusta_pct": 118.20731771096114
+  },
+  {
+   "injetado_mb_h": 40,
+   "rss_slope": 39.69264520009002,
+   "robust_slope": 39.069803465651106,
+   "valid": true,
+   "flags": [
+    "E1_erros_5xx_da_app"
+   ],
+   "detectado_pela_regra_do_juiz": true,
+   "recuperacao_robusta_pct": 97.67450866412777
+  }
+ ]
+}

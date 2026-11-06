@@ -1,0 +1,53 @@
+commit	run_id	seed	arm	rss_slope_mb_per_h	robust_slope_mb_per_h	score_rss_mb_per_h	mk_p	ratio_vs_baseline	ttd_min	status	flags	hypothesis
+9f32ab5	detect-1103-1349-1ee6	1	so_associate	7.098	0.971	NA	0.00000	NA	NA	discard	-	A1: retenção vem do caminho de escrita (1 thread)
+9f32ab5	detect-1103-1349-1ee6	1	baseline_artigo	0.374	1.006	NA	0.00000	NA	NA	baseline	E1_erros_5xx_da_app	baseline do artigo
+9f32ab5	detect-1103-1349-1ee6	1	so_retrieve	1.399	0.561	NA	0.00000	NA	NA	discard	-	A2: retenção vem do caminho de leitura
+9f32ab5	detect-1103-1349-1ee6	1	so_invalidas	0.268	-0.528	NA	0.00000	NA	NA	discard	D4_copia_da_baseline	A3: controle sem banco
+23be903	detect-1103-1450-59ca	1	baseline_artigo	0.000	0.000	NA	1.00000	NA	NA	invalid	D1_saturacao,H4_processo_reiniciado_ou_morto,sem_amostras_suficientes	baseline do artigo (app caiu por SQLITE_BUSY não tratado)
+23be903	detect-1103-1450-59ca	1	escrita_4_threads	9.089	1.066	NA	0.00000	NA	NA	discard	E1_erros_5xx_da_app	B3: escrita dominante com 4 threads
+23be903	detect-1103-1450-59ca	1	leitura_10_telefones	7.240	0.421	NA	0.00000	NA	NA	discard	-	B2: consulta larga retém memória nativa
+23be903	detect-1103-1450-59ca	1	valores_diversos	7.861	1.017	NA	0.00000	NA	NA	discard	E1_erros_5xx_da_app	B1: diversidade de valores
+8ae6f5e	detect-1103-1551-9be4	1	serial_misto	3.458	0.197	NA	0.00000	NA	NA	discard	-	C2: caminho normal serial
+8ae6f5e	detect-1103-1551-9be4	1	baseline_artigo	0.527	-0.048	NA	0.00000	NA	NA	baseline	E1_erros_5xx_da_app	baseline do artigo
+8ae6f5e	detect-1103-1551-9be4	1	leitura_serial_larga	1.411	0.544	NA	0.00000	NA	NA	discard	-	C3: leitura larga serial
+8ae6f5e	detect-1103-1551-9be4	1	payload_grande_invalido	0.138	0.135	NA	0.00237	NA	NA	discard	-	C1: payload grande rejeitado na validação
+d22137b	detect-1103-1652-1d7c	1	resultado_grande	0.523	-0.106	NA	0.00000	NA	NA	discard	-	D3: resultados grandes
+d22137b	detect-1103-1652-1d7c	1	um_cartao_muitos_telefones	0.448	-1.152	NA	0.00000	NA	NA	discard	-	D2: um cartão com muitos telefones
+d22137b	detect-1103-1652-1d7c	1	baseline_artigo	0.052	-0.218	NA	0.20438	NA	NA	baseline	E1_erros_5xx_da_app	baseline do artigo
+d22137b	detect-1103-1652-1d7c	1	strings_distintas	0.826	1.066	NA	0.00000	NA	NA	discard	E1_erros_5xx_da_app	D1: strings distintas
+09de8db	detect-1103-1753-954e	1	meia_concorrencia	7.439	-0.950	NA	0.00000	NA	NA	discard	E1_erros_5xx_da_app	E3: 6 threads 50/50
+09de8db	detect-1103-1753-954e	1	erros_intercalados	8.392	-0.430	NA	0.00000	NA	NA	discard	-	E2: erros 400 intercalados
+09de8db	detect-1103-1753-954e	1	baseline_artigo	8.120	0.170	NA	0.00000	NA	NA	baseline	E1_erros_5xx_da_app	baseline do artigo
+09de8db	detect-1103-1753-954e	1	associate_10_threads	1.718	1.140	NA	0.00000	NA	NA	discard	E1_erros_5xx_da_app,E2_erro_dominante_revisao_humana	E1: escrita pura 10 threads
+08334d2	detect-1103-1854-4ea7	1	corpo_extra_grande	2.403	2.407	NA	0.00000	NA	NA	discard	-	F1: corpo extra grande (body-parser)
+08334d2	detect-1103-1854-4ea7	1	baseline_artigo	0.946	0.090	NA	0.00000	NA	NA	baseline	E1_erros_5xx_da_app	baseline do artigo
+08334d2	detect-1103-1854-4ea7	1	telefones_duplicados	0.946	-0.099	NA	0.00000	NA	NA	discard	-	F2: telefones duplicados
+08334d2	detect-1103-1854-4ea7	1	taxa_baixa	1.064	1.007	NA	0.00000	NA	NA	discard	E1_erros_5xx_da_app	F3: taxa baixa (think 1 s)
+bc80140	detect-1103-1954-3d18	1	escrita_serial_corpo_grande	12.091	1.989	NA	0.00000	NA	NA	discard	-	G3: corpo grande em escrita serial
+bc80140	detect-1103-1954-3d18	1	baseline_artigo	4.335	0.385	NA	0.00000	NA	NA	baseline	E1_erros_5xx_da_app	baseline do artigo
+bc80140	detect-1103-1954-3d18	1	leitura_corpo_aleatorio_10t	1.157	0.342	NA	0.00000	NA	NA	discard	-	G2: corpo aleatório em leitura 10t
+bc80140	detect-1103-1954-3d18	1	leitura_corpo_grande_10t	3.116	0.150	NA	0.00000	NA	NA	discard	-	G1: corpo grande em leitura 10t
+2cb27cd	detect-1103-2055-6417	2	corpo_extra_2t	1.093	-0.053	NA	0.00000	NA	NA	discard	-	H1: F1 com 2 threads
+2cb27cd	detect-1103-2055-6417	2	escrita_serial_corpo_grande	1.505	-0.236	NA	0.00000	NA	NA	discard	-	G3 réplica semente 2
+2cb27cd	detect-1103-2055-6417	2	corpo_extra_grande	1.422	-0.012	NA	0.00000	NA	NA	discard	-	F1 réplica semente 2
+2cb27cd	detect-1103-2055-6417	2	baseline_artigo	-0.285	-0.517	NA	0.99999	NA	NA	baseline	E1_erros_5xx_da_app	baseline do artigo
+6708661	detect-1105-0910-b8cc	1	escrita_serial_120	2.669	1.001	NA	0.00000	NA	NA	discard	-	R1-A escrita pura 1 thread
+6708661	detect-1105-0910-b8cc	1	leitura_10t_120	NA	NA	NA	NA	NA	NA	invalid	erro_timeout_subprocesso_de_carga_7300s	R1-B leitura pura 10 threads
+6708661	detect-1105-0910-b8cc	1	misto_diverso_4t	NA	NA	NA	NA	NA	NA	invalid	erro_timeout_subprocesso_de_carga_7300s	R1-C mix diverso 4 threads
+6708661	detect-1105-0910-b8cc	1	baseline_artigo	NA	NA	NA	NA	NA	NA	invalid	erro_timeout_subprocesso_de_carga_7300s	baseline do artigo (sem resultado: timeout)
+6708661	detect-1105-1109-e938	1	escrita_serial_120	NA	NA	NA	NA	NA	NA	invalid	sem_avaliacao_no_resumo_do_juiz	R1-A escrita pura 1 thread (repeticao)
+6708661	detect-1105-1109-e938	1	leitura_10t_120	NA	NA	NA	NA	NA	NA	invalid	erro_timeout_subprocesso_de_carga_7300s	R1-B leitura pura 10 threads (repeticao)
+6708661	detect-1105-1109-e938	1	misto_diverso_4t	NA	NA	NA	NA	NA	NA	invalid	erro_timeout_subprocesso_de_carga_7300s	R1-C mix diverso 4 threads (repeticao)
+6708661	detect-1105-1109-e938	1	baseline_artigo	NA	NA	NA	NA	NA	NA	invalid	erro_timeout_subprocesso_de_carga_7300s	baseline do artigo (repeticao)
+bc75e03	detect-1105-1353-0ea3	1	misto_serial_diverso_120	0.514	0.366	NA	0.00000	NA	NA	discard	-	R2-B misto serial diverso
+bc75e03	detect-1105-1353-0ea3	1	leitura_larga_serial_120	0.174	0.123	NA	0.00000	NA	NA	discard	-	R2-C leitura larga 10 telefones serial
+bc75e03	detect-1105-1353-0ea3	1	leitura_serial_120	0.137	-0.033	NA	0.00000	NA	NA	discard	-	R2-A leitura pura 1 thread
+bc75e03	detect-1105-1353-0ea3	1	baseline_artigo	NA	NA	NA	NA	NA	NA	invalid	erro_timeout_subprocesso_de_carga_7300s	baseline (10 threads) estourou timeout
+1f506b5	detect-1105-1548-154d	1	escrita_diversa_serial	3.784	0.241	NA	0.00000	NA	NA	discard	-	R3-A escrita serial diversa
+1f506b5	detect-1105-1548-154d	1	leitura_inexistente_serial	1.161	0.594	NA	0.00000	NA	NA	discard	-	R3-B leitura de telefones inexistentes
+1f506b5	detect-1105-1548-154d	1	misto_com_5xx_serial	1.237	0.043	NA	0.00000	NA	NA	discard	E1_erros_5xx_da_app	R3-C 3% de 500 via errorHandler
+1f506b5	detect-1105-1548-154d	1	baseline_artigo	NA	NA	NA	NA	NA	NA	invalid	erro_timeout_subprocesso_de_carga_7300s	baseline (10 threads) estourou timeout
+63c1969	detect-1105-1758-c376	1	corpo_grande_misto_serial	1.111	0.005	NA	0.00000	NA	NA	discard	-	R4-C corpo 1,5KB misto
+63c1969	detect-1105-1758-c376	1	formatos_variados_serial	1.987	-0.265	NA	0.00000	NA	NA	discard	D2_crescimento_de_estado_legitimo	R4-B formatos variados (db_rows=3320)
+63c1969	detect-1105-1758-c376	1	misto_diverso_2t	NA	NA	NA	NA	NA	NA	invalid	erro_timeout_subprocesso_de_carga_7300s	R4-A misto diverso 2 threads
+63c1969	detect-1105-1758-c376	1	baseline_artigo	NA	NA	NA	NA	NA	NA	invalid	erro_timeout_subprocesso_de_carga_7300s	baseline (10 threads) estourou timeout

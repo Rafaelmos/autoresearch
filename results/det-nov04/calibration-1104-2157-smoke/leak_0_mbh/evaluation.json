@@ -1,0 +1,104 @@
+{
+ "arm": "leak_0_mbh",
+ "warmup_s": 12.0,
+ "requests": 14676,
+ "error_rate": 0.019555737258108476,
+ "server_error_rate": 0.019555737258108476,
+ "exception_rate": 0.0,
+ "client_error_rate": 0.0,
+ "ops": {
+  "/retrieve_cards": 12034,
+  "/associate_card": 2642
+ },
+ "rss_mb": {
+  "n": 56,
+  "mk_s": 777,
+  "mk_z": 5.4857,
+  "mk_p_two_sided": 4.1176155395652204e-08,
+  "mk_p_upward": 2.0588077697826102e-08,
+  "sen_slope_per_h": 55.4620434289192,
+  "sen_slope_first_half_per_h": 280.48133348862916,
+  "sen_slope_second_half_per_h": 19.684547367098922,
+  "robust_slope_per_h": 19.684547367098922,
+  "first": 90.99609375,
+  "last": 100.71484375
+ },
+ "heap_mb": {
+  "n": 56,
+  "mk_s": 996,
+  "mk_z": 7.0322,
+  "mk_p_two_sided": 2.0330610132318876e-12,
+  "mk_p_upward": 1.0165305066159438e-12,
+  "sen_slope_per_h": 13.521606262380022,
+  "sen_slope_first_half_per_h": 27.072210176666005,
+  "sen_slope_second_half_per_h": 2.8537469847615156,
+  "robust_slope_per_h": 2.8537469847615156,
+  "first": 8.480323791503906,
+  "last": 8.812026977539062
+ },
+ "external_mb": {
+  "n": 56,
+  "mk_s": -8,
+  "mk_z": -0.0495,
+  "mk_p_two_sided": 0.9605405878977555,
+  "mk_p_upward": 0.5197297060511222,
+  "sen_slope_per_h": -0.006277142707517451,
+  "sen_slope_first_half_per_h": 0.03568742539803549,
+  "sen_slope_second_half_per_h": -0.03475661412564763,
+  "robust_slope_per_h": -0.03475661412564763,
+  "first": 2.110751152038574,
+  "last": 2.093496322631836
+ },
+ "handles": {
+  "n": 56,
+  "mk_s": -55,
+  "mk_z": -1.6705,
+  "mk_p_two_sided": 0.09482874155938903,
+  "mk_p_upward": 0.9525856292203054,
+  "sen_slope_per_h": 0.0,
+  "sen_slope_first_half_per_h": 0.0,
+  "sen_slope_second_half_per_h": 0.0,
+  "robust_slope_per_h": 0.0
+ },
+ "p95_ms": {
+  "n": 22,
+  "mk_s": -127,
+  "mk_z": -3.5529,
+  "mk_p_two_sided": 0.00038095257032077573,
+  "mk_p_upward": 0.9998095237148397,
+  "sen_slope_per_h": -7125.3449576241655,
+  "sen_slope_first_half_per_h": -3642.0106887817387,
+  "sen_slope_second_half_per_h": -470.2019691467286,
+  "robust_slope_per_h": -3642.0106887817387
+ },
+ "throughput": {
+  "n": 22,
+  "mk_s": 119,
+  "mk_z": 3.3274,
+  "mk_p_two_sided": 0.0008767437883529101,
+  "mk_p_upward": 0.00043837189417645506,
+  "sen_slope_per_h": 4236.631578947369,
+  "sen_slope_first_half_per_h": -1943.999999999999,
+  "sen_slope_second_half_per_h": 185.1428571428583,
+  "robust_slope_per_h": -1943.999999999999
+ },
+ "throughput_mean_rps": 123.66363636363636,
+ "p95_ms_median": 82.07297325134277,
+ "db_rows": 3,
+ "db_state_counts": {
+  "credit_cards": 1,
+  "phones": 1,
+  "card_phone_associations": 1
+ },
+ "time_to_detect_min": null,
+ "rss_upward_significant": true,
+ "flags": [
+  "E1_erros_5xx_da_app"
+ ],
+ "valid": true,
+ "spec_name": "baseline_artigo",
+ "hypothesis": "controle positivo",
+ "sig_hash": null,
+ "seed": 1,
+ "app_dir": "/home/rafae/pesquisa/aging-autoresearch/results/calibration-1104-2157-smoke/_app_leak_0"
+}

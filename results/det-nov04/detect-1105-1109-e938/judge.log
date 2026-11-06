@@ -1,0 +1,18 @@
+Exception in thread Thread-2 (one):
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/threading.py", line 1073, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.12/threading.py", line 1010, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/rafae/pesquisa/aging-autoresearch/prepare.py", line 281, in one
+    ev = evaluate_arm(arm["label"], inst.probe_rows(), load, inst.db_state(), pids, alive, seconds)
+                                                             ^^^^^^^^^^^^^^^
+  File "/home/rafae/pesquisa/aging-autoresearch/harness/instance.py", line 165, in db_state
+    tables = [r[0] for r in con.execute(
+                            ^^^^^^^^^^^^
+sqlite3.OperationalError: attempt to write a readonly database
+---
+run_id: detect-1105-1109-e938 seed: 1
+arm=misto_diverso_4t valid=False score_rss_mb_per_h=NA rss_slope=NA robust_slope=NA h1_slope=NA h2_slope=NA mk_p=NA heap_slope=NA handles_slope=NA p95_slope=NA ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=None err=NA db_rows=None flags=erro: Command '['/usr/bin/python', '-m', 'harness.load', 'run', '--workload', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1109-e938/workload.py', '--arm', 'misto_diverso_4t', '--port', '39953', '--seconds', '7200', '--seed', '1', '--out', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1109-e938/misto_diverso_4t/load_summary.json']' timed out after 7300 seconds
+arm=baseline_artigo valid=False score_rss_mb_per_h=NA rss_slope=NA robust_slope=NA h1_slope=NA h2_slope=NA mk_p=NA heap_slope=NA handles_slope=NA p95_slope=NA ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=None err=NA db_rows=None flags=erro: Command '['/usr/bin/python', '-m', 'harness.load', 'run', '--workload', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1109-e938/workload.py', '--arm', 'baseline_artigo', '--port', '33127', '--seconds', '7200', '--seed', '1', '--out', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1109-e938/baseline_artigo/load_summary.json']' timed out after 7300 seconds
+arm=leitura_10t_120 valid=False score_rss_mb_per_h=NA rss_slope=NA robust_slope=NA h1_slope=NA h2_slope=NA mk_p=NA heap_slope=NA handles_slope=NA p95_slope=NA ttd_min=NA ratio=NA keep_eligible=False confirmed_seeds=- req=None err=NA db_rows=None flags=erro: Command '['/usr/bin/python', '-m', 'harness.load', 'run', '--workload', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1109-e938/workload.py', '--arm', 'leitura_10t_120', '--port', '57049', '--seconds', '7200', '--seed', '1', '--out', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1109-e938/leitura_10t_120/load_summary.json']' timed out after 7300 seconds

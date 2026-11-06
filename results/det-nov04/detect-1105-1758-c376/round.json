@@ -1,0 +1,258 @@
+{
+ "event": "detect",
+ "run_id": "detect-1105-1758-c376",
+ "commit": "63c1969",
+ "smoke": false,
+ "minutes": 120.0,
+ "seed": 1,
+ "arms": [
+  {
+   "arm": "corpo_grande_misto_serial",
+   "warmup_s": 300.0,
+   "requests": 209915,
+   "error_rate": 0.0007479217778624681,
+   "server_error_rate": 0.0007002834480623109,
+   "exception_rate": 4.763832980015721e-05,
+   "client_error_rate": 0.0,
+   "ops": {
+    "/associate_card": 104958,
+    "/retrieve_cards": 104957
+   },
+   "rss_mb": {
+    "n": 1385,
+    "mk_s": 435460,
+    "mk_z": 25.3316,
+    "mk_p_two_sided": 1.431815118478296e-141,
+    "mk_p_upward": 7.15907559239148e-142,
+    "sen_slope_per_h": 1.1114320343675026,
+    "sen_slope_first_half_per_h": 10.857696779973164,
+    "sen_slope_second_half_per_h": 0.005009963665117462,
+    "robust_slope_per_h": 0.005009963665117462,
+    "first": 93.2421875,
+    "last": 103.0546875
+   },
+   "heap_mb": {
+    "n": 1385,
+    "mk_s": 448238,
+    "mk_z": 26.0747,
+    "mk_p_two_sided": 7.058043719876804e-150,
+    "mk_p_upward": 3.529021859938402e-150,
+    "sen_slope_per_h": 0.07924950347673312,
+    "sen_slope_first_half_per_h": 0.37404680628953013,
+    "sen_slope_second_half_per_h": 0.003417216806534008,
+    "robust_slope_per_h": 0.003417216806534008,
+    "first": 8.692062377929688,
+    "last": 8.952072143554688
+   },
+   "external_mb": {
+    "n": 1385,
+    "mk_s": 61634,
+    "mk_z": 3.5853,
+    "mk_p_two_sided": 0.0003366857172046668,
+    "mk_p_upward": 0.0001683428586023334,
+    "sen_slope_per_h": 0.006723653897693475,
+    "sen_slope_first_half_per_h": 0.213759961617345,
+    "sen_slope_second_half_per_h": -0.03856299368673712,
+    "robust_slope_per_h": -0.03856299368673712,
+    "first": 2.3919191360473633,
+    "last": 2.093496322631836
+   },
+   "handles": {
+    "n": 1385,
+    "mk_s": -2766,
+    "mk_z": -2.446,
+    "mk_p_two_sided": 0.014446993973331197,
+    "mk_p_upward": 0.9927765030133344,
+    "sen_slope_per_h": 0.0,
+    "sen_slope_first_half_per_h": 0.0,
+    "sen_slope_second_half_per_h": 0.0,
+    "robust_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 1267,
+    "mk_s": 8400,
+    "mk_z": 0.5584,
+    "mk_p_two_sided": 0.5765871395626112,
+    "mk_p_upward": 0.2882935697813056,
+    "sen_slope_per_h": 0.14527164288421174,
+    "sen_slope_first_half_per_h": -3.472843868251112,
+    "sen_slope_second_half_per_h": 3.2220965754376714,
+    "robust_slope_per_h": -3.472843868251112
+   },
+   "throughput": {
+    "n": 1267,
+    "mk_s": -8710,
+    "mk_z": -0.5793,
+    "mk_p_two_sided": 0.5623739540948812,
+    "mk_p_upward": 0.7188130229525593,
+    "sen_slope_per_h": 0.0,
+    "sen_slope_first_half_per_h": 2.560000000000008,
+    "sen_slope_second_half_per_h": -2.4827586206896557,
+    "robust_slope_per_h": -2.4827586206896557
+   },
+   "throughput_mean_rps": 31.554538279400155,
+   "p95_ms_median": 46.349287033081055,
+   "db_rows": 440,
+   "db_state_counts": {
+    "credit_cards": 20,
+    "phones": 20,
+    "card_phone_associations": 400
+   },
+   "time_to_detect_min": null,
+   "rss_upward_significant": false,
+   "flags": [],
+   "valid": true,
+   "spec_name": "corpo_grande_misto_serial",
+   "hypothesis": "R4-C: corpo de ~1,5 KB em mix 50/50 serial (body-parser + banco); replica em 120 min a pista F1/G3 de det-nov03, que não replicou em 60 min; falsificada se robusto < 2 MB/h.",
+   "sig_hash": "3af3fce54a27",
+   "seed": 1,
+   "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original",
+   "rss_slope_mb_per_h": 1.1114320343675026,
+   "robust_slope_mb_per_h": 0.005009963665117462,
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null,
+   "confirmed_seeds": [],
+   "keep_eligible": false,
+   "replicated_score_mb_per_h": null
+  },
+  {
+   "arm": "formatos_variados_serial",
+   "warmup_s": 300.0,
+   "requests": 209714,
+   "error_rate": 0.0008010910096607761,
+   "server_error_rate": 0.0007534070209904918,
+   "exception_rate": 4.768398867028429e-05,
+   "client_error_rate": 0.0,
+   "ops": {
+    "/associate_card": 104857,
+    "/retrieve_cards": 104857
+   },
+   "rss_mb": {
+    "n": 1384,
+    "mk_s": 431758,
+    "mk_z": 25.1435,
+    "mk_p_two_sided": 1.6661780904411347e-139,
+    "mk_p_upward": 8.330890452205674e-140,
+    "sen_slope_per_h": 1.9874978160718189,
+    "sen_slope_first_half_per_h": 13.25160642978625,
+    "sen_slope_second_half_per_h": -0.2653098996111123,
+    "robust_slope_per_h": -0.2653098996111123,
+    "first": 90.12109375,
+    "last": 101.2421875
+   },
+   "heap_mb": {
+    "n": 1384,
+    "mk_s": 357009,
+    "mk_z": 20.7903,
+    "mk_p_two_sided": 5.301018237678346e-96,
+    "mk_p_upward": 2.650509118839173e-96,
+    "sen_slope_per_h": 0.07150991416771335,
+    "sen_slope_first_half_per_h": 0.36439520005153736,
+    "sen_slope_second_half_per_h": 0.007433976264786322,
+    "robust_slope_per_h": 0.007433976264786322,
+    "first": 8.673675537109375,
+    "last": 8.970108032226562
+   },
+   "external_mb": {
+    "n": 1384,
+    "mk_s": 98296,
+    "mk_z": 5.7242,
+    "mk_p_two_sided": 1.0392742935240624e-08,
+    "mk_p_upward": 5.196371467620312e-09,
+    "sen_slope_per_h": 0.00335511284525974,
+    "sen_slope_first_half_per_h": 0.09685848757375372,
+    "sen_slope_second_half_per_h": -0.022975394342974173,
+    "robust_slope_per_h": -0.022975394342974173,
+    "first": 2.166844367980957,
+    "last": 2.1361026763916016
+   },
+   "handles": {
+    "n": 1384,
+    "mk_s": -1383,
+    "mk_z": -1.7295,
+    "mk_p_two_sided": 0.08371101067137135,
+    "mk_p_upward": 0.9581444946643143,
+    "sen_slope_per_h": 0.0,
+    "sen_slope_first_half_per_h": 0.0,
+    "sen_slope_second_half_per_h": 0.0,
+    "robust_slope_per_h": 0.0
+   },
+   "p95_ms": {
+    "n": 1267,
+    "mk_s": 2623,
+    "mk_z": 0.1743,
+    "mk_p_two_sided": 0.8616186442610387,
+    "mk_p_upward": 0.43080932213051937,
+    "sen_slope_per_h": 0.048242073148419204,
+    "sen_slope_first_half_per_h": -3.770611917480908,
+    "sen_slope_second_half_per_h": 3.2884791745977893,
+    "robust_slope_per_h": -3.770611917480908
+   },
+   "throughput": {
+    "n": 1267,
+    "mk_s": -6928,
+    "mk_z": -0.4608,
+    "mk_p_two_sided": 0.6449594485382479,
+    "mk_p_upward": 0.677520275730876,
+    "sen_slope_per_h": 0.0,
+    "sen_slope_first_half_per_h": 2.8097560975609657,
+    "sen_slope_second_half_per_h": -2.5454545454545427,
+    "robust_slope_per_h": -2.5454545454545427
+   },
+   "throughput_mean_rps": 31.530702446724547,
+   "p95_ms_median": 46.34523391723633,
+   "db_rows": 3320,
+   "db_state_counts": {
+    "credit_cards": 40,
+    "phones": 80,
+    "card_phone_associations": 3200
+   },
+   "time_to_detect_min": null,
+   "rss_upward_significant": false,
+   "flags": [
+    "D2_crescimento_de_estado_legitimo"
+   ],
+   "valid": true,
+   "spec_name": "formatos_variados_serial",
+   "hypothesis": "R4-B: strings de telefone/cartão em formatos válidos distintos (espaços, hífens, parênteses) retêm memória nativa por parâmetros ligados distintos; falsificada se robusto < 2 MB/h.",
+   "sig_hash": "200e0faffe7f",
+   "seed": 1,
+   "app_dir": "/home/rafae/pesquisa/aging-autoresearch/apps/credit-card/original",
+   "rss_slope_mb_per_h": 1.9874978160718189,
+   "robust_slope_mb_per_h": -0.2653098996111123,
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null,
+   "confirmed_seeds": [],
+   "keep_eligible": false,
+   "replicated_score_mb_per_h": null
+  },
+  {
+   "arm": "baseline_artigo",
+   "valid": false,
+   "flags": [
+    "erro: Command '['/usr/bin/python', '-m', 'harness.load', 'run', '--workload', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1758-c376/workload.py', '--arm', 'baseline_artigo', '--port', '51365', '--seconds', '7200', '--seed', '1', '--out', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1758-c376/baseline_artigo/load_summary.json']' timed out after 7300 seconds"
+   ],
+   "rss_slope_mb_per_h": null,
+   "robust_slope_mb_per_h": null,
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null,
+   "confirmed_seeds": [],
+   "keep_eligible": false,
+   "replicated_score_mb_per_h": null
+  },
+  {
+   "arm": "misto_diverso_2t",
+   "valid": false,
+   "flags": [
+    "erro: Command '['/usr/bin/python', '-m', 'harness.load', 'run', '--workload', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1758-c376/workload.py', '--arm', 'misto_diverso_2t', '--port', '36139', '--seconds', '7200', '--seed', '1', '--out', '/home/rafae/pesquisa/aging-autoresearch/results/detect-1105-1758-c376/misto_diverso_2t/load_summary.json']' timed out after 7300 seconds"
+   ],
+   "rss_slope_mb_per_h": null,
+   "robust_slope_mb_per_h": null,
+   "score_rss_mb_per_h": null,
+   "ratio_vs_baseline": null,
+   "confirmed_seeds": [],
+   "keep_eligible": false,
+   "replicated_score_mb_per_h": null
+  }
+ ]
+}
