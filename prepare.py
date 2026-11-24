@@ -1,25 +1,26 @@
-"""Juiz fixo do AutoResearch-Aging. O AGENTE NÃO PODE EDITAR ESTE ARQUIVO.
+"""Fixed judge of AutoResearch-Aging. THE AGENT MUST NOT EDIT THIS FILE.
 
-Papel equivalente ao prepare.py do karpathy/autoresearch: medição e avaliação
-fixas. O agente edita workload.py (detecção) ou candidates/vN/ (reparo).
+Same role as prepare.py in karpathy/autoresearch: fixed measurement and evaluation. The agent only edits
+workload.py. This version covers detection and causes only (see program.md); there is no repair.
 
-Comandos (todos a partir da raiz do repositório):
-  python prepare.py setup --zip <project-bolt-credit-card.zip>   # humano, uma vez
-  python prepare.py detect [--minutes 60] [--seed 1] [--background]
-  python prepare.py freeze <run_id> <arm>                          # humano, fim da detecção
-  python prepare.py repair-init                                    # cria candidates/v1..v3
-  python prepare.py repair [--minutes 60] [--background]
-  python prepare.py promote <vN>                                   # adota um candidato como base
-  python prepare.py confirm --phase detect|repair [--minutes 60]   # 3 sementes + referência
-  python prepare.py wait <run_id>                                  # bloqueia até 9 min
-  python prepare.py verify                                         # confere hashes do juiz
-Use --smoke (2 min) só para checar o fluxo; smoke nunca entra no ranking.
+Commands (run from the repository root):
+  python prepare.py setup --src <llm-aging-detection-agents>          # human, once
+  python prepare.py check-oracles                                       # human: César's functional test on the app
+  python prepare.py experiment --tag <tag> [--smoke]                    # full experiment (orchestrator), no human
+  -- pieces used by the orchestrator (also runnable by hand, for debugging):
+  python prepare.py controls [--minutes 60] [--with-r1]                 # phase 0: R0 and R0b (+ R1)
+  python prepare.py detect [--minutes 60] [--seed 101] [--background]   # search round (run by the agent)
+  python prepare.py check-load --run <run_id> --arm <arm> --seed <s>    # verification round (R1, workload, R0, R0b)
+  python prepare.py freeze <run_id> <arm>                               # freeze the workload of one arm
+  python prepare.py causes [--minutes 60] [--seed 301] [--background]   # causes round (run by the agent)
+  python prepare.py rehash                                              # human: rebuild the manifest after editing the judge
+  python prepare.py wait <run_id>                                       # blocks up to 9 min
+  python prepare.py verify                                              # check the judge hashes
+Use --smoke (2 min) only to check the flow; smoke runs never count.
 """
 
 import argparse
-import difflib
 import hashlib
-import importlib.util
 import json
 import os
 import shutil
@@ -29,32 +30,53 @@ import tempfile
 import threading
 import time
 import uuid
-import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
+# After setup, always run inside the pinned venv, even if the agent calls "python prepare.py".
+_VPY = ROOT / ".cache" / "venv" / "bin" / "python"
+if _VPY.exists() and Path(sys.prefix).resolve() != (ROOT / ".cache" / "venv").resolve():
+    os.execv(str(_VPY), [str(_VPY), *sys.argv])
 
-from harness.instance import Instance, NODE_MODULES, copy_app  # noqa: E402
-from harness.load import BASELINE, LoadRun, validate_spec, WorkloadError  # noqa: E402
-from harness.evaluate import evaluate_arm, ALPHA, MIN_EFFECT_MB_PER_H  # noqa: E402
-from harness import gates  # noqa: E402
+from harness.instance import Instance  # noqa: E402
+from harness.remote import Client, RemoteInstance, check_server_manifest, server_config  # noqa: E402
+from harness.load import (BASELINE, R0, R0B, WorkloadError, one_factor_diff, read_client, run_script,  # noqa: E402
+                          same_as_default, summarize_client, validate_spec)
+from harness.evaluate import evaluate_arm  # noqa: E402
+from harness.functional_check import functional_check  # noqa: E402
+from harness.workload_check import load_workload  # noqa: E402
 
-APP = "credit-card"
-ORIGINAL = ROOT / "apps" / APP / "original"
-CANDS = ROOT / "candidates"
+APP = "credit-card-fastapi"
+APPS = ROOT / "apps" / APP
+INSTRUMENTED = APPS / "instrumented"
+VENV = ROOT / ".cache" / "venv"
+VENV_PY = VENV / "bin" / "python"
+CESAR_REPO_DEFAULT = ROOT.parent / "llm-aging-detection-agents"
+# Files copied unchanged from César's repository (source -> destination).
+CESAR_FILES = {
+    "findings/bax-fastapi-credit-card-F1.yaml": "findings/bax-fastapi-credit-card-F1.yaml",
+    "apps/credit-card-fastapi/campaign.yaml": "findings/campaign.yaml",
+    "reference/tests/test_credit_card_service.py": "oracle/test_credit_card_service.py",
+    "workloads/bax-fastapi-credit-card-F1_targeted_v1.py": "workloads/bax-fastapi-credit-card-F1_targeted_v1.py",
+    "workloads/bax-fastapi-credit-card-F1_targeted_v1.md": "workloads/bax-fastapi-credit-card-F1_targeted_v1.md",
+    "workloads/bax-fastapi-credit-card-F1_control.py": "workloads/bax-fastapi-credit-card-F1_control.py",
+}
+HARNESS_REQS = ["psutil", "httpx", "requests", "pymannkendall", "numpy", "pyyaml"]
 FROZEN = ROOT / "frozen" / "workload_frozen.py"
 RESULTS = ROOT / "results"
 JUDGE_DIR = ROOT / ".judge"
 MANIFEST = JUDGE_DIR / "manifest.json"
 JUDGE_LOG = RESULTS / "judge_log.jsonl"
-SLOTS = 4                       # 4 instâncias em paralelo (decisão de 20/10)
-DEFAULT_MINUTES = 60            # janela da reunião: sinal em ~1 h, não 48 h
-CONFIRM_SEEDS = (11, 12, 13)
-FIXED_GLOBS = ["prepare.py", "harness/*.py", "harness/*.js", "oracle/*.py", "oracle/hidden/*.py"]
+SLOTS = 4
+DEFAULT_MINUTES = 60
+FIXED_GLOBS = ["prepare.py", "harness/*.py", "oracle/*.py", "workloads/*.py", "findings/*.yaml"]
+AGENT_TIMEOUT_S = 3 * 3600
+CAUSES_REF = "frozen_reference"
+CHECK_LOAD = "workload"
 
 
-# ---------------------------------------------------------------- integridade
+# ---------------------------------------------------------------- integrity
 def _sha(p):
     return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
@@ -65,29 +87,40 @@ def fixed_files():
         files += sorted(ROOT.glob(g))
     if FROZEN.exists():
         files.append(FROZEN)
-    files += sorted(p for p in ORIGINAL.rglob("*") if p.is_file() and "node_modules" not in p.parts)
+    files += sorted(p for p in INSTRUMENTED.rglob("*") if p.is_file() and "__pycache__" not in p.parts
+                    and p.suffix != ".pyc" and not p.name.startswith("db.sqlite3"))
+    if (APPS / "SOURCE.json").exists():
+        files.append(APPS / "SOURCE.json")
     return files
+
+
+def _key(p):
+    return str(p.relative_to(ROOT))
+
+
+def _path(k):
+    return ROOT / k
 
 
 def write_manifest():
     JUDGE_DIR.mkdir(exist_ok=True)
-    m = {str(p.relative_to(ROOT)): _sha(p) for p in fixed_files()}
+    m = {_key(p): _sha(p) for p in fixed_files()}
     MANIFEST.write_text(json.dumps(m, indent=1))
     return m
 
 
 def verify(quiet=False):
     if not MANIFEST.exists():
-        sys.exit("manifesto ausente: rode 'python prepare.py setup' (humano)")
+        sys.exit("manifest missing: run 'python prepare.py setup' (human)")
     m = json.loads(MANIFEST.read_text())
-    now = {str(p.relative_to(ROOT)) for p in fixed_files()}
-    bad = [k for k, v in m.items() if not (ROOT / k).exists() or _sha(ROOT / k) != v]
+    now = {_key(p) for p in fixed_files()}
+    bad = [k for k, v in m.items() if not _path(k).exists() or _sha(_path(k)) != v]
     bad += sorted(now - set(m))
     if bad:
-        log_judge({"event": "juiz_alterado", "files": bad, "flag": "H5_juiz_ou_oraculo_alterado"})
-        sys.exit("ABORTADO: arquivos fixos alterados -> " + ", ".join(bad))
+        log_judge({"event": "judge_modified", "files": bad, "flag": "H5_judge_or_oracle_modified"})
+        sys.exit("ABORTED: fixed files changed -> " + ", ".join(bad))
     if not quiet:
-        print("verify: ok", len(m), "arquivos fixos íntegros")
+        print("verify: ok", len(m), "fixed files intact")
 
 
 def log_judge(rec):
@@ -106,98 +139,129 @@ def git_head():
 
 
 # ---------------------------------------------------------------- setup
+def _git_out(repo, *args):
+    return subprocess.check_output(["git", "-C", str(repo), *args], text=True, stderr=subprocess.DEVNULL).strip()
+
+
 def cmd_setup(a):
     if MANIFEST.exists() and not a.force:
-        sys.exit("setup já feito. Use --force apenas como humano, fora da campanha.")
-    with zipfile.ZipFile(a.zip) as z:
-        tmp = Path(tempfile.mkdtemp())
-        z.extractall(tmp)
-    src = next(p.parent for p in tmp.rglob("package.json") if "node_modules" not in p.parts)
-    if ORIGINAL.exists():
-        shutil.rmtree(ORIGINAL)
-    shutil.copytree(src, ORIGINAL, ignore=shutil.ignore_patterns("node_modules", "uptime_db", ".bolt"))
-    build = Path(tempfile.mkdtemp())
-    shutil.copy(ORIGINAL / "package.json", build)
-    if (ORIGINAL / "package-lock.json").exists():
-        shutil.copy(ORIGINAL / "package-lock.json", build)
-    print("npm install (dependências travadas do app original)...")
-    subprocess.check_call(["npm", "install", "--omit=dev", "--no-audit", "--no-fund"], cwd=build)
-    NODE_MODULES.parent.mkdir(exist_ok=True)
-    if NODE_MODULES.exists():
-        shutil.rmtree(NODE_MODULES)
-    shutil.move(str(build / "node_modules"), NODE_MODULES)
-    print("Conferindo oráculos contra o original...")
-    rep = gates.functional_and_hidden(ORIGINAL, Path(tempfile.mkdtemp()))
-    if any(rep):
-        sys.exit(f"O ORIGINAL falha nos oráculos; revise os testes: {rep}")
+        sys.exit("setup already done. Use --force only as a human, outside a campaign.")
+    src = Path(a.src).expanduser().resolve()
+    cc = src / "apps" / APP
+    if not (cc / "instrumented" / "app.py").exists():
+        sys.exit(f"{cc}/instrumented/app.py not found: pass --src <clone of chas42/llm-aging-detection-agents>")
+    # César's repository is only read; everything the judge uses is copied here and hashed.
+    if INSTRUMENTED.exists():
+        shutil.rmtree(INSTRUMENTED)
+    shutil.copytree(cc / "instrumented", INSTRUMENTED, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "db.sqlite3*"))
+    for rel_src, rel_dst in CESAR_FILES.items():
+        (ROOT / rel_dst).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src / rel_src, ROOT / rel_dst)
+    try:
+        commit, dirty = _git_out(src, "rev-parse", "HEAD"), bool(_git_out(src, "status", "--porcelain"))
+    except Exception:
+        commit, dirty = "unknown", None
+    (APPS / "SOURCE.json").write_text(json.dumps({
+        "repo": "https://github.com/chas42/llm-aging-detection-agents", "commit": commit, "dirty": dirty,
+        "copied": sorted(CESAR_FILES) + [f"apps/{APP}/instrumented"]}, indent=1))
+    print("pinned venv (app requirements.txt + judge dependencies)...")
+    if VENV.exists():
+        shutil.rmtree(VENV)
+    VENV.parent.mkdir(exist_ok=True)
+    # Without ensurepip the venv has no pip, so packages are installed from outside with `pip --python`.
+    subprocess.check_call([sys.executable, "-m", "venv", "--without-pip", str(VENV)])
+    pip = [sys.executable, "-m", "pip", "--python", str(VENV_PY)]
+    subprocess.check_call(pip + ["install", "-q", "-r", str(INSTRUMENTED / "requirements.txt")])
+    subprocess.check_call(pip + ["install", "-q", *HARNESS_REQS])
+    with open(VENV.parent / "venv-freeze.txt", "w") as f:
+        subprocess.check_call(pip + ["freeze"], stdout=f)
     m = write_manifest()
-    print(f"setup ok: {len(m)} arquivos fixos no manifesto")
+    print(f"setup ok: {len(m)} fixed files in the manifest. "
+          "Next: python prepare.py check-oracles (starts the app and runs César's functional test).")
 
 
-# ---------------------------------------------------------------- utilidades
-def load_module(path, name):
-    spec = importlib.util.spec_from_file_location(name, path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
+def cmd_check_oracles(a):
+    """César's functional test against the instrumented app: checks the copy works before measuring."""
+    fails = functional_check(INSTRUMENTED, Path(tempfile.mkdtemp()))
+    print(f"instrumented: functional={fails or 'ok'}")
+    if fails:
+        sys.exit("César's functional test fails against the copied app; check the setup before going on")
+    print("check-oracles: ok")
 
 
+# ---------------------------------------------------------------- utilities
 def frozen_spec():
     if not FROZEN.exists():
-        sys.exit("frozen/workload_frozen.py ausente: o humano roda 'prepare.py freeze' ao fim da detecção")
-    mod = load_module(FROZEN, "workload_frozen")
-    name = mod.FROZEN_ARM
+        sys.exit("frozen/workload_frozen.py missing: the orchestrator freezes the confirmed workload")
+    try:
+        ns = load_workload(FROZEN)
+    except WorkloadError as e:
+        sys.exit(f"frozen workload rejected: {e}")
+    name = ns["FROZEN_ARM"]
     if name == BASELINE["name"]:
         return BASELINE
-    for c in mod.CANDIDATES:
+    for c in ns["CANDIDATES"]:
         if c["name"] == name:
+            validate_spec(c)
             return c
-    sys.exit(f"candidato congelado {name} não encontrado")
+    sys.exit(f"frozen candidate {name} not found")
 
 
-def same_as_baseline(spec):
-    """Carga equivalente à baseline (mesmos parâmetros e mesma sequência) não é hipótese nova."""
-    import random as _r
-    if spec["threads"] != BASELINE["threads"] or abs(spec["think_time_s"] - BASELINE["think_time_s"]) > 1e-9:
-        return False
-    for seed in (1, 2):
-        ra, rb = _r.Random(seed), _r.Random(seed)
-        for i in range(400):
-            if spec["request"](ra, i) != BASELINE["request"](rb, i):
-                return False
-    return True
+def pins(i):
+    """CPU pinning per slot (app i -> CPU i, load generator -> CPU 4+i), only with >= 8 cores and taskset."""
+    if (os.cpu_count() or 0) >= 8 and shutil.which("taskset"):
+        return str(i), str(4 + i)
+    return None, None
 
 
 def run_arms(arms, minutes, run_dir, smoke):
-    """arms: lista de dicts {label, app_dir, spec, seed}. Roda todos em paralelo."""
+    """arms: list of {label, app_dir, spec, seed}. Runs all of them in parallel, one slot per arm."""
     seconds = int(minutes * 60)
-    probe_ms = 2000 if smoke else 5000
+    sample_s = 2.0 if smoke else 5.0
     results = {}
 
-    def one(arm):
+    server = server_config()
+    client = None
+    if server:
+        client = Client(server["addr"], server["token"])
+        check_server_manifest(client, json.loads(MANIFEST.read_text()))
+
+    def one(slot, arm):
         wd = run_dir / arm["label"]
-        inst = Instance(arm["app_dir"], wd, probe_interval_ms=probe_ms, sample_s=probe_ms / 1000)
+        if client:
+            load_cpu = str(slot) if (os.cpu_count() or 0) >= SLOTS and shutil.which("taskset") else None
+            inst = RemoteInstance(client, server["host"], arm["app_dir"], wd, ROOT, sample_s=sample_s, slot=slot)
+        else:
+            app_cpu, load_cpu = pins(slot)
+            inst = Instance(arm["app_dir"], wd, sample_s=sample_s, cpus=app_cpu)
         try:
             inst.prepare()
             port = inst.start()
             inst.start_sampler()
-            load = LoadRun(arm["spec"], port, seconds, arm["seed"]).run()
-            time.sleep(probe_ms / 1000 * 1.5)  # última amostra pós-GC
-            alive = inst.alive()
-            pids = set(inst.pids_seen)
+            t0 = time.time()
+            base_url = inst.base_url() if client else f"http://127.0.0.1:{port}"
+            ran = run_script(arm["spec"], base_url, seconds, arm["seed"], wd, cpus=load_cpu)
+            time.sleep(sample_s * 1.5)
+            alive, pids, children = inst.alive(), set(inst.pids_seen), inst.max_children
         except Exception as e:
-            results[arm["label"]] = {"arm": arm["label"], "valid": False, "flags": [f"erro: {e}"]}
+            results[arm["label"]] = {"arm": arm["label"], "valid": False, "flags": [f"error: {e}"]}
             inst.stop()
             return
         inst.stop()
-        ev = evaluate_arm(arm["label"], inst.probe_rows(), load, inst.db_state(), pids, alive, seconds)
+        rows = read_client(ran["client_csv"])
+        load = summarize_client(rows, t0)
+        load.update({"script_exit": ran["exit"], "loadgen_cpu_p95": ran["loadgen_cpu_p95"]})
+        snaps = inst.instrumentation()
+        ev = evaluate_arm(arm["label"], inst.probe_rows(), rows, t0, load, inst.db_state(), pids, alive, seconds,
+                          children, instr_last=(snaps[-1]["metrics"] if snaps else None))
         ev.update({"spec_name": arm["spec"]["name"], "hypothesis": arm["spec"].get("hypothesis", ""),
-                   "seed": arm["seed"], "app_dir": str(arm["app_dir"])})
-        (wd / "buckets.json").write_text(json.dumps(load["buckets"]))
+                   "seed": arm["seed"], "app_dir": str(arm["app_dir"]), "workload_cmd": ran["cmd"], "topology": "client-server" if client else "local"})
+        if client:
+            ev["clock"] = inst.clock
         (wd / "evaluation.json").write_text(json.dumps(ev, indent=1, ensure_ascii=False))
         results[arm["label"]] = ev
 
-    ths = [threading.Thread(target=one, args=(a,)) for a in arms]
+    ths = [threading.Thread(target=one, args=(k, a)) for k, a in enumerate(arms)]
     for t in ths:
         t.start()
     for t in ths:
@@ -225,235 +289,433 @@ def fmt(v, nd=3):
     return "NA" if v is None else (f"{v:.{nd}f}" if isinstance(v, float) else str(v))
 
 
-# ---------------------------------------------------------------- detecção
+def hot_slope(ev):
+    return (ev.get("hot_latency_p50") or {}).get("sen_slope_per_h")
+
+
+def _ratio(num, den):
+    return (num / den) if (num is not None and den not in (None, 0)) else None
+
+
+def _load_candidates(path, reserved):
+    """Reads and validates CANDIDATES from a workload file; raises WorkloadError (D3) on any violation."""
+    wl = load_workload(path)
+    cands = wl.get("CANDIDATES")
+    if not isinstance(cands, list) or not 1 <= len(cands) <= SLOTS - 1:
+        raise WorkloadError(f"CANDIDATES must be a list of 1 to {SLOTS - 1} items (1 slot is the reference)")
+    if not all(isinstance(c, dict) for c in cands):
+        raise WorkloadError("each candidate must be a dict")
+    names = [c.get("name") for c in cands]
+    if len(set(names)) != len(names) or reserved in names:
+        raise WorkloadError("candidate names must be unique and different from the reference")
+    for c in cands:
+        validate_spec(c)
+    return cands
+
+
+def _reject(event, run_id, run_dir, error):
+    rec = {"event": event, "run_id": run_id, "commit": git_head(), "valid": False,
+           "flag": "D3_out_of_contract", "error": str(error)}
+    log_judge(rec)
+    (run_dir / "STATUS").write_text("done")
+    (run_dir / "round.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False))
+    print("INVALID:", error)
+
+
+# ---------------------------------------------------------------- detection
 def cmd_detect(a):
     verify(quiet=True)
     minutes = 2 if a.smoke else a.minutes
     run_id, run_dir = new_run_dir("detect" + ("-smoke" if a.smoke else ""), a.run_id)
     try:
-        wl = load_module(ROOT / "workload.py", "workload")
-        cands = list(wl.CANDIDATES)
-        if not 1 <= len(cands) <= SLOTS - 1:
-            raise WorkloadError(f"CANDIDATES deve ter de 1 a {SLOTS - 1} itens (1 slot é da baseline)")
-        names = [c["name"] for c in cands]
-        if len(set(names)) != len(names) or BASELINE["name"] in names:
-            raise WorkloadError("nomes de candidatos devem ser únicos e diferentes da baseline")
-        for c in cands:
-            validate_spec(c)
+        cands = _load_candidates(ROOT / "workload.py", BASELINE["name"])
     except Exception as e:
-        rec = {"event": "detect", "run_id": run_id, "commit": git_head(), "valid": False,
-               "flag": "D3_fora_do_contrato", "error": str(e)}
-        log_judge(rec)
-        (run_dir / "STATUS").write_text("done")
-        (run_dir / "round.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False))
-        print("INVÁLIDO:", e)
-        return
+        return _reject("detect", run_id, run_dir, e)
     if a.background:
         return background(sys.argv[1:], run_id, run_dir)
     shutil.copy(ROOT / "workload.py", run_dir / "workload.py")
-    arms = [{"label": BASELINE["name"], "app_dir": ORIGINAL, "spec": BASELINE, "seed": a.seed}]
-    arms += [{"label": c["name"], "app_dir": ORIGINAL, "spec": c, "seed": a.seed} for c in cands]
+    arms = [{"label": BASELINE["name"], "app_dir": INSTRUMENTED, "spec": BASELINE, "seed": a.seed}]
+    arms += [{"label": c["name"], "app_dir": INSTRUMENTED, "spec": c, "seed": a.seed} for c in cands]
     res = run_arms(arms, minutes, run_dir, a.smoke)
     base = res[BASELINE["name"]]
-    base_slope = base.get("rss_mb", {}).get("sen_slope_per_h") if base.get("valid") else None
+    base_slope = hot_slope(base) if base.get("score_eligible") else None
     rows = []
-    copies = {c["name"] for c in cands if same_as_baseline(c)}
+    copies = {c["name"] for c in cands if same_as_default(c)}
     for label, ev in res.items():
         if label in copies:
-            ev.setdefault("flags", []).append("D4_copia_da_baseline")
-        slope = ev.get("rss_mb", {}).get("sen_slope_per_h")
-        p = ev.get("rss_mb", {}).get("mk_p_upward")
-        eligible = (ev.get("valid") and ev.get("rss_upward_significant")
-                    and not any(f.startswith(("D2", "D4", "E2")) for f in ev.get("flags", [])))
-        ev["score_rss_mb_per_h"] = slope if eligible and label != BASELINE["name"] else None
-        ev["ratio_vs_baseline"] = (slope / base_slope) if (eligible and base_slope and base_slope > 0) else None
+            ev.setdefault("flags", []).append("D4_copy_of_reference")
+        slope = hot_slope(ev)
+        eligible = ev.get("score_eligible") and not any(f.startswith(("D2", "D4")) for f in ev.get("flags", []))
+        ev["score_latency_ms_per_h"] = slope if eligible and label != BASELINE["name"] else None
+        ev["ratio_vs_reference"] = (slope / base_slope) if (eligible and base_slope and base_slope > 0) else None
         rows.append(ev)
     rec = {"event": "detect", "run_id": run_id, "commit": git_head(), "smoke": a.smoke,
            "minutes": minutes, "seed": a.seed, "arms": rows}
     (run_dir / "round.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False))
     log_judge({k: v for k, v in rec.items() if k != "arms"} | {"summary": [
         {"arm": r["arm"], "valid": r.get("valid"), "flags": r.get("flags"),
-         "score": r.get("score_rss_mb_per_h"), "p": r.get("rss_mb", {}).get("mk_p_upward")} for r in rows]})
+         "score": r.get("score_latency_ms_per_h"), "p": (r.get("hot_latency_p50") or {}).get("mk_p_upward")}
+        for r in rows]})
     (run_dir / "STATUS").write_text("done")
     print_detect(run_id, rows)
 
 
-def print_detect(run_id, rows):
-    print(f"---\nrun_id: {run_id}")
+def print_detect(run_id, rows, header=True):
+    if header:
+        print(f"---\nrun_id: {run_id}")
     for r in rows:
-        rss = r.get("rss_mb", {})
-        print(f"arm={r['arm']} valid={r.get('valid')} score_rss_mb_per_h={fmt(r.get('score_rss_mb_per_h'))} "
-              f"rss_slope={fmt(rss.get('sen_slope_per_h'))} mk_p={fmt(rss.get('mk_p_upward'), 5)} "
-              f"heap_slope={fmt(r.get('heap_mb', {}).get('sen_slope_per_h'))} "
-              f"handles_slope={fmt(r.get('handles', {}).get('sen_slope_per_h'))} "
-              f"p95_slope={fmt(r.get('p95_ms', {}).get('sen_slope_per_h'))} "
-              f"ttd_min={fmt(r.get('time_to_detect_min'))} ratio={fmt(r.get('ratio_vs_baseline'))} "
+        lat, byt, rss = r.get("hot_latency_p50") or {}, r.get("hot_resp_bytes") or {}, r.get("rss_mb") or {}
+        refs = " ".join(f"{k.replace('retrieve_', '')}={fmt(((r.get('client') or {}).get(k) or {}).get('p50', {}).get('sen_change_pct'), 1)}%"
+                        for k in ("retrieve_ref4", "retrieve_ref200"))
+        print(f"arm={r['arm']} valid={r.get('valid')} score_hot_latency_ms_per_h={fmt(r.get('score_latency_ms_per_h'))} "
+              f"hot_lat_slope={fmt(lat.get('sen_slope_per_h'))} hot_lat_change={fmt(lat.get('sen_change_pct'), 1)}% "
+              f"hr_p={fmt(lat.get('mk_p_upward'), 5)} hot_bytes_slope={fmt(byt.get('sen_slope_per_h'), 0)} "
+              f"rss_slope={fmt(rss.get('sen_slope_per_h'))} rss_mk_p={fmt(rss.get('mk_p_upward'), 5)} "
+              f"ref_change[{refs}] ttd_min={fmt(r.get('time_to_detect_min'))} ratio={fmt(r.get('ratio_vs_reference'))} "
               f"req={r.get('requests')} err={fmt(r.get('error_rate'), 4)} db_rows={r.get('db_rows')} "
-              f"flags={','.join(r.get('flags', [])) or '-'}")
+              f"{ref4_diag_str(r)} flags={','.join(r.get('flags', [])) or '-'}")
 
 
-# ---------------------------------------------------------------- congelar (humano)
-def cmd_freeze(a):
-    src = RESULTS / a.run_id / "workload.py"
-    if not src.exists():
-        sys.exit("run sem workload.py salvo")
+# ---------------------------------------------------------------- freeze
+def freeze_spec(spec, source):
+    """Freezes a candidate workload in frozen/workload_frozen.py and rebuilds the manifest."""
+    clean = {k: v for k, v in spec.items() if not k.startswith("_")}
     FROZEN.parent.mkdir(exist_ok=True)
-    FROZEN.write_text(src.read_text() + f"\n\nFROZEN_ARM = {a.arm!r}\nFROZEN_FROM = {a.run_id!r}\n")
+    FROZEN.write_text('"""Frozen workload."""\n\n'
+                      f"CANDIDATES = [{clean!r}]\n\nFROZEN_ARM = {clean['name']!r}\n"
+                      f"FROZEN_FROM = {json.dumps(source, ensure_ascii=False)!r}\n")
     write_manifest()
-    print(f"carga congelada: {a.arm} de {a.run_id}; manifesto atualizado")
 
 
-# ---------------------------------------------------------------- reparo
-def cmd_repair_init(a):
-    base = CANDS / "base"
-    if not base.exists():
-        shutil.copytree(ORIGINAL, base)
-    for v in ("v1", "v2", "v3"):
-        d = CANDS / v
-        if d.exists():
-            shutil.rmtree(d)
-        shutil.copytree(base, d)
-    print("candidates/v1..v3 criados a partir de candidates/base")
+def round_spec(run_id, arm):
+    """Spec of one arm of a past search round, read from the workload.py saved with that round."""
+    wl = load_workload(RESULTS / run_id / "workload.py")
+    for c in wl.get("CANDIDATES", []):
+        if c.get("name") == arm:
+            validate_spec(c)
+            return c
+    sys.exit(f"arm {arm} not found in {run_id}")
 
 
-def cmd_promote(a):
-    src = CANDS / a.version
-    base = CANDS / "base"
-    shutil.rmtree(base)
-    shutil.copytree(src, base)
-    cmd_repair_init(a)
-    print(f"{a.version} promovido a base")
+def cmd_freeze(a):
+    freeze_spec(round_spec(a.run_id, a.arm), {"run_id": a.run_id, "arm": a.arm})
+    print(f"frozen workload: {a.arm} from {a.run_id}; manifest updated")
 
 
-def diff_lines(orig, cand):
-    n = 0
-    files = {p.relative_to(orig) for p in Path(orig).rglob("*") if p.is_file()}
-    files |= {p.relative_to(cand) for p in Path(cand).rglob("*") if p.is_file() and "node_modules" not in p.parts}
-    for f in sorted(files):
-        a_ = (Path(orig) / f).read_text(errors="ignore").splitlines() if (Path(orig) / f).exists() else []
-        b_ = (Path(cand) / f).read_text(errors="ignore").splitlines() if (Path(cand) / f).exists() else []
-        n += sum(1 for l in difflib.unified_diff(a_, b_, lineterm="", n=0)
-                 if l[:1] in "+-" and not l.startswith(("+++", "---")))
-    return n
+# ---------------------------------------------------------------- causes
+def _interf_level(ev, ep):
+    return ((ev.get("interference") or {}).get(ep) or {}).get("p95_level_ms")
 
 
-def reference_replay(spec, trace):
-    key = hashlib.sha256((json.dumps(trace) + _sha(ORIGINAL / "package.json")).encode()).hexdigest()[:16]
-    cache = JUDGE_DIR / f"replay_ref_{key}.json"
-    if cache.exists():
-        return json.loads(cache.read_text())
-    ref = gates.replay(ORIGINAL, trace, Path(tempfile.mkdtemp()))
-    cache.write_text(json.dumps(ref))
-    return ref
+def compare_to_reference(ref, ev):
+    """Effect of a one-factor variation against the frozen workload of the same round and seed (variant/ref)."""
+    byt = lambda e: (e.get("hot_resp_bytes") or {}).get("sen_slope_per_h")  # noqa: E731
+    return {"lat_ratio": _ratio(hot_slope(ev), hot_slope(ref)),
+            "bytes_ratio": _ratio(byt(ev), byt(ref)),
+            "cost_ratio": _ratio(ev.get("hot_cost_ms_per_mb"), ref.get("hot_cost_ms_per_mb")),
+            "assoc_p95_ratio": _ratio(_interf_level(ev, "associate_card"), _interf_level(ref, "associate_card")),
+            "ref4_p95_ratio": _ratio(_interf_level(ev, "retrieve_ref4"), _interf_level(ref, "retrieve_ref4"))}
 
 
-def cmd_repair(a):
+def cmd_causes(a):
+    """Causes round: slot 0 = frozen workload (reference); slots 1..3 = variations changing exactly one arg."""
     verify(quiet=True)
-    spec = frozen_spec()
     minutes = 2 if a.smoke else a.minutes
-    run_id, run_dir = new_run_dir("repair" + ("-smoke" if a.smoke else ""), a.run_id)
+    run_id, run_dir = new_run_dir("causes" + ("-smoke" if a.smoke else ""), a.run_id)
+    ref_spec = dict(frozen_spec(), name=CAUSES_REF)
+    try:
+        cands = _load_candidates(ROOT / "workload.py", CAUSES_REF)
+        factors = {c["name"]: one_factor_diff(ref_spec, c) for c in cands}
+    except Exception as e:
+        return _reject("causes", run_id, run_dir, e)
     if a.background:
         return background(sys.argv[1:], run_id, run_dir)
-    versions = [v for v in ("v1", "v2", "v3") if (CANDS / v).exists()]
-    trace = gates.build_trace(spec)
-    ref = reference_replay(spec, trace)
-    gate_reports = {}
-    for v in versions:
-        gate_reports[v] = gates.run_gates(ORIGINAL, CANDS / v, ref, trace, run_dir)
-        gate_reports[v]["diff_lines"] = diff_lines(ORIGINAL, CANDS / v)
-        if gate_reports[v]["diff_lines"] == 0:
-            gate_reports[v]["flags"].append("sem_alteracao")
-            gate_reports[v]["passed"] = False
-        print(f"gates {v}: passed={gate_reports[v]['passed']} flags={gate_reports[v]['flags']} "
-              f"diff_lines={gate_reports[v]['diff_lines']}", flush=True)
-    for v in versions:  # snapshot do que foi avaliado
-        shutil.copytree(CANDS / v, run_dir / "snapshot" / v)
-    arms = [{"label": "original", "app_dir": ORIGINAL, "spec": spec, "seed": a.seed}]
-    arms += [{"label": v, "app_dir": CANDS / v, "spec": spec, "seed": a.seed}
-             for v in versions if gate_reports[v]["passed"]]
+    shutil.copy(ROOT / "workload.py", run_dir / "workload.py")
+    arms = [{"label": CAUSES_REF, "app_dir": INSTRUMENTED, "spec": ref_spec, "seed": a.seed}]
+    arms += [{"label": c["name"], "app_dir": INSTRUMENTED, "spec": c, "seed": a.seed} for c in cands]
     res = run_arms(arms, minutes, run_dir, a.smoke)
-    rows = [score_repair(res, v, gate_reports.get(v)) for v in ["original"] + versions]
-    rec = {"event": "repair", "run_id": run_id, "commit": git_head(), "smoke": a.smoke,
-           "minutes": minutes, "frozen_arm": spec["name"], "rows": rows}
+    ref = res[CAUSES_REF]
+    ref_ok = bool(ref.get("valid") and ref.get("score_eligible"))
+    rows = []
+    for label, ev in res.items():
+        if label != CAUSES_REF:
+            k, v_ref, v_cand = factors[label]
+            ev["factor"] = {"arg": k, "reference": v_ref, "variant": v_cand}
+            ev["effect"] = compare_to_reference(ref, ev) if (ref_ok and ev.get("valid")) else None
+        rows.append(ev)
+    rec = {"event": "causes", "run_id": run_id, "commit": git_head(), "smoke": a.smoke, "minutes": minutes,
+           "seed": a.seed, "reference_ok": ref_ok, "frozen_args": ref_spec.get("args", {}), "arms": rows}
     (run_dir / "round.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False))
-    log_judge({k: v for k, v in rec.items() if k != "rows"} | {"summary": [
-        {"arm": r["arm"], "score": r.get("score_reduction"), "flags": r.get("flags")} for r in rows]})
+    log_judge({k: v for k, v in rec.items() if k != "arms"} | {"summary": [
+        {"arm": r["arm"], "valid": r.get("valid"), "flags": r.get("flags"), "factor": r.get("factor"),
+         "effect": r.get("effect")} for r in rows]})
     (run_dir / "STATUS").write_text("done")
-    print_repair(run_id, rows)
+    print_causes(run_id, rows, ref_ok)
 
 
-def score_repair(res, v, gate):
-    o = res.get("original", {})
-    if v == "original":
-        return {"arm": "original", "valid": o.get("valid"), "rss": o.get("rss_mb"),
-                "throughput_mean_rps": o.get("throughput_mean_rps"), "p95_ms_median": o.get("p95_ms_median"),
-                "flags": o.get("flags", [])}
-    row = {"arm": v, "gates_passed": gate["passed"], "flags": list(gate["flags"]),
-           "diff_lines": gate["diff_lines"], "gate_details": gate["details"], "score_reduction": None}
-    ev = res.get(v)
-    if not gate["passed"] or not ev:
-        return row
-    row["flags"] += ev.get("flags", [])
-    s0 = o.get("rss_mb", {}).get("sen_slope_per_h")
-    s1 = ev.get("rss_mb", {}).get("sen_slope_per_h")
-    p1 = ev.get("rss_mb", {}).get("mk_p_upward")
-    row.update({"rss": ev.get("rss_mb"), "heap": ev.get("heap_mb"), "handles": ev.get("handles"),
-                "throughput_mean_rps": ev.get("throughput_mean_rps"), "p95_ms_median": ev.get("p95_ms_median")})
-    if not ev.get("valid") or not o.get("valid"):
-        return row
-    thr_ok = ev["throughput_mean_rps"] >= 0.9 * o["throughput_mean_rps"]
-    lat_ok = ev["p95_ms_median"] <= 1.1 * o["p95_ms_median"] + 1.0
-    if not (thr_ok and lat_ok):
-        row["flags"].append("H6_desempenho_degradado")
-        return row
-    # 5xx por SQLITE_BUSY variam entre execuções: tolerância relativa + absoluta
-    if ev.get("server_error_rate", 0) > 1.5 * o.get("server_error_rate", 0) + 0.005:
-        row["flags"].append("H7_mais_erros_sob_carga")
-        return row
-    if s0 is None or s0 < MIN_EFFECT_MB_PER_H or o.get("rss_mb", {}).get("mk_p_upward", 1) >= ALPHA:
-        row["flags"].append("original_sem_tendencia_nesta_rodada")
-        return row
-    reduction = 1 - (s1 / s0)
-    row["score_reduction"] = reduction
-    row["fixed"] = (p1 >= 0.05) or (s1 < MIN_EFFECT_MB_PER_H) or reduction >= 0.8
-    return row
+def print_causes(run_id, rows, ref_ok):
+    print(f"---\nrun_id: {run_id}\nreference_ok: {ref_ok}")
+    for r in rows:
+        lat, byt = r.get("hot_latency_p50") or {}, r.get("hot_resp_bytes") or {}
+        f, e = r.get("factor") or {}, r.get("effect") or {}
+        fac = f"{f['arg']}:{f['reference']}->{f['variant']}" if f else "-"
+        print(f"arm={r['arm']} factor={fac} valid={r.get('valid')} eligible={r.get('score_eligible')} "
+              f"hot_lat_slope={fmt(lat.get('sen_slope_per_h'))} hot_lat_change={fmt(lat.get('sen_change_pct'), 1)}% "
+              f"hr_p={fmt(lat.get('mk_p_upward'), 5)} hot_bytes_slope={fmt(byt.get('sen_slope_per_h'), 0)} "
+              f"cost_ms_per_mb={fmt(r.get('hot_cost_ms_per_mb'), 1)} "
+              f"lat_ratio={fmt(e.get('lat_ratio'))} bytes_ratio={fmt(e.get('bytes_ratio'))} "
+              f"cost_ratio={fmt(e.get('cost_ratio'))} assoc_p95_ratio={fmt(e.get('assoc_p95_ratio'))} "
+              f"ref4_p95_ratio={fmt(e.get('ref4_p95_ratio'))} db_rows={r.get('db_rows')} "
+              f"err={fmt(r.get('error_rate'), 4)} flags={','.join(r.get('flags', [])) or '-'}")
 
 
-def print_repair(run_id, rows):
+# ---------------------------------------------------------------- ref4 diagnostic, controls and verification
+def ref4_vs_control(rows, control="R0b"):
+    """Diagnostic only (no effect on scores): ref4 latency of each arm against R0b in the same round and seed.
+    Global drift raises ref4 in R0b too; interference from the aging raises it only in the accumulating arm."""
+    ctl = next((r for r in rows if r.get("arm") == control), None)
+    if not ctl or not ctl.get("ref4_diag"):
+        return
+    c = ctl["ref4_diag"]
+    for r in rows:
+        d = r.get("ref4_diag")
+        if not d:
+            continue
+        if c["up"]:
+            interp = "likely_global_drift"
+        elif d["up"]:
+            interp = "interference_arm_only"
+        else:
+            interp = "flat"
+        r["ref4_vs_R0b"] = {"arm_p50_change_pct": d["p50_change_pct"], "arm_p50_mk_p": d["p50_mk_p"],
+                            "R0b_p50_change_pct": c["p50_change_pct"], "R0b_p50_mk_p": c["p50_mk_p"],
+                            "interpretation": interp}
+
+
+def ref4_diag_str(r):
+    d, v = r.get("ref4_diag") or {}, r.get("ref4_vs_R0b")
+    s = f"ref4_diag[p50={fmt(d.get('p50_change_pct'), 1)}% p={fmt(d.get('p50_mk_p'), 5)}"
+    if v:
+        s += f" R0b={fmt(v['R0b_p50_change_pct'], 1)}% -> {v['interpretation']}"
+    return s + "]"
+
+
+def flat(ev):
+    """Flat control: valid, with no rising latency, response size or RSS (same thresholds as the score)."""
+    return bool(ev.get("valid") and not ev.get("latency_up") and not ev.get("bytes_up")
+                and not ev.get("rss_upward_significant"))
+
+
+def controls_ok(rows):
+    """Phase 0 passes if R0 and R0b stay flat and R1 is eligible."""
+    by = {r.get("arm"): r for r in rows}
+    return bool(by.get("R0", {}).get("flat") and by.get("R0b", {}).get("flat")
+                and by.get("R1", {}).get("score_eligible"))
+
+
+def check_decision(rows):
+    """Automatic decision of a verification round (R1, workload, R0, R0b, same seed): invalid if any arm is
+    invalid (infrastructure); positive if R0 and R0b stay flat and R1 and the workload are eligible; else negative."""
+    by = {r.get("arm"): r for r in rows}
+    if len(by) < 4 or not all(r.get("valid") for r in by.values()):
+        return "invalid"
+    if (flat(by.get("R0", {})) and flat(by.get("R0b", {})) and by.get("R1", {}).get("score_eligible")
+            and by.get(CHECK_LOAD, {}).get("score_eligible")):
+        return "positive"
+    return "negative"
+
+
+def run_controls(seed, minutes=DEFAULT_MINUTES, smoke=False, with_r1=True, run_id=None):
+    """R0 (F1_control) and R0b (F1_targeted_v1 --key-space 4), with R1 alongside. There is no positive control:
+    if a control "detects" aging, the judge thresholds are too loose and no detection is valid."""
+    verify(quiet=True)
+    minutes = 2 if smoke else minutes
+    run_id, run_dir = new_run_dir("controls" + ("-smoke" if smoke else ""), run_id)
+    arms = [{"label": "R0", "app_dir": INSTRUMENTED, "spec": R0, "seed": seed},
+            {"label": "R0b", "app_dir": INSTRUMENTED, "spec": R0B, "seed": seed}]
+    if with_r1:
+        arms.append({"label": "R1", "app_dir": INSTRUMENTED, "spec": BASELINE, "seed": seed})
+    res = run_arms(arms, minutes, run_dir, smoke)
+    rows = []
+    for arm in arms:
+        ev = res[arm["label"]]
+        ev["expected_flat"] = arm["label"] != "R1"
+        ev["flat"] = flat(ev)
+        rows.append(ev)
+    ref4_vs_control(rows)
+    ok = controls_ok(rows) if with_r1 else None
+    rec = {"event": "controls", "run_id": run_id, "commit": git_head(), "smoke": smoke,
+           "minutes": minutes, "seed": seed, "ok": ok, "arms": rows}
+    (run_dir / "round.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False))
+    log_judge({k: v for k, v in rec.items() if k != "arms"} | {"summary": [
+        {"arm": r["arm"], "flat": r["flat"], "valid": r.get("valid"), "flags": r.get("flags"),
+         "hot_lat_slope": hot_slope(r)} for r in rows]})
+    (run_dir / "STATUS").write_text("done")
+    print_controls(run_id, rows)
+    return {"run_id": run_id, "ok": ok}
+
+
+def cmd_controls(a):
+    if a.background:
+        run_id, run_dir = new_run_dir("controls" + ("-smoke" if a.smoke else ""), a.run_id)
+        return background(sys.argv[1:], run_id, run_dir)
+    run_controls(a.seed, a.minutes, a.smoke, a.with_r1, a.run_id)
+
+
+def print_controls(run_id, rows):
     print(f"---\nrun_id: {run_id}")
     for r in rows:
-        rss = r.get("rss") or {}
-        print(f"arm={r['arm']} gates={r.get('gates_passed', '-')} score_reduction={fmt(r.get('score_reduction'))} "
-              f"fixed={r.get('fixed', '-')} rss_slope={fmt(rss.get('sen_slope_per_h'))} "
-              f"mk_p={fmt(rss.get('mk_p_upward'), 5)} thr={fmt(r.get('throughput_mean_rps'), 1)} "
-              f"p95={fmt(r.get('p95_ms_median'), 2)} diff_lines={r.get('diff_lines', '-')} "
-              f"flags={','.join(r.get('flags', [])) or '-'}")
+        lat, byt, rss = r.get("hot_latency_p50") or {}, r.get("hot_resp_bytes") or {}, r.get("rss_mb") or {}
+        ok = r["flat"] == r["expected_flat"]
+        print(f"arm={r['arm']} valid={r.get('valid')} expected={'flat' if r['expected_flat'] else 'rising'} "
+              f"flat={r['flat']} ok={ok} hot_lat_slope={fmt(lat.get('sen_slope_per_h'))} "
+              f"hot_lat_change={fmt(lat.get('sen_change_pct'), 1)}% hr_p={fmt(lat.get('mk_p_upward'), 5)} "
+              f"bytes_change={fmt(byt.get('sen_change_pct'), 1)}% rss_slope={fmt(rss.get('sen_slope_per_h'))} "
+              f"rss_mk_p={fmt(rss.get('mk_p_upward'), 5)} req={r.get('requests')} db_rows={r.get('db_rows')} "
+              f"{ref4_diag_str(r)} flags={','.join(r.get('flags', [])) or '-'}")
 
 
-# ---------------------------------------------------------------- confirmação
-def cmd_confirm(a):
+def run_check(spec, seed, minutes=DEFAULT_MINUTES, smoke=False, run_id=None, source=None):
+    """Verification round: the candidate workload next to R1, R0 and R0b, all with the same seed and a clean DB."""
     verify(quiet=True)
-    minutes = 2 if a.smoke else a.minutes
-    run_id, run_dir = new_run_dir(f"confirm-{a.phase}" + ("-smoke" if a.smoke else ""), a.run_id)
-    if a.background:
-        return background(sys.argv[1:], run_id, run_dir)
-    spec = frozen_spec()
-    if a.phase == "detect":
-        arms = [{"label": f"{spec['name']}_s{s}", "app_dir": ORIGINAL, "spec": spec, "seed": s} for s in CONFIRM_SEEDS]
-        arms.append({"label": "baseline_s11", "app_dir": ORIGINAL, "spec": BASELINE, "seed": 11})
-    else:
-        arms = [{"label": f"base_s{s}", "app_dir": CANDS / "base", "spec": spec, "seed": s} for s in CONFIRM_SEEDS]
-        arms.append({"label": "original_s11", "app_dir": ORIGINAL, "spec": spec, "seed": 11})
-    res = run_arms(arms, minutes, run_dir, a.smoke)
-    rec = {"event": f"confirm-{a.phase}", "run_id": run_id, "commit": git_head(), "smoke": a.smoke,
-           "minutes": minutes, "arms": list(res.values())}
+    minutes = 2 if smoke else minutes
+    run_id, run_dir = new_run_dir("check" + ("-smoke" if smoke else ""), run_id)
+    load = {k: v for k, v in spec.items() if not k.startswith("_")}
+    load["name"] = CHECK_LOAD
+    arms = [{"label": "R1", "app_dir": INSTRUMENTED, "spec": BASELINE, "seed": seed},
+            {"label": CHECK_LOAD, "app_dir": INSTRUMENTED, "spec": load, "seed": seed},
+            {"label": "R0", "app_dir": INSTRUMENTED, "spec": R0, "seed": seed},
+            {"label": "R0b", "app_dir": INSTRUMENTED, "spec": R0B, "seed": seed}]
+    res = run_arms(arms, minutes, run_dir, smoke)
+    rows = [res[x["label"]] for x in arms]
+    for r in rows:
+        if r.get("arm") in ("R0", "R0b"):
+            r["flat"] = flat(r)
+    ref4_vs_control(rows)
+    decision = check_decision(rows)
+    rec = {"event": "check", "run_id": run_id, "commit": git_head(), "smoke": smoke, "minutes": minutes,
+           "seed": seed, "load_args": spec.get("args", {}), "load_name": spec.get("name"), "source": source,
+           "decision": decision, "arms": rows}
     (run_dir / "round.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False))
-    log_judge({k: v for k, v in rec.items() if k != "arms"})
+    log_judge({k: v for k, v in rec.items() if k != "arms"} | {"summary": [
+        {"arm": r["arm"], "valid": r.get("valid"), "eligible": r.get("score_eligible"), "flat": r.get("flat"),
+         "flags": r.get("flags")} for r in rows]})
     (run_dir / "STATUS").write_text("done")
-    print_detect(run_id, list(res.values()))
+    print_check(run_id, rows, decision)
+    return {"run_id": run_id, "decision": decision}
 
 
-# ---------------------------------------------------------------- espera
+def print_check(run_id, rows, decision):
+    print(f"---\nrun_id: {run_id}\ndecision: {decision}")
+    print_detect(run_id, rows, header=False)
+
+
+def cmd_check(a):
+    spec = round_spec(a.run, a.arm)
+    run_check(spec, a.seed, a.minutes, a.smoke, a.run_id, source={"run_id": a.run, "arm": a.arm})
+
+
+def cmd_rehash(a):
+    if not MANIFEST.exists():
+        sys.exit("manifest missing: run 'python prepare.py setup' (human)")
+    m = write_manifest()
+    print(f"manifest rebuilt: {len(m)} fixed files")
+
+
+# ---------------------------------------------------------------- experiment (orchestrator)
+def _judge_records():
+    if not JUDGE_LOG.exists():
+        return []
+    out = []
+    for line in JUDGE_LOG.read_text().splitlines():
+        try:
+            out.append(json.loads(line))
+        except json.JSONDecodeError:
+            pass
+    return out
+
+
+def find_round(event, seed, after_ts):
+    """The round (round.json + candidates) the agent ran with this seed after after_ts, or None."""
+    for rec in reversed(_judge_records()):
+        if rec.get("ts", "") < after_ts:
+            break
+        if rec.get("event") == event and rec.get("seed") == seed and not rec.get("smoke") and "summary" in rec:
+            d = RESULTS / rec["run_id"]
+            rnd = json.loads((d / "round.json").read_text())
+            cands = {}
+            if (d / "workload.py").exists():
+                for c in load_workload(d / "workload.py").get("CANDIDATES", []):
+                    cands[c.get("name")] = c
+            return {"run_id": rec["run_id"], "arms": rnd.get("arms", []), "candidates": cands}
+    return None
+
+
+def call_agent(campaign, prompt, tag):
+    """One headless Claude Code call with the permissions of the campaign."""
+    shutil.copy(ROOT / ".claude" / f"settings.{campaign}.json", ROOT / ".claude" / "settings.json")
+    (ROOT / "logs").mkdir(exist_ok=True)
+    log = ROOT / "logs" / f"{tag}-{campaign}-{time.strftime('%Y%m%d-%H%M%S')}.jsonl"
+    with open(log, "wb") as f:
+        try:
+            subprocess.run(["claude", "-p", prompt, "--output-format", "stream-json", "--verbose"], cwd=ROOT,
+                           stdout=f, stderr=subprocess.STDOUT, timeout=AGENT_TIMEOUT_S)
+        except subprocess.TimeoutExpired:
+            f.write(b'\n{"orchestrator": "agent call timed out"}\n')
+
+
+def cmd_experiment(a):
+    """Full experiment, no human in the middle: phase 0 -> search -> verification -> causes -> resume -> report."""
+    from harness.load import normalize_args
+    from harness import orchestrator as O
+    verify(quiet=True)
+    exp_dir = RESULTS / f"experiment-{a.tag}"
+    if exp_dir.exists():
+        sys.exit(f"{exp_dir} already exists: use another tag")
+    exp_dir.mkdir(parents=True)
+    branch = f"autoresearch/{a.tag}"
+    if subprocess.run(["git", "checkout", "-b", branch], cwd=ROOT).returncode != 0:
+        sys.exit(f"could not create branch {branch}")
+    minutes, smoke = (2 if a.smoke else a.minutes), a.smoke
+    log_judge({"event": "experiment_start", "tag": a.tag, "commit": git_head(), "smoke": smoke})
+
+    def agent_round(campaign, round, seed, campaign_n=None):
+        t0 = time.strftime("%Y-%m-%dT%H:%M:%S")
+        if campaign == "detect":
+            prompt = f"Read program.md and run ONE round of the detect campaign. Round {round}, seed {seed}."
+            event = "detect"
+        else:
+            prompt = (f"Read program.md and run ONE round of the causes campaign. Campaign {campaign_n}, "
+                      f"round {round} of {O.CAUSES_ROUNDS}, seed {seed}.")
+            event = "causes"
+        if smoke:
+            prompt += " Use --smoke."
+        call_agent("detect" if campaign == "detect" else "causes", prompt, a.tag)
+        return find_round(event, seed, t0)
+
+    def agent_summary(campaign, campaign_n=None):
+        if campaign == "detect":
+            call_agent("detect", "Read program.md and write the summary of the detect campaign.", a.tag)
+        else:
+            call_agent("causes", f"Read program.md and write the summary of the causes campaign {campaign_n}.", a.tag)
+
+    def save(state):
+        (exp_dir / "state.json").write_text(json.dumps(state, indent=1, ensure_ascii=False))
+
+    orch = O.Orchestrator(
+        run_controls=lambda seed: run_controls(seed, minutes, smoke),
+        agent_round=agent_round,
+        run_check=lambda spec, seed: run_check(spec, seed, minutes, smoke),
+        freeze=freeze_spec, agent_summary=agent_summary,
+        normalize=normalize_args, save=save, reference_name=BASELINE["name"])
+    state = orch.run()
+    (exp_dir / "report.md").write_text(O.report_markdown(state, a.tag))
+    log_judge({"event": "experiment_end", "tag": a.tag, "status": state["status"],
+               "confirmed": [c["load"]["name"] for c in state["confirmed"]]})
+    print(f"experiment {a.tag}: {state['status']} · report in {exp_dir / 'report.md'}")
+
+
+# ---------------------------------------------------------------- wait
 def cmd_wait(a):
     d = RESULTS / a.run_id
     deadline = time.time() + min(a.max_seconds, 540)
@@ -461,40 +723,58 @@ def cmd_wait(a):
         st = (d / "STATUS").read_text().strip() if (d / "STATUS").exists() else "unknown"
         if st == "done":
             rec = json.loads((d / "round.json").read_text())
-            if rec.get("event") == "repair":
-                print_repair(a.run_id, rec["rows"])
+            if rec.get("event") == "check" and "arms" in rec:
+                print_check(a.run_id, rec["arms"], rec.get("decision"))
+            elif rec.get("event") == "causes" and "arms" in rec:
+                print_causes(a.run_id, rec["arms"], rec.get("reference_ok"))
+            elif rec.get("event") == "controls":
+                print_controls(a.run_id, rec["arms"])
             elif "arms" in rec:
                 print_detect(a.run_id, rec["arms"])
             else:
                 print(json.dumps(rec, ensure_ascii=False))
             return
         time.sleep(15)
-    print(f"status: running ({a.run_id}); chame wait novamente")
+    print(f"status: running ({a.run_id}); call wait again")
 
 
 def main():
     ap = argparse.ArgumentParser()
     sp = ap.add_subparsers(dest="cmd", required=True)
-    s = sp.add_parser("setup"); s.add_argument("--zip", required=True); s.add_argument("--force", action="store_true")
-    for name in ("detect", "repair"):
-        s = sp.add_parser(name)
-        s.add_argument("--minutes", type=float, default=DEFAULT_MINUTES)
-        s.add_argument("--seed", type=int, default=1)
-        s.add_argument("--smoke", action="store_true")
-        s.add_argument("--background", action="store_true")
-        s.add_argument("--run-id")
-    s = sp.add_parser("confirm"); s.add_argument("--phase", choices=["detect", "repair"], required=True)
-    s.add_argument("--minutes", type=float, default=DEFAULT_MINUTES); s.add_argument("--smoke", action="store_true")
-    s.add_argument("--background", action="store_true"); s.add_argument("--run-id")
+    s = sp.add_parser("setup"); s.add_argument("--src", default=str(CESAR_REPO_DEFAULT)); s.add_argument("--force", action="store_true")
+    sp.add_parser("check-oracles")
+    s = sp.add_parser("detect")
+    s.add_argument("--minutes", type=float, default=DEFAULT_MINUTES)
+    s.add_argument("--seed", type=int, default=1)
+    s.add_argument("--smoke", action="store_true")
+    s.add_argument("--background", action="store_true")
+    s.add_argument("--run-id")
+    s = sp.add_parser("check-load", help="verification round for one arm of a search round")
+    s.add_argument("--run", required=True); s.add_argument("--arm", required=True)
+    s.add_argument("--seed", type=int, required=True); s.add_argument("--minutes", type=float, default=DEFAULT_MINUTES)
+    s.add_argument("--smoke", action="store_true"); s.add_argument("--run-id")
+    s = sp.add_parser("experiment", help="full experiment, no human in the middle")
+    s.add_argument("--tag", required=True); s.add_argument("--minutes", type=float, default=DEFAULT_MINUTES)
+    s.add_argument("--smoke", action="store_true")
+    s = sp.add_parser("controls")
+    s.add_argument("--minutes", type=float, default=DEFAULT_MINUTES); s.add_argument("--seed", type=int, default=100)
+    s.add_argument("--with-r1", action="store_true", help="run R1 alongside (contrast)")
+    s.add_argument("--smoke", action="store_true"); s.add_argument("--background", action="store_true")
+    s.add_argument("--run-id")
+    sp.add_parser("rehash")
     s = sp.add_parser("freeze"); s.add_argument("run_id"); s.add_argument("arm")
-    sp.add_parser("repair-init")
-    s = sp.add_parser("promote"); s.add_argument("version", choices=["v1", "v2", "v3"])
+    s = sp.add_parser("causes")
+    s.add_argument("--minutes", type=float, default=DEFAULT_MINUTES)
+    s.add_argument("--seed", type=int, default=1)
+    s.add_argument("--smoke", action="store_true")
+    s.add_argument("--background", action="store_true")
+    s.add_argument("--run-id")
     s = sp.add_parser("wait"); s.add_argument("run_id"); s.add_argument("--max-seconds", type=int, default=540)
     sp.add_parser("verify")
     a = ap.parse_args()
-    {"setup": cmd_setup, "detect": cmd_detect, "repair": cmd_repair, "confirm": cmd_confirm,
-     "freeze": cmd_freeze, "repair-init": cmd_repair_init, "promote": cmd_promote,
-     "wait": cmd_wait, "verify": lambda _: verify()}[a.cmd](a)
+    {"setup": cmd_setup, "check-oracles": cmd_check_oracles, "detect": cmd_detect, "check-load": cmd_check,
+     "experiment": cmd_experiment, "controls": cmd_controls, "rehash": cmd_rehash, "freeze": cmd_freeze,
+     "causes": cmd_causes, "wait": cmd_wait, "verify": lambda _: verify()}[a.cmd](a)
 
 
 if __name__ == "__main__":

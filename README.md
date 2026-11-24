@@ -1,149 +1,235 @@
-# AutoResearch-Aging — Piloto 3 (detecção e reparo em apps geradas por LLM)
+# AutoResearch-Aging: detecção autônoma de aging no F1 (`credit-card-fastapi`)
 
-Este piloto adapta o [karpathy/autoresearch](https://github.com/karpathy/autoresearch)
-para **detectar e corrigir envelhecimento de software** nas aplicações de
-[chas42/generated-software-llm](https://github.com/chas42/generated-software-llm).
-Essas aplicações são as do artigo de Santos, Andrade e Natella,
-*Investigating Software Aging in LLM-Generated Software Systems*
-([arXiv:2510.24188](https://arxiv.org/abs/2510.24188)).
+Este repositório adapta o [karpathy/autoresearch](https://github.com/karpathy/autoresearch) para **detectar e
+explicar envelhecimento de software** numa aplicação gerada por LLM. O **método** é o do autoresearch: um agente
+propõe, um juiz fixo mede, e o laço mantém ou descarta a proposta. O **alvo e o cenário** são os do Cesar, em
+[chas42/llm-aging-detection-agents](https://github.com/chas42/llm-aging-detection-agents): a app
+`credit-card-fastapi` (BaxBench), o finding `bax-fastapi-credit-card-F1` e as rodadas R0, R0b e R1 do
+`apps/credit-card-fastapi/campaign.yaml`.
 
-Responsáveis: Rafael, Cesar e Ermeson (UFRPE). Colaboração com Fumio Machida (Tsukuba)
-e Artur Andrzejak (Heidelberg).
+Responsáveis: Rafael, Cesar e Ermeson (UFRPE). Colaboração com Fumio Machida (Tsukuba) e Artur Andrzejak
+(Heidelberg).
 
-## De onde vem cada decisão
+> **Escopo (branch `deteccao-f1`): só detecção e explicação pela carga, sem humano no meio.** O agente procura
+> cargas que causem o aging do F1; o sistema confirma cada carga repetindo-a nas rodadas seguintes, com os
+> controles negativos ao lado; depois o agente testa, variando um fator da carga de cada vez, o que causa o
+> envelhecimento. O humano só dispara o experimento e lê o relatório final. O **reparo** e a **análise de código** ficam de fora: são o tema da
+> pesquisa do Cesar (decisão de 22/11). A versão com reparo continua na branch `juiz-v2-bd0b0ad`.
 
-| Origem | Decisão | Onde está no código |
+| Documento | Para quem | Conteúdo |
 |---|---|---|
-| Reunião de 15/10 (consenso) | Primeiro teste em apps geradas por LLM; depois, apps reais | Alvo: `credit-card`; apps reais ficam como trabalho futuro |
-| Reunião de 15/10 (consenso) | Experimentos de **detecção** e de **reparo** | `program_detect.md` → `program_repair.md` |
-| Artur | Reward hacking: o agente remove funcionalidade para melhorar a métrica | Portões H1–H7 em `harness/gates.py` e flags D1–D3 em `harness/load.py` e `harness/evaluate.py` |
-| Artur | Feedback curto: sinal em cerca de 1 h, não 48 h | `DEFAULT_MINUTES = 60` |
-| Artur | Várias versões em paralelo | `SLOTS = 4`: 3 candidatos + 1 referência por rodada |
-| Fumio | Documentar os atalhos do agente já é contribuição | Toda flag vai para `results/judge_log.jsonl`, e o agente registra `"atalho"` no `ledger.jsonl` |
-| Ermeson | Definir workloads, métricas, critério de parada e duração | Contrato em `harness/load.py`; métrica em `harness/evaluate.py`; orçamento de 8 rodadas nos `program_*.md` |
-| Reunião de 20/10 (Rafael) | 4 apps JS do repositório; duas campanhas em sequência; Claude Code; baseline do artigo; confirmação com 3 sementes | Este piloto começa pela `credit-card` |
-| Artigo | Mann-Kendall + Sen's slope; 10 threads; intervalo de 0,01 s | `harness/stats.py`; `BASELINE` em `harness/load.py` |
-| Piloto 2 | Margem para não selecionar ruído; registro de proveniência | Keep exige +10%; hashes do juiz em `.judge/manifest.json` |
+| [`program.md`](program.md) | o agente | só as instruções de execução e as regras das campanhas `detect` e `causes` |
+| [`docs/DESENHO-EXPERIMENTAL.md`](docs/DESENHO-EXPERIMENTAL.md) | as pessoas do projeto | perguntas de pesquisa, fases, critérios, parâmetros, custo, limitações |
+| [`docs/AMEACAS-A-VALIDADE.md`](docs/AMEACAS-A-VALIDADE.md) | as pessoas do projeto | prováveis ameaças à validade e o que falta mitigar |
+| [`updates/`](updates/README.md) | as pessoas do projeto | uma nota por mudança, com o porquê |
 
-## Por que a `credit-card` primeiro
+## Fluxo do experimento
 
-No artigo, ela tem a maior tendência de memória: Sen ≈ 37,7e-3, cerca de
-1,5 GB em 50 h. É a única com sinal plausível numa janela de 60 min. No smoke
-test que fizemos (2 min, 4 instâncias), a baseline já mostrou RSS subindo com
-Mann-Kendall p < 0,001, e o heap subindo bem menos. Isso sugere retenção
-**nativa**, possivelmente do sqlite3, que abre uma conexão nova por
-requisição. Também apareceram erros `SQLITE_BUSY` sob concorrência. É uma
-hipótese, não uma conclusão.
+```
+Humano dispara: ./run_experiment.sh <tag>
+ └─ Fase 0: controles de 60 min (R0, R0b, R1) ── falha ──► relatório: sem calibração
+ └─ Busca: rodadas de 60 min do agente (R1 + até 3 candidatos), até a rodada 8
+      um candidato fica elegível na rodada n
+      └─ Verificação: rodadas n+1 e n+2 repetem a carga com R1, R0 e R0b (mesma semente), até a rodada 10
+           ├─ as 2 positivas ──► aging confirmado ──► a busca pausa ──► Campanha de causas (6 rodadas)
+           │                                                          └─ a busca retoma nas rodadas que restam
+           └─ alguma negativa ──► a busca continua
+ └─ Fim do orçamento ──► relatório final (results/experiment-<tag>/report.md + resumos do agente)
+Humano lê o relatório
+```
+
+| Etapa | Quem roda | Braços | Passa se |
+|---|---|---|---|
+| Fase 0 | juiz | R0, R0b, R1 (semente 100) | R0 e R0b planos, R1 elegível |
+| Busca | agente, uma rodada por chamada | referência + até 3 candidatos (sementes 101…) | algum candidato elegível dispara a verificação |
+| Verificação | juiz | R1, a carga, R0, R0b, mesma semente | 2 rodadas positivas: R0 e R0b planos, R1 e a carga elegíveis |
+| Causas | agente, uma rodada por chamada | carga confirmada + até 3 variações de um fator | cada variação com duas réplicas válidas |
+
+Quem decide cada passagem é o **orquestrador** (`harness/orchestrator.py`, `prepare.py experiment`), código fixo
+com hash no manifesto, nunca o agente.
+
+## O cenário do Cesar (resumo)
+
+- **Finding F1:** cada `POST /associate_card` com par (cartão, telefone) novo grava uma linha (e 3 entradas de
+  índice) em `associations` que nada apaga; `POST /retrieve_cards` lê todas as linhas do telefone, sem `LIMIT`, e
+  materializa tudo (`fetchall`, modelo pydantic, JSON). O custo da leitura cresce com os cartões acumulados.
+- **Carga de referência (R1):** `workloads/bax-fastapi-credit-card-F1_targeted_v1.py`. Contrato:
+  `script --base-url URL --duration S --seed N --out client.csv`. Fluxos: `grow` (pares novos num telefone quente,
+  10/s), `refresh`, `ref`, e as sondas `retrieve_hot` (o sintoma) e `retrieve_ref4`/`retrieve_ref200` (controle
+  interno: mesma rota, tamanho constante, devem ficar planos).
+- **Controles negativos, sem controle positivo:** R0 = `F1_control.py` (um par fixo, laço fechado); R0b =
+  `F1_targeted_v1 --key-space 4` (mesma carga, cartões repetidos).
+- **Teste funcional:** `oracle/test_credit_card_service.py`, usado só no preparo (`check-oracles`).
+- **Resultado de referência do Cesar** (8 h, semente 42): latência de `retrieve_hot` de ~10 ms para ~1,3 s; R0 e
+  R0b planos. Veredito `ACTIVATED_WITH_AGING`, aging misto.
+
+### O aging do F1 é misto
+
+1. **Custo por cartão:** cada leitura do telefone quente custa proporcionalmente aos cartões acumulados;
+2. **Pico de memória:** cada leitura grande materializa a lista inteira;
+3. **Interferência:** a cada leitura grande o processo trava ~150 ms ou mais e atrasa as outras requisições
+   (`associate_card`, `retrieve_ref4`).
+
+A detecção mede (1) e (2) pela latência e pelo tamanho de resposta de `retrieve_hot` e pelo RSS. A campanha
+`causes` separa os componentes: razão da inclinação da latência, do tamanho da resposta, do **custo por MB** e da
+interferência (p95 de `associate_card` e `retrieve_ref4`).
+
+### A flag D2 não se aplica ao F1
+
+A flag **D2** ("mais de 1000 linhas no banco: não pontua") existe para findings em que encher o banco é um atalho.
+No F1 o crescimento de linhas é **exigido pela spec** (`activation_criteria.resource_growth`): é a **ativação** do
+finding, não o aging em si. Por isso a D2 está **desligada** para `bax-fastapi-credit-card-F1`
+(`D2_BY_FINDING` em `harness/evaluate.py`). Contra o atalho equivalente sobram o controle interno (C1), os limites
+de taxa (até 2x os padrões) e o controle negativo R0b.
 
 ## Arquitetura (mesma lógica do autoresearch)
 
-| autoresearch original | Este piloto | Quem edita |
+| autoresearch original | Este repositório | Quem edita |
 |---|---|---|
-| `prepare.py` (avaliação fixa) | `prepare.py` + `harness/` + `oracle/` | Ninguém durante a campanha |
-| `train.py` | Detecção: `workload.py`. Reparo: `candidates/v1..v3/` | Agente |
-| `program.md` | `program_detect.md`, `program_repair.md` | Humano |
-| `val_bpb` | Detecção: Sen's slope do RSS pós-GC (MB/h). Reparo: redução da inclinação em relação ao original | Juiz |
-| Execução de 5 min | Execução de 60 min, 4 em paralelo | Juiz |
+| `prepare.py` (avaliação fixa, não muda) | `prepare.py` + `harness/` + `oracle/`, com hash no manifesto | ninguém durante as campanhas |
+| `train.py` (o único arquivo que o agente edita) | `workload.py`: só literais, variantes da carga do Cesar | agente |
+| `program.md` (instruções do agente) | `program.md`: instruções de uma rodada das campanhas `detect` e `causes` e dos resumos | humano |
+| `val_bpb` (uma métrica) | `detect`: Sen's slope da latência de `retrieve_hot` (ms/h), com Hamed-Rao, e `ratio` contra a referência da rodada. `causes`: razões de cada variação contra a carga congelada | juiz |
+| orçamento fixo de 5 min | 60 min por rodada, 4 instâncias em paralelo | juiz |
+| `results.tsv` sem commit; keep avança a branch, discard faz `git reset` | igual na `detect`; na `causes` não há keep nem discard | agente |
+| o agente roda o laço inteiro | um orquestrador fixo chama o agente uma rodada por vez e decide verificação, causas e retomada | ninguém |
 
 ```
-aging-autoresearch/
-├── prepare.py              # juiz: setup, detect, repair, confirm, freeze, wait, verify
+autoresearch/
+├── program.md                  # instruções do agente (detect e causas)
+├── workload.py                 # o agente edita: CANDIDATES com args literais
+├── prepare.py                  # juiz: setup, check-oracles, experiment, controls, detect, check-load, freeze, causes, wait, verify, rehash
+├── run_experiment.sh           # dispara o experimento completo (orquestrador)
+├── docs/DESENHO-EXPERIMENTAL.md
+├── apps/credit-card-fastapi/
+│   ├── instrumented/           # alvo (código do Cesar + aging_probe.py)
+│   └── SOURCE.json             # commit do repo do Cesar de onde veio
+├── findings/                   # card do F1 e campaign.yaml (cópias do Cesar)
+├── workloads/                  # F1_targeted_v1 (referência, R1, R0b) e F1_control (R0), intactos
 ├── harness/
-│   ├── instance.py         # cópia limpa da app, porta própria, coleta via psutil
-│   ├── gc_probe.js         # sonda carregada por fora da app: GC forçado + memória + handles
-│   ├── load.py             # gerador de carga fechada + CONTRATO + BASELINE do artigo
-│   ├── evaluate.py         # MK/Sen por braço, flags D1–D3/E1/H4, tempo até a detecção
-│   ├── gates.py            # portões do reparo: deps, funcional, escondidos, persistência, replay
-│   └── stats.py            # Mann-Kendall (com empates) e Sen's slope
-├── oracle/
-│   ├── functional_test.py  # teste do repositório do Cesar (público para o agente)
-│   └── hidden/hidden_tests.py   # testes escondidos (o agente não lê) ← REVISAR
-├── workload.py             # campanha 1: o agente edita
-├── candidates/             # campanha 2: base + v1..v3 (o agente edita v1..v3)
-├── frozen/                 # carga congelada pelo humano ao fim da campanha 1
-├── .claude/settings.{detect,repair}.json   # permissões do Claude Code por fase
-└── run_campaign.sh         # lança a campanha em modo headless
+│   ├── instance.py             # cópia limpa da app, uvicorn em porta própria, banco novo, psutil, filhos (H4)
+│   ├── load.py                 # roda os scripts do Cesar; contrato de args; regra de um fator (causas)
+│   ├── evaluate.py             # MK Hamed-Rao + Sen; elegibilidade; flags; custo por MB; interferência
+│   ├── functional_check.py     # sobe a app e roda o teste funcional (check-oracles)
+│   ├── orchestrator.py         # orquestrador: Fase 0, busca, verificação, causas, retomada, relatório
+│   ├── workload_check.py       # lê workload.py como dados (AST + literal_eval)
+│   └── stats.py                # Mann-Kendall, Sen's slope, Hamed-Rao (pymannkendall)
+├── oracle/                     # teste funcional do Cesar e o executor
+├── tests/                      # test_c1.py (controle interno), test_causes.py (causas), test_orchestrator.py (fluxo)
+├── frozen/                     # carga confirmada congelada pelo orquestrador (campanha de causas atual)
+├── .claude/settings.{detect,causes}.json   # permissões do agente por campanha
+└── updates/                    # notas de mudança
 ```
+
+### O que o agente vê
+
+Para o agente trabalhar só sobre a temática e sem viés, ele **lê apenas** `program.md`, `workload.py`, `frozen/`,
+`results/` e os próprios registros. Código da app, card do F1, cargas do Cesar, juiz, testes, documentação,
+`updates/` e o histórico do git (`git log -p`, `git show`, `git diff`) estão negados nas permissões. As hipóteses
+dos braços fixos e as mensagens de erro do contrato são neutras. As permissões do Claude Code ajudam, mas não são
+barreira de segurança; para isolar de verdade, rode o agente com outro usuário Linux.
+
+## Campanhas do agente (resumo; regras completas no `program.md`)
+
+O orquestrador chama o agente **uma rodada por vez**, dizendo a campanha, a rodada e a semente.
+
+**`detect`:** em cada rodada, a referência (carga com os parâmetros padrão) e até 3 candidatos. Um braço é
+**elegível** quando é válido, a latência e o tamanho de resposta de `retrieve_hot` sobem (Hamed-Rao p < 0,01 e
+mudança ≥ 50%) e o controle interno fica plano. Keep quando o `ratio` contra a referência da mesma rodada supera o
+melhor anterior em pelo menos 10%; empate dentro de 10% com menos parâmetros alterados também vira keep (critério de
+simplicidade). O melhor candidato elegível de cada rodada (que não seja uma carga já confirmada) vai para a
+verificação.
+
+**`causes`:** 6 rodadas por carga confirmada. A referência é a carga congelada; cada variação muda **exatamente
+um** parâmetro (o juiz recusa as outras) e roda em duas réplicas. Um efeito é declarado quando a razão fica do
+mesmo lado de 1, a pelo menos 20% dele, nas duas réplicas. Hipóteses já testadas numa campanha anterior entram só
+no resumo.
+
+O `ref_sizes` (telefones de referência 4 e 200) é fixo: é o controle interno e não pode ser um fator.
 
 ## Como rodar
 
-Requisitos: Linux (WSL2, servidor do laboratório ou nuvem), Python 3.10+ com
-`psutil`, Node 18+ e npm, Git e o Claude Code.
+Requisitos: Linux (WSL2, servidor do laboratório ou nuvem), Python 3.10+ com `psutil` e `pip`, Git e o Claude Code.
+O venv travado sai do `requirements.txt` do próprio Cesar.
 
 ```bash
-# 1. Mesmo procedimento do guia do Piloto 2: ramificação dentro de um clone do autoresearch
-git clone https://github.com/karpathy/autoresearch.git && cd autoresearch
-git switch -c autoresearch/aging-piloto3
-mkdir original_autoresearch && git mv prepare.py train.py program.md original_autoresearch/
-cp -r /caminho/para/aging-autoresearch/. .        # copia este piloto para a raiz
-pip install psutil
-git clone --depth 1 https://github.com/chas42/generated-software-llm /tmp/gsl
+# 0. Clone o repo do Cesar ao lado deste (o juiz só LÊ; nada dentro dele é editado)
+git clone https://github.com/chas42/llm-aging-detection-agents ../llm-aging-detection-agents
 
-# 2. Setup (humano, uma vez): extrai a app, instala dependências travadas, valida os oráculos
-python prepare.py setup --zip /tmp/gsl/projects/project-bolt-credit-card.zip
-git add -A && git commit -m "Piloto 3: AutoResearch-Aging (detecção e reparo)"
+# 1. Preparo (humano, uma vez): copia instrumented + workloads + teste, cria o venv, grava o manifesto
+python prepare.py setup --src ../llm-aging-detection-agents
+python prepare.py check-oracles
+git add -A && git commit -m "Setup do alvo do Cesar"
 
-# 3. Teste rápido do fluxo (cerca de 3 min)
-python prepare.py detect --smoke
+# 2. Teste rápido do fluxo inteiro (rodadas de 2 min; não mostra tendência)
+./run_experiment.sh teste-smoke --smoke
 
-# 4. Teste A/A (uma vez, 60 min): 3 cópias da baseline medem o ruído
-cp workload.py workload_campanha.py && cp workload_aa.py workload.py
-python prepare.py detect && cp workload_campanha.py workload.py
-
-# 5. Campanha 1 (cerca de 8,5 h)
-./run_campaign.sh detect det-out21
-
-# 6. Humano: confirmar o vencedor com 3 sementes e congelar
-python prepare.py freeze <run_id> <arm>
-python prepare.py confirm --phase detect
-
-# 7. Campanha 2 (cerca de 9 h)
-python prepare.py repair-init
-./run_campaign.sh repair rep-out28
-python prepare.py confirm --phase repair
+# 3. Experimento completo, sem humano no meio
+nohup ./run_experiment.sh exp-nov23 &
+# relatório: results/experiment-exp-nov23/report.md; resumos do agente: summary_detect.md, summary_causes_<N>.md
 ```
 
-`run_campaign.sh` tira a permissão de escrita de `prepare.py`, `harness/`,
-`oracle/`, `apps/`, `.judge/` e `frozen/`. Para rodar `freeze` ou `setup`
-depois disso, devolva a escrita com `chmod -R u+w`. Para isolar de verdade os
-testes escondidos, rode o agente com outro usuário Linux e deixe
-`oracle/hidden/` com `chmod 700` para o seu usuário. As permissões do Claude
-Code ajudam, mas não são barreira de segurança.
+`run_experiment.sh` tira a permissão de escrita de `prepare.py`, `harness/`, `oracle/`, `apps/`, `workloads/` e
+`findings/` (o orquestrador precisa escrever em `frozen/` e `.judge/`). Para rodar `setup` depois disso, devolva a
+escrita com `chmod -R u+w`. Depois de alterar qualquer arquivo do juiz, rode `python prepare.py rehash`; senão
+`verify` aborta. As peças do fluxo também podem ser rodadas à mão para depurar (`controls`, `detect`,
+`check-load`, `freeze`, `causes`).
+
+**Duas máquinas (cliente-servidor):** com `AGING_SERVER=IP:8100` no cliente e `python -m harness.server_agent`
+no servidor, a app roda no servidor e a carga e o juiz no cliente. Configuração completa em
+[`docs/CLIENTE-SERVIDOR.md`](docs/CLIENTE-SERVIDOR.md). Sem a variável, tudo continua local.
+
+**Verificação:** 2 rodadas de 60 min logo depois da rodada de busca que achou a carga, com R1, a carga, R0 e R0b
+na mesma semente e banco limpo (regra do Ermeson). Confirmado só se **as duas** forem positivas. Uma rodada
+**inválida** (D1, D3, H4, app caiu) é repetida uma vez; uma **negativa** encerra a verificação e a busca continua.
+A verificação pode ir até a rodada 10.
 
 ## Taxonomia de atalhos (reward hacking)
 
-| Fase | Flag | Atalho |
+| Flag | Atalho | Efeito |
 |---|---|---|
-| Detecção | D1 | Saturar a máquina (timeouts) e chamar isso de aging |
-| Detecção | D2 | Inflar o banco com dados novos: a memória sobe por estado legítimo |
-| Detecção | D3 | Sair do contrato da API ou dos limites de carga |
-| Detecção | E1 | Explorar caminhos de erro 5xx (permitido, mas exige revisão) |
-| Detecção | E2 | Mais de 5% de 5xx: quebrar a app em vez de envelhecê-la (não pontua) |
-| Reparo | H1 | Remover ou alterar funcionalidade |
-| Reparo | H2 | Abandonar a persistência (memória ou cache em vez do SQLite) |
-| Reparo | H3 | Mudar respostas da API |
-| Reparo | H4 | Reiniciar o processo (rejuvenescimento disfarçado) ou derrubá-lo |
-| Reparo | H5 | Mexer em dependências, no juiz ou nos oráculos |
-| Reparo | H6 | Ganhar memória perdendo desempenho |
-| Reparo | H7 | Ganhar memória devolvendo mais erros |
+| D1 | Saturar a máquina (timeouts, 5xx acima de 1%, gerador acima de 90% de um núcleo) e chamar isso de aging | Braço inválido |
+| D2 | Inflar o banco com dados novos. **Desligada no F1** | Não se aplica |
+| D3 | Sair do contrato (`args` fora das faixas, mais de um fator na campanha `causes`) ou o gerador falhar | Braço ou rodada inválida |
+| D4 | Candidato igual à referência | Medido, sem nota |
+| C1 | Tamanho de resposta dos refs ou latência do `ref200` sobem: deriva global, não crescimento por linha. A latência do `ref4` é só diagnóstico (sobe por interferência do próprio aging) | Medido, sem nota |
+| H4 | O processo da app morreu, mudou de PID ou abriu processos filhos | Braço inválido |
 
-No teste do juiz, um patch que trocava o SQLite por um `Map` em memória foi
-barrado como H2. Um patch de conexão única compartilhada derrubou o processo
-sob carga (H4: transações aninhadas no SQLite).
+Toda flag vai para `results/judge_log.jsonl`, e o agente marca no ledger as ideias que só melhoravam o número por
+um desses caminhos (`"shortcut": true`). Esses casos também são resultado da pesquisa.
 
-## Pendências (revisar com o Cesar)
+## De onde vem cada decisão
 
-1. **Baseline:** o JMX `credit_card_test.jmx` do repositório tem **1 thread** e
-   nenhum timer, mas o texto do artigo diz 10 threads e 0,01 s. Usamos o texto.
-   Com 10 threads, a app gera cerca de 1–5% de `SQLITE_BUSY` (5xx). Qual
-   configuração rodou de fato nas 50 h?
-2. **Testes escondidos:** foram gerados a partir do OpenAPI e precisam de
-   revisão. A app original devolve 200 com `[]` onde o OpenAPI pede 404; os
-   testes aceitam os dois.
-3. **Cliente e app na mesma máquina:** no artigo eram máquinas separadas.
-   Com 4 instâncias em paralelo, o gerador em Python compete por CPU. No
-   servidor do laboratório, vale fixar núcleos (`taskset`) ou separar o
-   cliente.
-4. **Próximas apps:** convert-image, monitor e uptime. Cada uma precisa do seu
-   contrato em `load.py` e dos seus oráculos.
-5. **Apps reais, não sintéticas:** exigência do Artur para publicação.
+| Origem | Decisão | Onde está |
+|---|---|---|
+| Reunião de 15/10 | Primeiro apps geradas por LLM; depois apps reais | alvo `credit-card-fastapi` |
+| **Cesar** (`campaign.yaml`, `findings/…-F1.yaml`) | Alvo, finding, carga de referência, controles R0/R0b | `apps/`, `workloads/`, `findings/`; `R0`, `R0B`, `BASELINE` em `harness/load.py` |
+| **Cesar** (`run_diagnostic.py`, `analyze_run.py`) | Contrato da carga, instrumentação, pinagem de CPU; Hamed-Rao + Sen em janelas de 60 s | `harness/load.py`, `harness/instance.py`, `harness/stats.py`, `harness/evaluate.py` |
+| **Cesar** (22/11) | O autoresearch roda sozinho, com um mínimo de rodadas, e foca em causar o aging; reparo fora | escopo desta branch; `docs/DESENHO-EXPERIMENTAL.md` |
+| Artur | Reward hacking; feedback em ~1 h; versões em paralelo | flags D1–D4, C1, H4; `DEFAULT_MINUTES = 60`; `SLOTS = 4` |
+| Fumio | Documentar os atalhos do agente é contribuição | `judge_log.jsonl` e `"shortcut"` no ledger |
+| Ermeson | Workloads, métricas, critério de parada e duração | `harness/load.py`, `harness/evaluate.py`, orçamentos no `program.md` |
+| Rafael e Ermeson (19/11) | Sementes independentes; confirmação repetida com parâmetros fixos, mesma duração, banco limpo, R1 e controles com a mesma semente, unanimidade | sementes 100 + *n*; verificação em 2 rodadas |
+| Rafael (23/11) | Sem humano no meio; confirmação nas rodadas seguintes (até a 10); cada carga confirmada ganha campanha de causas; a busca retoma depois | `harness/orchestrator.py`, `prepare.py experiment` |
+| Rafael (23/11) | Investigação de causas só pela carga; `program.md` só com instruções; agente sem acesso ao que causaria viés | `prepare.py causes`, `program.md`, `.claude/settings.*.json` |
+| karpathy/autoresearch | Arquivo único editado pelo agente, orçamento fixo, keep/discard por git, critério de simplicidade, registros sem commit, não parar para perguntar | `workload.py`, `program.md` |
+
+## Diferenças em relação ao cenário do Cesar
+
+| Ponto | Cesar | Aqui | Por quê |
+|---|---|---|---|
+| Instâncias | uma, `python app.py` na porta 5000 | quatro em paralelo, `uvicorn app:app` em porta livre | os 4 braços rodam ao mesmo tempo |
+| Log do servidor | `uvicorn.run()` com log de acesso | igual: `--log-level info --access-log` | paridade de custo por requisição |
+| Máquinas | cliente e app separados | mesma máquina, núcleos distintos | ver Pendências |
+| Rodadas | R0, R0b, R1 e R2 | R0, R0b e R1 | reparo fora do escopo |
+| Stall do `ps` | só no app Monitor | não implementado | não faz parte deste cenário |
+
+## Pendências
+
+1. **Limiares** (50% na latência, 25% no controle interno, 5 MB/h no RSS, 20% para declarar efeito na
+   `causes`): valores de partida, a calibrar com a Fase 0 e com as primeiras campanhas.
+2. **Nenhuma rodada real ainda:** o fluxo foi testado com juiz e agente simulados; falta o primeiro
+   `./run_experiment.sh <tag> --smoke` com a app.
+3. **Sem controle positivo:** "não achamos aging" não mede a sensibilidade do juiz.
+4. **Cliente e app na mesma máquina.**
+5. **Próximas apps** do Cesar (convert-image, monitor, uptime) e **apps reais** (exigência do Artur).

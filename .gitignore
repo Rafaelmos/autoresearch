@@ -1,3 +1,13 @@
+results/
+results.tsv
+ledger.jsonl
+results_causes.tsv
+ledger_causes.jsonl
+logs/
 .cache/
 __pycache__/
 *.pyc
+.claude/settings.json
+.claude/settings.local.json
+summary_*.md
+frozen/
